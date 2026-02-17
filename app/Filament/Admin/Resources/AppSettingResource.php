@@ -24,7 +24,7 @@ class AppSettingResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = Heroicon::Cog;
 
-    protected static ?string $navigationLabel = 'Settings';
+    protected static ?string $navigationLabel = 'App Settings';
 
     public static function form(Schema $schema): Schema
     {
