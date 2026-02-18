@@ -13,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
@@ -40,6 +41,7 @@ class ProductResource extends Resource
                 Select::make('category_id')->relationship('category', 'name')->nullable(),
                 Select::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])->required(),
                 DateTimePicker::make('published_at'),
+                Toggle::make('is_featured')->label('Featured Product'),
             ]),
             Section::make('Description')->schema([
                 RichEditor::make('detailed_description'),
@@ -65,6 +67,9 @@ class ProductResource extends Resource
                 Repeater::make('tags')->schema([
                     TextInput::make('tag')->required(),
                 ]),
+            ]),
+            Section::make('Related Products')->schema([
+                Select::make('related_products')->multiple()->relationship('relatedProducts', 'title'),
             ]),
             Section::make('SEO')->schema([
                 TextInput::make('meta_title'),
