@@ -79,7 +79,7 @@ class ProductResource extends Resource
         return $table->columns([
             ImageColumn::make('main_image')->label('Image'),
             TextColumn::make('title')->searchable()->sortable(),
-            SelectColumn::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])->rules(['required'])->sortable(),
+            SelectColumn::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])->rules(['required'])->sortable()->afterStateUpdated(function ($state, $record) { \Filament\Notifications\Notification::make()->success()->title('Status updated')->body('Product status has been changed to ' . $state . '.')->send(); }),
             TextColumn::make('category.name')->label('Category')->sortable(),
             TextColumn::make('published_at')->dateTime()->sortable(),
         ])->filters([

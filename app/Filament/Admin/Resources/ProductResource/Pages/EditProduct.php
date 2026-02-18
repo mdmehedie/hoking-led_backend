@@ -16,4 +16,9 @@ class EditProduct extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function afterSave(): void
+    {
+        $this->dispatch('toastr', ['type' => 'success', 'title' => 'Product updated', 'message' => 'The product has been updated successfully.']);
+    }
 }

@@ -18,6 +18,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\HtmlString;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -59,11 +60,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook('head.end', function () {
                 $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());
-                $position = $settings && $settings->toastr_enabled ? 'toast-' . $settings->toastr_position : 'toast-top-right';
-                $duration = $settings ? $settings->toastr_duration : 5000;
-                $showMethod = $settings ? $settings->toastr_show_method : 'fadeIn';
-                $hideMethod = $settings ? $settings->toastr_hide_method : 'fadeOut';
-                return '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script><script> toastr.options = { "positionClass": "' . $position . '", "timeOut": ' . $duration . ', "showMethod": "' . $showMethod . '", "hideMethod": "' . $hideMethod . '" }; </script>';
+                return $settings && $settings->toastr_enabled ? '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>' : '';
+            })
+            ->renderHook('scripts.after', function () {
+                $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());
+                if (!$settings || !$settings->toastr_enabled) return null;
+                return new \Illuminate\Support\HtmlString("<script> toastr.options = { positionClass: 'toast-{$settings->toastr_position}', timeOut: {$settings->toastr_timeout} * 1000, extendedTimeOut: {$settings->toastr_extended_timeout} * 1000, closeButton: " . ($settings->toastr_close_button ? 'true' : 'false') . ", debug: false, newestOnTop: " . ($settings->toastr_newest_on_top ? 'true' : 'false') . ", progressBar: " . ($settings->toastr_progress_bar ? 'true' : 'false') . ", preventDuplicates: " . ($settings->toastr_prevent_duplicates ? 'true' : 'false') . ", showDuration: {$settings->toastr_show_duration}, hideDuration: {$settings->toastr_hide_duration}, showEasing: '{$settings->toastr_show_easing}', hideEasing: '{$settings->toastr_hide_easing}', showMethod: '{$settings->toastr_show_method}', hideMethod: '{$settings->toastr_hide_method}' }; document.addEventListener('toastr', function(e) { if (typeof toastr !== 'undefined') { toastr[e.detail.type](e.detail.message, e.detail.title); } }); </script>");
             });
     }
 }

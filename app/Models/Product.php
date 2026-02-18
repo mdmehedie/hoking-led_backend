@@ -26,6 +26,7 @@ class Product extends Model implements HasMedia
         'gallery',
         'downloads',
         'category_id',
+        'slug',
     ];
 
     protected $casts = [
