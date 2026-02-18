@@ -18,6 +18,9 @@ use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Table;
 
 class ProductResource extends Resource
@@ -42,18 +45,15 @@ class ProductResource extends Resource
                 RichEditor::make('detailed_description'),
             ]),
             Section::make('Media')->schema([
-                FileUpload::make('gallery')->multiple(),
+                FileUpload::make('main_image')->image()->directory('products/main'),
+                FileUpload::make('gallery')->multiple()->image()->directory('products/gallery'),
                 Repeater::make('video_embeds')->schema([
                     Select::make('type')->options(['embed' => 'Embed URL', 'file' => 'Self-hosted File'])->required(),
                     TextInput::make('title')->visible(fn ($get) => $get('type') === 'embed'),
                     TextInput::make('url')->url()->rules(['regex:/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|vimeo\.com)/'])->visible(fn ($get) => $get('type') === 'embed'),
                     FileUpload::make('video_file')->visible(fn ($get) => $get('type') === 'file'),
                 ]),
-                FileUpload::make('downloads')->multiple()->acceptedFileTypes([
-                    'application/pdf',
-                    'application/msword',
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                ]),
+                FileUpload::make('downloads')->multiple()->directory('products/downloads'),
             ]),
             Section::make('Technical Specs')->schema([
                 Repeater::make('technical_specs')->schema([
@@ -77,10 +77,11 @@ class ProductResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            Tables\Columns\TextColumn::make('title')->searchable()->sortable(),
-            Tables\Columns\SelectColumn::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])->sortable(),
-            Tables\Columns\TextColumn::make('category.name')->label('Category')->sortable(),
-            Tables\Columns\TextColumn::make('published_at')->dateTime()->sortable(),
+            ImageColumn::make('main_image')->label('Image'),
+            TextColumn::make('title')->searchable()->sortable(),
+            SelectColumn::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])->rules(['required'])->sortable(),
+            TextColumn::make('category.name')->label('Category')->sortable(),
+            TextColumn::make('published_at')->dateTime()->sortable(),
         ])->filters([
             Tables\Filters\SelectFilter::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived']),
             Tables\Filters\SelectFilter::make('category_id')->relationship('category', 'name'),

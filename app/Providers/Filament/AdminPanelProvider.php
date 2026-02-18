@@ -10,7 +10,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
+use App\Models\AppSetting;
 use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -37,7 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
             ->widgets([
-                AccountWidget::class,
+                \Filament\Widgets\AccountWidget::class,
                 FilamentInfoWidget::class,
             ])
             ->middleware([
@@ -53,6 +53,14 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->renderHook('head.end', function () {
+                $settings = AppSetting::first();
+                $position = $settings && $settings->toastr_enabled ? 'toast-' . $settings->toastr_position : 'toast-top-right';
+                $duration = $settings ? $settings->toastr_duration : 5000;
+                $showMethod = $settings ? $settings->toastr_show_method : 'fadeIn';
+                $hideMethod = $settings ? $settings->toastr_hide_method : 'fadeOut';
+                return '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script><script> toastr.options = { "positionClass": "' . $position . '", "timeOut": ' . $duration . ', "showMethod": "' . $showMethod . '", "hideMethod": "' . $hideMethod . '" }; </script>';
+            });
     }
 }

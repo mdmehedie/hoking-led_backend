@@ -2,15 +2,14 @@
 
 namespace App\Filament\Admin\Resources;
 
-use App\Filament\Admin\Resources\AppSettingResource\Pages;
+use App\Filament\Admin\Resources\AppSettingResource\Pages as Pages;
 use App\Models\AppSetting;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
@@ -48,10 +47,10 @@ class AppSettingResource extends Resource
                     'Times New Roman' => 'Times New Roman',
                     'Courier New' => 'Courier New',
                 ])->default('Arial')->required(),
-                TextInput::make('base_font_size')->default('16px')->required(),
+                \Filament\Forms\Components\TextInput::make('base_font_size')->default('16px')->required(),
             ]),
             Section::make('Organization')->schema([
-                TextInput::make('organization.company_name')
+                \Filament\Forms\Components\TextInput::make('organization.company_name')
                     ->label('Company name')
                     ->default(''),
                 RichEditor::make('organization.about')
@@ -63,23 +62,23 @@ class AppSettingResource extends Resource
                 Repeater::make('organization.contact_emails')
                     ->label('Contact email(s)')
                     ->schema([
-                        TextInput::make('email')->email()->required(),
+                        \Filament\Forms\Components\TextInput::make('email')->email()->required(),
                     ])
                     ->default([]),
                 Repeater::make('organization.contact_phones')
                     ->label('Contact phone number(s)')
                     ->schema([
-                        TextInput::make('phone')->required(),
+                        \Filament\Forms\Components\TextInput::make('phone')->required(),
                     ])
                     ->default([]),
                 Repeater::make('organization.office_addresses')
                     ->label('Office addresses')
                     ->schema([
-                        TextInput::make('label')->required(),
-                        Textarea::make('street')->rows(2)->required(),
-                        TextInput::make('city')->required(),
-                        TextInput::make('country')->required(),
-                        TextInput::make('map_link')->label('Map link (Google Maps URL)')->url(),
+                        \Filament\Forms\Components\TextInput::make('label')->required(),
+                        \Filament\Forms\Components\Textarea::make('street')->rows(2)->required(),
+                        \Filament\Forms\Components\TextInput::make('city')->required(),
+                        \Filament\Forms\Components\TextInput::make('country')->required(),
+                        \Filament\Forms\Components\TextInput::make('map_link')->label('Map link (Google Maps URL)')->url(),
                     ])
                     ->default([]),
                 Repeater::make('organization.social_links')
@@ -97,9 +96,27 @@ class AppSettingResource extends Resource
                                 'website' => 'Website',
                             ])
                             ->required(),
-                        TextInput::make('url')->url()->required(),
+                        \Filament\Forms\Components\TextInput::make('url')->url()->required(),
                     ])
                     ->default([]),
+            ]),
+            Section::make('Toastr Settings')->schema([
+                Toggle::make('toastr_enabled')->label('Enable Toastr Notifications')->default(true),
+                Select::make('toastr_position')->label('Position')->options([
+                    'top-left' => 'Top Left',
+                    'top-right' => 'Top Right',
+                    'bottom-left' => 'Bottom Left',
+                    'bottom-right' => 'Bottom Right',
+                ])->default('top-right'),
+                \Filament\Forms\Components\TextInput::make('toastr_duration')->label('Duration (ms)')->numeric()->default(5000),
+                Select::make('toastr_show_method')->label('Show Method')->options([
+                    'fadeIn' => 'Fade In',
+                    'slideDown' => 'Slide Down',
+                ])->default('fadeIn'),
+                Select::make('toastr_hide_method')->label('Hide Method')->options([
+                    'fadeOut' => 'Fade Out',
+                    'slideUp' => 'Slide Up',
+                ])->default('fadeOut'),
             ]),
         ]);
     }

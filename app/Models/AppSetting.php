@@ -16,6 +16,11 @@ class AppSetting extends Model
         'font_family',
         'base_font_size',
         'organization',
+        'toastr_enabled',
+        'toastr_position',
+        'toastr_duration',
+        'toastr_show_method',
+        'toastr_hide_method',
     ];
 
     protected $casts = [

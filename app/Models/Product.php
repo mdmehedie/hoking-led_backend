@@ -22,6 +22,9 @@ class Product extends Model implements HasMedia
         'technical_specs',
         'tags',
         'video_embeds',
+        'main_image',
+        'gallery',
+        'downloads',
         'category_id',
     ];
 
@@ -29,6 +32,8 @@ class Product extends Model implements HasMedia
         'technical_specs' => 'array',
         'tags' => 'array',
         'video_embeds' => 'array',
+        'gallery' => 'array',
+        'downloads' => 'array',
         'published_at' => 'datetime',
     ];
 
@@ -39,13 +44,7 @@ class Product extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('gallery')->acceptsMimeTypes(['image/*']);
-        $this->addMediaCollection('videos')->acceptsMimeTypes(['video/*']);
-        $this->addMediaCollection('downloads')->acceptsMimeTypes([
-            'application/pdf',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        ]);
+        // No media collections needed, using file uploads to fields
     }
 
     public function registerMediaConversions(Media $media = null): void
