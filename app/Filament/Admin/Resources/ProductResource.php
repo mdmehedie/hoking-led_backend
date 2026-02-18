@@ -10,6 +10,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
@@ -39,6 +40,20 @@ class ProductResource extends Resource
             ]),
             Section::make('Description')->schema([
                 RichEditor::make('detailed_description'),
+            ]),
+            Section::make('Media')->schema([
+                FileUpload::make('gallery')->multiple(),
+                Repeater::make('video_embeds')->schema([
+                    Select::make('type')->options(['embed' => 'Embed URL', 'file' => 'Self-hosted File'])->required(),
+                    TextInput::make('title')->visible(fn ($get) => $get('type') === 'embed'),
+                    TextInput::make('url')->url()->rules(['regex:/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|vimeo\.com)/'])->visible(fn ($get) => $get('type') === 'embed'),
+                    FileUpload::make('video_file')->visible(fn ($get) => $get('type') === 'file'),
+                ]),
+                FileUpload::make('downloads')->multiple()->acceptedFileTypes([
+                    'application/pdf',
+                    'application/msword',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                ]),
             ]),
             Section::make('Technical Specs')->schema([
                 Repeater::make('technical_specs')->schema([
