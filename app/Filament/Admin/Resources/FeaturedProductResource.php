@@ -32,6 +32,10 @@ class FeaturedProductResource extends Resource
                 TextColumn::make('status'),
                 TextColumn::make('category.name')->label('Category'),
             ])
+            ->filters([
+                \Filament\Tables\Filters\SelectFilter::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived']),
+                \Filament\Tables\Filters\SelectFilter::make('category_id')->relationship('category', 'name'),
+            ])
             ->actions([
                 Action::make('remove_featured')
                     ->label('Remove from Featured')
