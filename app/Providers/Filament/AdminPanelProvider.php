@@ -17,15 +17,18 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Support\Facades\Cache;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());
+
         return $panel
             ->id('admin')
             ->path('admin')
+            ->brandName($settings->app_name ?? 'Admin Panel')
             ->login()
             ->colors([
                 'primary' => Color::Amber,
@@ -45,7 +48,7 @@ class AdminPanelProvider extends PanelProvider
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
                 AuthenticateSession::class,
-                ShareErrorsFromSession::class,
+                \Illuminate\View\Middleware\ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
@@ -55,7 +58,7 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->renderHook('head.end', function () {
-                $settings = AppSetting::first();
+                $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());
                 $position = $settings && $settings->toastr_enabled ? 'toast-' . $settings->toastr_position : 'toast-top-right';
                 $duration = $settings ? $settings->toastr_duration : 5000;
                 $showMethod = $settings ? $settings->toastr_show_method : 'fadeIn';

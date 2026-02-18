@@ -21,6 +21,7 @@ class AppSetting extends Model
         'toastr_duration',
         'toastr_show_method',
         'toastr_hide_method',
+        'app_name',
     ];
 
     protected $casts = [

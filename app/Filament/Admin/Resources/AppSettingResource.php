@@ -53,6 +53,9 @@ class AppSettingResource extends Resource
                 \Filament\Forms\Components\TextInput::make('organization.company_name')
                     ->label('Company name')
                     ->default(''),
+                \Filament\Forms\Components\TextInput::make('app_name')
+                    ->label('Company Title')
+                    ->default('Admin Panel'),
                 RichEditor::make('organization.about')
                     ->label('About information')
                     ->fileAttachmentsDisk('public')
