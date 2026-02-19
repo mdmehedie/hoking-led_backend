@@ -4,7 +4,7 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\CaseStudyResource\Pages;
 use App\Models\CaseStudy;
-use Filament\Forms;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -37,7 +37,9 @@ class CaseStudyResource extends Resource
                     TextInput::make('title')
                         ->afterStateUpdated(function ($state, callable $set, $context) {
                             $record = $context['record'] ?? null;
-                            $set('slug', static::generateUniqueSlug($state, $record?->id));
+                            if ($record === null) {
+                                $set('slug', static::generateUniqueSlug($state, $record?->id));
+                            }
                         })
                         ->live()
                         ->required(),
@@ -51,10 +53,10 @@ class CaseStudyResource extends Resource
                             'published' => 'Published',
                         ])
                         ->required(),
-                    DateTimePicker::make('published_at'),
-                    Select::make('author_id')
-                        ->relationship('author', 'name')
-                        ->required(),
+                    Hidden::make('published_at')
+                        ->default(now()),
+                    Hidden::make('author_id')
+                        ->default(auth()->id()),
                 ]),
                 Section::make('Content')->schema([
                     Textarea::make('excerpt'),

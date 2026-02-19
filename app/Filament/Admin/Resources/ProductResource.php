@@ -38,7 +38,9 @@ class ProductResource extends Resource
             Section::make('General')->schema([
                 TextInput::make('title')->afterStateUpdated(function ($state, callable $set, $context) {
                     $record = $context['record'] ?? null;
-                    $set('slug', static::generateUniqueSlug($state, $record?->id));
+                    if ($record === null) {
+                        $set('slug', static::generateUniqueSlug($state, $record?->id));
+                    }
                 })->live()->required(),
                 TextInput::make('slug')->unique(ignoreRecord: true)->required(),
                 Textarea::make('short_description'),

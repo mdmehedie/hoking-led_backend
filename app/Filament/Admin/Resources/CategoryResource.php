@@ -31,7 +31,7 @@ class CategoryResource extends Resource
     protected static function generateUniqueSlug($title, $id = null)
     {
         $table = 'categories';
-        $baseSlug = Str::slug($title);
+        $baseSlug = \Illuminate\Support\Str::slug($title);
         $slug = $baseSlug;
         $counter = 1;
         while (DB::table($table)->where('slug', $slug)->where('id', '!=', $id)->exists()) {
@@ -48,7 +48,9 @@ class CategoryResource extends Resource
                 TextInput::make('name')
                     ->afterStateUpdated(function ($state, callable $set, $context) {
                         $record = $context['record'] ?? null;
-                        $set('slug', static::generateUniqueSlug($state, $record?->id));
+                        if ($record === null) {
+                            $set('slug', static::generateUniqueSlug($state, $record?->id));
+                        }
                     })
                     ->live()
                     ->required(),
