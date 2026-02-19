@@ -5,7 +5,8 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\ProductResource\Pages;
 use App\Models\Product;
 use Filament\Actions\Action;
-use Filament\Forms;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
@@ -16,6 +17,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use Illuminate\Support\Str;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
@@ -46,7 +48,8 @@ class ProductResource extends Resource
                 Textarea::make('short_description'),
                 Select::make('category_id')->relationship('category', 'name')->nullable(),
                 Select::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])->required(),
-                DateTimePicker::make('published_at'),
+                Hidden::make('published_at')
+                    ->default(now()),
                 Toggle::make('is_featured')->label('Featured Product'),
             ]),
             Section::make('Description')->schema([
