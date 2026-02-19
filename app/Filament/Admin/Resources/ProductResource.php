@@ -9,14 +9,14 @@ use Filament\Forms;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Select;
+use Illuminate\Support\Facades\DB;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
+use Illuminate\Support\Str;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Columns\ImageColumn;
@@ -36,7 +36,11 @@ class ProductResource extends Resource
     {
         return $schema->schema([
             Section::make('General')->schema([
-                TextInput::make('title')->required(),
+                TextInput::make('title')->afterStateUpdated(function ($state, callable $set, $context) {
+                    $record = $context['record'] ?? null;
+                    $set('slug', static::generateUniqueSlug($state, $record?->id));
+                })->live()->required(),
+                TextInput::make('slug')->unique(ignoreRecord: true)->required(),
                 Textarea::make('short_description'),
                 Select::make('category_id')->relationship('category', 'name')->nullable(),
                 Select::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])->required(),
@@ -121,5 +125,18 @@ class ProductResource extends Resource
             'create' => Pages\CreateProduct::route('/create'),
             'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
+    }
+
+    protected static function generateUniqueSlug($title, $id = null)
+    {
+        $table = 'products';
+        $baseSlug = \Illuminate\Support\Str::slug($title);
+        $slug = $baseSlug;
+        $counter = 1;
+        while (DB::table($table)->where('slug', $slug)->where('id', '!=', $id)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+        return $slug;
     }
 }

@@ -19,6 +19,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
+use Illuminate\Support\Facades\DB;
 
 class CaseStudyResource extends Resource
 {
@@ -34,8 +35,14 @@ class CaseStudyResource extends Resource
             ->schema([
                 Section::make('General')->schema([
                     TextInput::make('title')
+                        ->afterStateUpdated(function ($state, callable $set, $context) {
+                            $record = $context['record'] ?? null;
+                            $set('slug', static::generateUniqueSlug($state, $record?->id));
+                        })
+                        ->live()
                         ->required(),
                     TextInput::make('slug')
+                        ->unique(ignoreRecord: true)
                         ->required(),
                     Select::make('status')
                         ->options([
@@ -120,5 +127,18 @@ class CaseStudyResource extends Resource
             'create' => Pages\CreateCaseStudy::route('/create'),
             'edit' => Pages\EditCaseStudy::route('/{record}/edit'),
         ];
+    }
+
+    protected static function generateUniqueSlug($title, $id = null)
+    {
+        $table = 'case_studies';
+        $baseSlug = \Illuminate\Support\Str::slug($title);
+        $slug = $baseSlug;
+        $counter = 1;
+        while (DB::table($table)->where('slug', $slug)->where('id', '!=', $id)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+        return $slug;
     }
 }

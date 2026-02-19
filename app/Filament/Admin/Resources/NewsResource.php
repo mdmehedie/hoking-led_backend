@@ -14,6 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
+use Illuminate\Support\Facades\DB;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -34,8 +35,14 @@ class NewsResource extends Resource
             ->schema([
                 Section::make('General')->schema([
                     TextInput::make('title')
+                        ->afterStateUpdated(function ($state, callable $set, $context) {
+                            $record = $context['record'] ?? null;
+                            $set('slug', static::generateUniqueSlug($state, $record?->id));
+                        })
+                        ->live()
                         ->required(),
                     TextInput::make('slug')
+                        ->unique(ignoreRecord: true)
                         ->required(),
                     Select::make('status')
                         ->options([
@@ -120,5 +127,18 @@ class NewsResource extends Resource
             'create' => Pages\CreateNews::route('/create'),
             'edit' => Pages\EditNews::route('/{record}/edit'),
         ];
+    }
+
+    protected static function generateUniqueSlug($title, $id = null)
+    {
+        $table = 'news';
+        $baseSlug = \Illuminate\Support\Str::slug($title);
+        $slug = $baseSlug;
+        $counter = 1;
+        while (DB::table($table)->where('slug', $slug)->where('id', '!=', $id)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+        return $slug;
     }
 }

@@ -8,13 +8,13 @@ use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Select;
+use Illuminate\Support\Facades\DB;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
+use Illuminate\Support\Str;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Actions\Action;
@@ -28,11 +28,29 @@ class CategoryResource extends Resource
 
     protected static ?string $navigationLabel = 'Categories';
 
+    protected static function generateUniqueSlug($title, $id = null)
+    {
+        $table = 'categories';
+        $baseSlug = Str::slug($title);
+        $slug = $baseSlug;
+        $counter = 1;
+        while (DB::table($table)->where('slug', $slug)->where('id', '!=', $id)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+        return $slug;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
             Section::make('General')->schema([
                 TextInput::make('name')
+                    ->afterStateUpdated(function ($state, callable $set, $context) {
+                        $record = $context['record'] ?? null;
+                        $set('slug', static::generateUniqueSlug($state, $record?->id));
+                    })
+                    ->live()
                     ->required(),
                 TextInput::make('slug')->unique(ignoreRecord: true)->required(),
                 Textarea::make('description'),
