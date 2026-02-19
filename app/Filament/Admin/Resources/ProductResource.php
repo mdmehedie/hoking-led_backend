@@ -20,11 +20,15 @@ use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Illuminate\Support\Str;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Tables\Table;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\SelectColumn;
-use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Collection;
+use Filament\Notifications\Notification;
 
 class ProductResource extends Resource
 {
@@ -97,8 +101,8 @@ class ProductResource extends Resource
             TextColumn::make('category.name')->label('Category')->sortable(),
             TextColumn::make('published_at')->dateTime()->sortable(),
         ])->filters([
-            Tables\Filters\SelectFilter::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived']),
-            Tables\Filters\SelectFilter::make('category_id')->relationship('category', 'name'),
+            SelectFilter::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived']),
+            SelectFilter::make('category_id')->relationship('category', 'name'),
         ])->actions([
             Action::make('edit')
                 ->url(fn ($record) => static::getUrl('edit', ['record' => $record]))
@@ -108,6 +112,43 @@ class ProductResource extends Resource
                 ->requiresConfirmation()
                 ->color('danger')
                 ->icon('heroicon-o-trash'),
+        ])
+        ->bulkActions([
+            BulkAction::make('delete_selected')
+                ->label('Delete Selected')
+                ->color('danger')
+                ->icon('heroicon-o-trash')
+                ->requiresConfirmation()
+                ->action(function (Collection $records) {
+                    $count = $records->count();
+                    $records->each->delete();
+                    Notification::make()
+                        ->success()
+                        ->title('Deleted')
+                        ->body($count . ' items deleted successfully.')
+                        ->send();
+                }),
+            BulkAction::make('change_status')
+                ->label('Change Status')
+                ->form([
+                    Select::make('status')
+                        ->options([
+                            'draft' => 'Draft',
+                            'published' => 'Published',
+                            'archived' => 'Archived',
+                        ])
+                        ->required(),
+                ])
+                ->action(function (Collection $records, array $data) {
+                    $records->each->update(['status' => $data['status']]);
+                    Notification::make()
+                        ->success()
+                        ->title('Status Updated')
+                        ->body('Selected items have been updated to ' . $data['status'] . '.')
+                        ->send();
+                })
+                ->requiresConfirmation()
+                ->icon('heroicon-o-cog'),
         ]);
     }
 

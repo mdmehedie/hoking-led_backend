@@ -19,6 +19,9 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Actions\Action;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BooleanColumn;
+use Filament\Actions\DeleteBulkAction;
 
 class CategoryResource extends Resource
 {
@@ -83,6 +86,22 @@ class CategoryResource extends Resource
                 ->requiresConfirmation()
                 ->color('danger')
                 ->icon('heroicon-o-trash'),
+        ])
+        ->bulkActions([
+            BulkAction::make('delete_selected')
+                ->label('Delete Selected')
+                ->color('danger')
+                ->icon('heroicon-o-trash')
+                ->requiresConfirmation()
+                ->action(function (Collection $records) {
+                    $count = $records->count();
+                    $records->each->delete();
+                    Notification::make()
+                        ->success()
+                        ->title('Deleted')
+                        ->body($count . ' items deleted successfully.')
+                        ->send();
+                }),
         ]);
     }
 

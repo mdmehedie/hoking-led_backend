@@ -15,11 +15,13 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Illuminate\Support\Facades\DB;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
+use Filament\Notifications\Notification;
 
 class NewsResource extends Resource
 {
@@ -112,6 +114,43 @@ class NewsResource extends Resource
                     ->action(fn ($record) => $record->update(['status' => 'draft'])),
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                BulkAction::make('delete_selected')
+                    ->label('Delete Selected')
+                    ->color('danger')
+                    ->icon('heroicon-o-trash')
+                    ->requiresConfirmation()
+                    ->action(function (Collection $records) {
+                        $count = $records->count();
+                        $records->each->delete();
+                        Notification::make()
+                            ->success()
+                            ->title('Deleted')
+                            ->body($count . ' items deleted successfully.')
+                            ->send();
+                    }),
+                BulkAction::make('change_status')
+                    ->label('Change Status')
+                    ->form([
+                        Select::make('status')
+                            ->options([
+                                'draft' => 'Draft',
+                                'review' => 'Review',
+                                'published' => 'Published',
+                            ])
+                            ->required(),
+                    ])
+                    ->action(function (Collection $records, array $data) {
+                        $records->each->update(['status' => $data['status']]);
+                        Notification::make()
+                            ->success()
+                            ->title('Status Updated')
+                            ->body('Selected items have been updated to ' . $data['status'] . '.')
+                            ->send();
+                    })
+                    ->requiresConfirmation()
+                    ->icon('heroicon-o-cog'),
             ]);
     }
 
