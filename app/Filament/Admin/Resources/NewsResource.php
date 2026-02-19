@@ -13,6 +13,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -31,30 +32,38 @@ class NewsResource extends Resource
     {
         return $schema
             ->schema([
-                TextInput::make('title')
-                    ->required(),
-                TextInput::make('slug')
-                    ->required(),
-                Select::make('status')
-                    ->options([
-                        'draft' => 'Draft',
-                        'review' => 'Review',
-                        'published' => 'Published',
-                    ])
-                    ->required(),
-                DateTimePicker::make('published_at'),
-                Select::make('author_id')
-                    ->relationship('author', 'name')
-                    ->required(),
-                Textarea::make('excerpt'),
-                RichEditor::make('content')
-                    ->required(),
-                FileUpload::make('featured_image')
-                    ->image()
-                    ->directory('news'),
-                TextInput::make('meta_title'),
-                Textarea::make('meta_description'),
-                Textarea::make('meta_keywords'),
+                Section::make('General')->schema([
+                    TextInput::make('title')
+                        ->required(),
+                    TextInput::make('slug')
+                        ->required(),
+                    Select::make('status')
+                        ->options([
+                            'draft' => 'Draft',
+                            'review' => 'Review',
+                            'published' => 'Published',
+                        ])
+                        ->required(),
+                    DateTimePicker::make('published_at'),
+                    Select::make('author_id')
+                        ->relationship('author', 'name')
+                        ->required(),
+                ]),
+                Section::make('Content')->schema([
+                    Textarea::make('excerpt'),
+                    RichEditor::make('content')
+                        ->required(),
+                ]),
+                Section::make('Media')->schema([
+                    FileUpload::make('featured_image')
+                        ->image()
+                        ->directory('news'),
+                ]),
+                Section::make('SEO')->schema([
+                    TextInput::make('meta_title'),
+                    Textarea::make('meta_description'),
+                    Textarea::make('meta_keywords'),
+                ]),
             ]);
     }
 
