@@ -99,7 +99,9 @@ class AppSettingResource extends Resource
                                 'website' => 'Website',
                             ])
                             ->required(),
-                        \Filament\Forms\Components\TextInput::make('url')->url()->required(),
+                        \Filament\Forms\Components\TextInput::make('url')
+                            ->label('URL')
+                            ->required(),
                     ])
                     ->default([]),
             ]),
