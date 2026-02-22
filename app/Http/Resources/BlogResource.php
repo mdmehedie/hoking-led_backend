@@ -19,6 +19,7 @@ class BlogResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'slug' => $this->slug,
+            'excerpt' => $this->excerpt,
             'description' => $this->description,
             'content' => $this->content,
             'image_path' => $this->image_path ? url(Storage::url($this->image_path)) : null,
