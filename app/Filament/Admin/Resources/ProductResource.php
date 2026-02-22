@@ -48,7 +48,7 @@ class ProductResource extends Resource
                         $set('slug', static::generateUniqueSlug($state, $record?->id));
                     }
                 })->live()->required(),
-                TextInput::make('slug')->unique(ignoreRecord: true)->required(),
+                TextInput::make('slug')->unique(ignoreRecord: true)->required()->readonly(fn ($get, $record) => $record && $record->exists),
                 Textarea::make('short_description'),
                 Select::make('category_id')->relationship('category', 'name')->nullable(),
                 Select::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])->required(),

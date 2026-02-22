@@ -26,7 +26,7 @@ class ProductResource extends JsonResource
             'published_at' => $this->published_at,
             'author_id' => $this->author_id,
             'is_featured' => $this->is_featured,
-            'image_path' => $this->image_path ? url(Storage::url($this->image_path)) : null,
+            'image_path' => $this->main_image ? url(Storage::url($this->main_image)) : null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

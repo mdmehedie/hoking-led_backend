@@ -13,10 +13,15 @@ use App\Http\Controllers\Api\V1\ApiFrontendPageController;
 Route::prefix('v1')->group(function () {
     Route::get('sliders', [ApiFrontendSliderController::class, 'index']);
     Route::get('blogs', [ApiFrontendBlogController::class, 'index']);
+    Route::get('blogs/{slug}', [ApiFrontendBlogController::class, 'show']);
     Route::get('case-studies', [ApiFrontendCaseStudyController::class, 'index']);
+    Route::get('case-studies/{slug}', [ApiFrontendCaseStudyController::class, 'show']);
     Route::get('products', [ApiFrontendProductController::class, 'index']);
+    Route::get('products/{slug}', [ApiFrontendProductController::class, 'show']);
     Route::get('categories', [ApiFrontendCategoryController::class, 'index']);
     Route::get('featured-products', [ApiFrontendFeaturedProductController::class, 'index']);
     Route::get('news', [ApiFrontendNewsController::class, 'index']);
+    Route::get('news/{slug}', [ApiFrontendNewsController::class, 'show']);
     Route::get('pages', [ApiFrontendPageController::class, 'index']);
+    Route::get('pages/{slug}', [ApiFrontendPageController::class, 'show']);
 });

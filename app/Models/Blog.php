@@ -17,6 +17,7 @@ class Blog extends Model implements HasMedia
         'slug',
         'excerpt',
         'content',
+        'image_path',
         'author_id',
         'status',
         'published_at',

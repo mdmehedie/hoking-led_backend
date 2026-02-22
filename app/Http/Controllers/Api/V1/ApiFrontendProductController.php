@@ -18,8 +18,21 @@ class ApiFrontendProductController extends ApiBaseController
             $query->where('category_id', $request->category_id);
         }
 
-        $products = $query->orderBy('title')->get();
+        $perPage = $request->get('per_page', 10);
+
+        $products = $query->orderBy('title')->paginate($perPage);
 
         return $this->okResponse(['products' => ProductResource::collection($products)], __('Products retrieved successfully'));
+    }
+
+    public function show($slug): JsonResponse
+    {
+        $product = Product::where('slug', $slug)->where('status', 'published')->first();
+
+        if (!$product) {
+            return $this->notFoundResponse([], 'Product not found');
+        }
+
+        return $this->okResponse(['product' => new ProductResource($product)], __('Product retrieved successfully'));
     }
 }

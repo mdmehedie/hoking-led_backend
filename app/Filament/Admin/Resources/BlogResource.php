@@ -16,6 +16,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Collection;
@@ -67,7 +68,7 @@ class BlogResource extends Resource
                         ->required(),
                 ]),
                 Section::make('Media')->schema([
-                    FileUpload::make('featured_image')
+                    FileUpload::make('image_path')
                         ->image()
                         ->directory('blogs'),
                 ]),

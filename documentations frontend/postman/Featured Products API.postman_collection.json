@@ -18,9 +18,16 @@
         "url": {
           "raw": "{{base_url}}/v1/featured-products",
           "host": ["{{base_url}}"],
-          "path": ["v1", "featured-products"]
+          "path": ["v1", "featured-products"],
+          "query": [
+            {
+              "key": "per_page",
+              "value": "10",
+              "description": "Optional: Number of items per page (default 10)"
+            }
+          ]
         },
-        "description": "Retrieves a list of featured products that are published."
+        "description": "Retrieves a list of featured products that are published. Supports pagination with per_page parameter (default 10)."
       },
       "response": [
         {

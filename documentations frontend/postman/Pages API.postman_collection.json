@@ -1,0 +1,114 @@
+{
+  "info": {
+    "name": "Pages API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "API collection for retrieving pages data from the Laravel backend."
+  },
+  "item": [
+    {
+      "name": "Get Pages",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/pages",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "pages"],
+          "query": [
+            {
+              "key": "per_page",
+              "value": "10",
+              "description": "Optional: Number of items per page (default 10)"
+            }
+          ]
+        },
+        "description": "Retrieves a list of published pages ordered by published date descending. Supports pagination with per_page parameter (default 10)."
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/pages",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "pages"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"status\": true,\n  \"message\": \"Pages retrieved successfully\",\n  \"data\": {\n    \"pages\": [\n      {\n        \"id\": 1,\n        \"title\": \"Sample Page Title\",\n        \"slug\": \"sample-page-title\",\n        \"description\": \"Brief description of the page.\",\n        \"content\": \"Full HTML content of the page.\",\n        \"image_path\": \"http://localhost:8000/storage/pages/image.jpg\",\n        \"published_at\": \"2023-01-01T00:00:00.000000Z\",\n        \"author_id\": 1,\n        \"status\": \"published\",\n        \"created_at\": \"2023-01-01T00:00:00.000000Z\",\n        \"updated_at\": \"2023-01-01T00:00:00.000000Z\"\n      }\n    ]\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Page by Slug",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/pages/{{page_slug}}",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "pages", "{{page_slug}}"]
+        },
+        "description": "Retrieves a single published page by its slug."
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/pages/{{page_slug}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "pages", "{{page_slug}}"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"status\": true,\n  \"message\": \"Page retrieved successfully\",\n  \"data\": {\n    \"page\": {\n      \"id\": 1,\n      \"title\": \"Sample Page Title\",\n      \"slug\": \"sample-page-title\",\n      \"description\": \"Brief description of the page.\",\n      \"content\": \"Full HTML content of the page.\",\n      \"image_path\": \"http://localhost:8000/storage/pages/image.jpg\",\n      \"published_at\": \"2023-01-01T00:00:00.000000Z\",\n      \"author_id\": 1,\n      \"status\": \"published\",\n      \"created_at\": \"2023-01-01T00:00:00.000000Z\",\n      \"updated_at\": \"2023-01-01T00:00:00.000000Z\"\n    }\n  }\n}"
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "page_slug",
+      "value": "sample-page-title",
+      "type": "string"
+    }
+  ]
+}

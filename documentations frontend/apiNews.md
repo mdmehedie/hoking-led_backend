@@ -1,8 +1,8 @@
-# Blogs API Documentation
+# News API Documentation
 
 ## Overview
 
-This API provides endpoints to retrieve blog data for the frontend application.
+This API provides endpoints to retrieve news data for the frontend application.
 
 ## Base URL
 
@@ -10,14 +10,14 @@ http://localhost:8000/api
 
 ## Endpoints
 
-### Get Blogs
+### Get News
 
-Retrieves a list of all published blogs.
+Retrieves a list of all published news.
 
 #### Request
 
 - **Method**: GET
-- **URL**: /v1/blogs
+- **URL**: /v1/news
 - **Headers**: None required
 
 #### Response
@@ -27,16 +27,16 @@ Retrieves a list of all published blogs.
 ```json
 {
   "status": true,
-  "message": "Blogs retrieved successfully",
+  "message": "News retrieved successfully",
   "data": {
-    "blogs": [
+    "news": [
       {
         "id": 1,
-        "title": "Sample Blog Title",
-        "slug": "sample-blog-title",
-        "description": "Brief description of the blog.",
-        "content": "Full HTML content of the blog.",
-        "image_path": "http://localhost:8000/storage/blogs/image.jpg",
+        "title": "Sample News Title",
+        "slug": "sample-news-title",
+        "description": "Brief description of the news.",
+        "content": "Full HTML content of the news.",
+        "image_path": "http://localhost:8000/storage/news/image.jpg",
         "published_at": "2023-01-01T00:00:00.000000Z",
         "author_id": 1,
         "status": "published",
@@ -50,12 +50,12 @@ Retrieves a list of all published blogs.
 
 ##### Fields Description
 
-- `id`: Unique identifier for the blog.
-- `title`: Blog title (HTML content).
+- `id`: Unique identifier for the news.
+- `title`: News title (HTML content).
 - `slug`: URL-friendly slug.
 - `description`: Short description.
-- `content`: Full blog content in HTML.
-- `image_path`: Full URL to the blog image.
+- `content`: Full news content in HTML.
+- `image_path`: Full URL to the news image.
 - `published_at`: Publication date.
 - `author_id`: ID of the author.
 - `status`: Publication status.
@@ -73,16 +73,16 @@ Retrieves a list of all published blogs.
 }
 ```
 
-### Get Blog by Slug
+### Get News by Slug
 
-Retrieves a single published blog by its slug.
+Retrieves a single published news by its slug.
 
 #### Request
 
 - **Method**: GET
-- **URL**: /v1/blogs/{slug}
+- **URL**: /v1/news/{slug}
 - **Parameters**:
-  - `slug`: The slug of the blog
+  - `slug`: The slug of the news
 - **Headers**: None required
 
 #### Response
@@ -92,15 +92,15 @@ Retrieves a single published blog by its slug.
 ```json
 {
   "status": true,
-  "message": "Blog retrieved successfully",
+  "message": "News retrieved successfully",
   "data": {
-    "blog": {
+    "news": {
       "id": 1,
-      "title": "Sample Blog Title",
-      "slug": "sample-blog-title",
-      "description": "Brief description of the blog.",
-      "content": "Full HTML content of the blog.",
-      "image_path": "http://localhost:8000/storage/blogs/image.jpg",
+      "title": "Sample News Title",
+      "slug": "sample-news-title",
+      "description": "Brief description of the news.",
+      "content": "Full HTML content of the news.",
+      "image_path": "http://localhost:8000/storage/news/image.jpg",
       "published_at": "2023-01-01T00:00:00.000000Z",
       "author_id": 1,
       "status": "published",
@@ -116,7 +116,7 @@ Retrieves a single published blog by its slug.
 
 ##### Error Responses
 
-- **404 Not Found**: Blog not found or not published.
+- **404 Not Found**: News not found or not published.
 
 ```json
 {
@@ -131,30 +131,30 @@ Retrieves a single published blog by its slug.
 ## Usage Example (React)
 
 ```javascript
-fetch('/api/v1/blogs')
+// Get all news
+fetch('/api/v1/news')
   .then(response => response.json())
   .then(data => {
     if (data.status) {
-      console.log('Blogs:', data.data.blogs);
+      console.log('News:', data.data.news);
     } else {
       console.error('Error:', data.message);
     }
-  })
-  .catch(error => console.error('Fetch error:', error));
+  });
 
-// Get single blog
-fetch('/api/v1/blogs/sample-blog-title')
+// Get single news
+fetch('/api/v1/news/sample-news-title')
   .then(response => response.json())
   .then(data => {
     if (data.status) {
-      console.log('Blog:', data.data.blog);
-      // Use data.data.blog.meta_title for <title>, etc.
+      console.log('News:', data.data.news);
+      // Use data.data.news.meta_title for <title>, etc.
     }
   });
 ```
 
 ## Notes
 
-- Only blogs with `status: "published"` are returned.
-- Blogs are sorted by `published_at` in descending order (newest first).
+- Only news with `status: "published"` are returned.
+- News are sorted by `published_at` in descending order (newest first).
 - Title and content fields contain HTML for rich text formatting.

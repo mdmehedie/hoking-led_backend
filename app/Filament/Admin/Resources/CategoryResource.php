@@ -15,13 +15,13 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables;
 use Filament\Actions\Action;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BooleanColumn;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\BulkAction;
+use Filament\Support\Icons\Heroicon;
 
 class CategoryResource extends Resource
 {
@@ -73,10 +73,10 @@ class CategoryResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('slug')->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('parent.name')->label('Parent')->sortable(),
-            Tables\Columns\BooleanColumn::make('is_visible')->sortable(),
+            TextColumn::make('name')->searchable()->sortable(),
+            TextColumn::make('slug')->searchable()->sortable(),
+            TextColumn::make('parent.name')->label('Parent')->sortable(),
+            BooleanColumn::make('is_visible')->sortable(),
         ])->actions([
             Action::make('edit')
                 ->url(fn ($record) => static::getUrl('edit', ['record' => $record]))

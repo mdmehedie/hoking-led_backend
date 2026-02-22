@@ -24,10 +24,15 @@
               "key": "category_id",
               "value": "",
               "description": "Optional: Filter products by category ID"
+            },
+            {
+              "key": "per_page",
+              "value": "10",
+              "description": "Optional: Number of items per page (default 10)"
             }
           ]
         },
-        "description": "Retrieves a list of published products, optionally filtered by category. Ordered by order field."
+        "description": "Retrieves a list of published products, optionally filtered by category. Supports pagination with per_page parameter (default 10). Ordered by title."
       },
       "response": [
         {
@@ -51,7 +56,50 @@
             }
           ],
           "cookie": [],
-          "body": "{\n  \"status\": true,\n  \"message\": \"Products retrieved successfully\",\n  \"data\": {\n    \"products\": [\n      {\n        \"id\": 1,\n        \"title\": \"Sample Product Title\",\n        \"slug\": \"sample-product-title\",\n        \"short_description\": \"Brief description.\",\n        \"detailed_description\": \"Full description.\",\n        \"category_id\": 1,\n        \"status\": \"published\",\n        \"published_at\": \"2023-01-01T00:00:00.000000Z\",\n        \"author_id\": 1,\n        \"is_featured\": false,\n        \"image_path\": \"http://localhost:8000/storage/products/image.jpg\",\n        \"created_at\": \"2023-01-01T00:00:00.000000Z\",\n        \"updated_at\": \"2023-01-01T00:00:00.000000Z\"\n      }\n    ]\n  }\n}"
+          "body": "{\n  \"status\": true,\n  \"message\": \"Products retrieved successfully\",\n  \"data\": {\n    \"products\": [\n      {\n        \"id\": 1,\n        \"title\": \"Sample Product Title\",\n        \"slug\": \"sample-product-title\",\n        \"short_description\": \"Brief description.\",\n        \"detailed_description\": \"Full detailed description.\",\n        \"category_id\": 1,\n        \"status\": \"published\",\n        \"published_at\": \"2023-01-01T00:00:00.000000Z\",\n        \"author_id\": 1,\n        \"is_featured\": false,\n        \"image_path\": \"http://localhost:8000/storage/products/image.jpg\",\n        \"created_at\": \"2023-01-01T00:00:00.000000Z\",\n        \"updated_at\": \"2023-01-01T00:00:00.000000Z\"\n      }\n    ]\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Get Product by Slug",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/v1/products/{{product_slug}}",
+          "host": ["{{base_url}}"],
+          "path": ["v1", "products", "{{product_slug}}"]
+        },
+        "description": "Retrieves a single published product by its slug."
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/v1/products/{{product_slug}}",
+              "host": ["{{base_url}}"],
+              "path": ["v1", "products", "{{product_slug}}"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"status\": true,\n  \"message\": \"Product retrieved successfully\",\n  \"data\": {\n    \"product\": {\n      \"id\": 1,\n      \"title\": \"Sample Product Title\",\n      \"slug\": \"sample-product-title\",\n      \"short_description\": \"Brief description.\",\n      \"detailed_description\": \"Full detailed description.\",\n      \"category_id\": 1,\n      \"status\": \"published\",\n      \"published_at\": \"2023-01-01T00:00:00.000000Z\",\n      \"author_id\": 1,\n      \"is_featured\": false,\n      \"image_path\": \"http://localhost:8000/storage/products/image.jpg\",\n      \"created_at\": \"2023-01-01T00:00:00.000000Z\",\n      \"updated_at\": \"2023-01-01T00:00:00.000000Z\"\n    }\n  }\n}"
         }
       ]
     }
@@ -60,6 +108,11 @@
     {
       "key": "base_url",
       "value": "http://localhost:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "product_slug",
+      "value": "sample-product-title",
       "type": "string"
     }
   ]
