@@ -6,7 +6,7 @@ This API provides endpoints to retrieve slider data for the frontend application
 
 ## Base URL
 
-All API endpoints are prefixed with `/api/v1`.
+All API endpoints are prefixed with `http://localhost:8000/api/v1`.
 
 ## Authentication
 
@@ -21,7 +21,7 @@ Retrieves a list of all active sliders.
 #### Request
 
 - **Method**: GET
-- **URL**: `/api/v1/sliders`
+- **URL**: `/v1/sliders`
 - **Headers**: None required
 
 #### Response

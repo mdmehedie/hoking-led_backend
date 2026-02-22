@@ -16,9 +16,9 @@
           }
         ],
         "url": {
-          "raw": "{{base_url}}/api/v1/sliders",
+          "raw": "{{base_url}}/v1/sliders",
           "host": ["{{base_url}}"],
-          "path": ["api", "v1", "sliders"]
+          "path": ["v1", "sliders"]
         },
         "description": "Retrieves a list of active sliders ordered by their display order."
       },
@@ -52,7 +52,7 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:8000",
+      "value": "http://localhost:8000/api",
       "type": "string"
     }
   ]
