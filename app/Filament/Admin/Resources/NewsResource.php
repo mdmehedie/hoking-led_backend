@@ -63,7 +63,7 @@ class NewsResource extends Resource
                 ]),
                 Section::make('Content')->schema([
                     Textarea::make('excerpt'),
-                    RichEditor::make('content')
+                    \App\Filament\Forms\Components\CustomRichEditor::make('content')
                         ->required(),
                 ]),
                 Section::make('Media')->schema([

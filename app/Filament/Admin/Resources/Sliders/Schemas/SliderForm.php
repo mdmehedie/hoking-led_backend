@@ -17,9 +17,9 @@ class SliderForm
         return $schema
             ->components([
                 Section::make('Slider Details')->schema([
-                    RichEditor::make('title')
+                    \App\Filament\Forms\Components\CustomRichEditor::make('title')
                         ->required(),
-                    RichEditor::make('description'),
+                    \App\Filament\Forms\Components\CustomRichEditor::make('description'),
                     FileUpload::make('image_path')
                         ->directory('sliders')
                         ->visibility('public')

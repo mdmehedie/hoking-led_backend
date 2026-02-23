@@ -56,11 +56,8 @@ class AppSettingResource extends Resource
                 \Filament\Forms\Components\TextInput::make('app_name')
                     ->label('Company Title')
                     ->default('Admin Panel'),
-                RichEditor::make('organization.about')
+                \App\Filament\Forms\Components\CustomRichEditor::make('organization.about')
                     ->label('About information')
-                    ->fileAttachmentsDisk('public')
-                    ->fileAttachmentsDirectory('settings/about')
-                    ->fileAttachmentsVisibility('public')
                     ->default(''),
                 Repeater::make('organization.contact_emails')
                     ->label('Contact email(s)')

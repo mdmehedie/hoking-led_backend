@@ -66,6 +66,47 @@ class AdminPanelProvider extends PanelProvider
                 $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());
                 if (!$settings || !$settings->toastr_enabled) return null;
                 return new \Illuminate\Support\HtmlString("<script> toastr.options = { positionClass: 'toast-{$settings->toastr_position}', timeOut: {$settings->toastr_timeout} * 1000, extendedTimeOut: {$settings->toastr_extended_timeout} * 1000, closeButton: " . ($settings->toastr_close_button ? 'true' : 'false') . ", debug: false, newestOnTop: " . ($settings->toastr_newest_on_top ? 'true' : 'false') . ", progressBar: " . ($settings->toastr_progress_bar ? 'true' : 'false') . ", preventDuplicates: " . ($settings->toastr_prevent_duplicates ? 'true' : 'false') . ", showDuration: {$settings->toastr_show_duration}, hideDuration: {$settings->toastr_hide_duration}, showEasing: '{$settings->toastr_show_easing}', hideEasing: '{$settings->toastr_hide_easing}', showMethod: '{$settings->toastr_show_method}', hideMethod: '{$settings->toastr_hide_method}' }; document.addEventListener('toastr', function(e) { if (typeof toastr !== 'undefined') { toastr[e.detail.type](e.detail.message, e.detail.title); } }); </script>");
+            })
+            ->renderHook('scripts.after', function () {
+                return new \Illuminate\Support\HtmlString('
+                    <script>
+                        document.addEventListener("trix-attachment-add", function(event) {
+                            var attachment = event.attachment;
+                            if (attachment.file) {
+                                uploadFile(attachment);
+                            }
+                        });
+
+                        function uploadFile(attachment) {
+                            var file = attachment.file;
+                            var form = new FormData();
+                            form.append("file", file);
+                            var csrfToken = document.querySelector(\'meta[name="csrf-token"]\');
+                            if (csrfToken) {
+                                form.append("_token", csrfToken.getAttribute("content"));
+                            }
+                            var xhr = new XMLHttpRequest();
+                            xhr.open("POST", "/admin/editor-image-upload");
+                            xhr.onload = function() {
+                                if (xhr.status === 200) {
+                                    var data = JSON.parse(xhr.responseText);
+                                    attachment.setAttributes({
+                                        url: data.url,
+                                        href: data.url
+                                    });
+                                } else {
+                                    console.error("Upload failed");
+                                    attachment.remove();
+                                }
+                            };
+                            xhr.onerror = function() {
+                                console.error("Upload error");
+                                attachment.remove();
+                            };
+                            xhr.send(form);
+                        }
+                    </script>
+                ');
             });
     }
 }

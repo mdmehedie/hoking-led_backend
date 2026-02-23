@@ -57,7 +57,7 @@ class ProductResource extends Resource
                 Toggle::make('is_featured')->label('Featured Product'),
             ]),
             Section::make('Description')->schema([
-                RichEditor::make('detailed_description'),
+                \App\Filament\Forms\Components\CustomRichEditor::make('detailed_description'),
             ]),
             Section::make('Media')->schema([
                 FileUpload::make('main_image')->image()->directory('products/main'),
