@@ -35,6 +35,13 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
+            ->navigationGroups([
+                \Filament\Navigation\NavigationGroup::make('Content Management'),
+                \Filament\Navigation\NavigationGroup::make('Product Management'),
+                \Filament\Navigation\NavigationGroup::make('Marketing'),
+                \Filament\Navigation\NavigationGroup::make('Settings'),
+                \Filament\Navigation\NavigationGroup::make('User Management'),
+            ])
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
             ->pages([
                 Dashboard::class,

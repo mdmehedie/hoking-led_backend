@@ -33,6 +33,21 @@ class BlogResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
+    public static function canCreate(): bool
+    {
+        return !auth()->user()->hasRole('Viewer');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return !auth()->user()->hasRole('Viewer');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return !auth()->user()->hasRole('Viewer');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -59,8 +74,10 @@ class BlogResource extends Resource
                         ->required(),
                     Hidden::make('published_at')
                         ->default(now()),
-                    Hidden::make('author_id')
-                        ->default(auth()->id()),
+                    Select::make('author_id')
+                        ->relationship('author', 'name')
+                        ->default(fn() => auth()->user()->hasRole('Content Manager') ? auth()->id() : null)
+                        ->required(),
                 ]),
                 Section::make('Content')->schema([
                     Textarea::make('excerpt'),
