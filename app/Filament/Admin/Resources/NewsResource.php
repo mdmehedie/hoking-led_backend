@@ -23,6 +23,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Collection;
 use Filament\Notifications\Notification;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\Tab;
 
 class NewsResource extends Resource
 {
@@ -92,6 +94,7 @@ class NewsResource extends Resource
                     TextInput::make('meta_title'),
                     Textarea::make('meta_description'),
                     Textarea::make('meta_keywords'),
+                    TextInput::make('canonical_url'),
                 ]),
             ]);
     }

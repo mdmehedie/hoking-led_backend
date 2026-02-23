@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Traits\HasSeo;
 
 class News extends Model implements HasMedia
 {
-    use InteractsWithMedia;
+    use InteractsWithMedia, HasSeo;
 
     protected $fillable = [
         'title',
@@ -50,5 +51,10 @@ class News extends Model implements HasMedia
             ->width(600)
             ->height(600)
             ->sharpen(10);
+    }
+
+    public function getUrl(): string
+    {
+        return url('/news/' . $this->slug);
     }
 }

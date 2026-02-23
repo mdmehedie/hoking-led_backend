@@ -22,6 +22,8 @@ use Filament\Tables\Columns\BooleanColumn;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\BulkAction;
 use Filament\Support\Icons\Heroicon;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\Tab;
 
 class CategoryResource extends Resource
 {
@@ -66,6 +68,7 @@ class CategoryResource extends Resource
                 TextInput::make('meta_title'),
                 Textarea::make('meta_description'),
                 Textarea::make('meta_keywords'),
+                TextInput::make('canonical_url'),
             ]),
         ]);
     }

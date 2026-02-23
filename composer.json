@@ -15,6 +15,7 @@
         "spatie/eloquent-sortable": "*",
         "spatie/laravel-medialibrary": "*",
         "spatie/laravel-permission": "*",
+        "spatie/laravel-sitemap": "*",
         "spatie/laravel-translatable": "*"
     },
     "require-dev": {

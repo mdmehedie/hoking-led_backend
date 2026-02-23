@@ -88,6 +88,7 @@ class ProductResource extends Resource
                 TextInput::make('meta_title'),
                 Textarea::make('meta_description'),
                 Textarea::make('meta_keywords'),
+                TextInput::make('canonical_url'),
             ]),
         ]);
     }

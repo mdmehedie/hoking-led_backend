@@ -24,6 +24,8 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Illuminate\Support\Facades\DB;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\Tab;
 
 class CaseStudyResource extends Resource
 {
@@ -76,6 +78,7 @@ class CaseStudyResource extends Resource
                     TextInput::make('meta_title'),
                     Textarea::make('meta_description'),
                     Textarea::make('meta_keywords'),
+                    TextInput::make('canonical_url'),
                 ]),
             ]);
     }

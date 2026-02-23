@@ -120,6 +120,9 @@ class AppSettingResource extends Resource
                     'slideUp' => 'Slide Up',
                 ])->default('fadeOut'),
             ]),
+            Section::make('SEO Settings')->schema([
+                Toggle::make('sitemap_enabled')->label('Enable Sitemap Generation')->default(true),
+            ]),
         ]);
     }
 

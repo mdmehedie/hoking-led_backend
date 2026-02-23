@@ -9,10 +9,11 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Translatable\HasTranslations;
+use App\Traits\HasSeo;
 
 class Product extends Model implements HasMedia
 {
-    use HasTranslations, InteractsWithMedia;
+    use HasTranslations, InteractsWithMedia, HasSeo;
 
     protected $fillable = [
         'title',
@@ -80,5 +81,10 @@ class Product extends Model implements HasMedia
             }
         }
         return $value;
+    }
+
+    public function getUrl(): string
+    {
+        return url('/products/' . $this->slug);
     }
 }

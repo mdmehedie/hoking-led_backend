@@ -22,6 +22,7 @@ class AppSetting extends Model
         'toastr_show_method',
         'toastr_hide_method',
         'app_name',
+        'sitemap_enabled',
     ];
 
     protected $casts = [

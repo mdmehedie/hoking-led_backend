@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Kalnoy\Nestedset\NodeTrait;
 use Illuminate\Support\Str;
+use App\Traits\HasSeo;
 
 class Category extends Model
 {
-    use NodeTrait;
+    use NodeTrait, HasSeo;
 
     protected $fillable = [
         'name',
@@ -29,5 +30,10 @@ class Category extends Model
                 $category->slug = Str::slug($category->name);
             }
         });
+    }
+
+    public function getUrl(): string
+    {
+        return url('/categories/' . $this->slug);
     }
 }
