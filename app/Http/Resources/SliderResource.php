@@ -15,14 +15,11 @@ class SliderResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        return [
+        $data = [
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
             'media_type' => $this->media_type,
-            'image_path' => $this->image_path ? url(Storage::url($this->image_path)) : null,
-            'video_url' => $this->video_url,
-            'video_file' => $this->video_file ? url(Storage::url($this->video_file)) : null,
             'link' => $this->link,
             'alt_text' => $this->alt_text,
             'order' => $this->order,
@@ -31,5 +28,21 @@ class SliderResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+
+        // Add the relevant media field based on type
+        switch ($this->media_type) {
+            case 'image':
+            case 'gif':
+                $data['image_path'] = $this->image_path ? url(Storage::url($this->image_path)) : null;
+                break;
+            case 'video_url':
+                $data['video_url'] = $this->video_url;
+                break;
+            case 'video_file':
+                $data['video_file'] = $this->video_file ? url(Storage::url($this->video_file)) : null;
+                break;
+        }
+
+        return $data;
     }
 }
