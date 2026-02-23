@@ -16,4 +16,17 @@ class EditSlider extends EditRecord
             DeleteAction::make(),
         ];
     }
+
+    public function getTitle(): string
+    {
+        return 'Edit ' . strip_tags($this->record->title);
+    }
+
+    public function getBreadcrumbs(): array
+    {
+        return [
+            SliderResource::getUrl() => 'Sliders',
+            SliderResource::getUrl('edit', ['record' => $this->record]) => 'Edit ' . strip_tags($this->record->title),
+        ];
+    }
 }

@@ -15,6 +15,9 @@ class Slider extends Model
         'order',
         'status',
         'custom_styles',
+        'media_type',
+        'video_url',
+        'video_file',
     ];
 
     protected $casts = [

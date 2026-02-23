@@ -22,8 +22,15 @@ class SlidersTable
     {
         return $table
             ->columns([
-                TextColumn::make('title')->sortable(),
-                ImageColumn::make('image_path')->label('Image'),
+                TextColumn::make('title')->sortable()->formatStateUsing(fn ($state) => strip_tags($state)),
+                TextColumn::make('media_type')->label('Media Type')->formatStateUsing(fn ($state) => match($state) {
+                    'image' => 'Image',
+                    'gif' => 'GIF (Playable)',
+                    'video_url' => 'Video URL',
+                    'video_file' => 'Uploaded Video',
+                    default => $state,
+                }),
+                ImageColumn::make('image_path')->label('Media'),
                 BooleanColumn::make('status'),
                 TextColumn::make('order')->sortable(),
             ])
