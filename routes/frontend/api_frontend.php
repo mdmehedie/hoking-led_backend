@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\ApiFrontendFeaturedProductController;
 use App\Http\Controllers\Api\V1\ApiFrontendNewsController;
 use App\Http\Controllers\Api\V1\ApiFrontendPageController;
 use App\Http\Controllers\Api\V1\ApiFrontendAppSettingController;
+use App\Http\Controllers\Api\V1\ApiFrontendFormController;
 
 Route::prefix('v1')->group(function () {
     Route::get('sliders', [ApiFrontendSliderController::class, 'index']);
@@ -27,4 +28,7 @@ Route::prefix('v1')->group(function () {
     Route::get('pages/{slug}', [ApiFrontendPageController::class, 'show']);
     Route::get('app-settings', [ApiFrontendAppSettingController::class, 'index']);
     Route::get('app-settings/{column}', [ApiFrontendAppSettingController::class, 'show']);
+    // Custom Forms API
+    Route::get('forms', [ApiFrontendFormController::class, 'index']);
+    Route::post('forms/{form}/submit', [ApiFrontendFormController::class, 'store']);
 });

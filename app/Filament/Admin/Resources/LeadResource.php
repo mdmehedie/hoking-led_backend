@@ -1,0 +1,117 @@
+<?php
+
+namespace App\Filament\Admin\Resources;
+
+use App\Filament\Admin\Resources\LeadResource\Pages;
+use App\Models\Lead;
+use Filament\Forms;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\Filter;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Collection;
+
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+
+use Filament\Support\Icons\Heroicon;
+
+class LeadResource extends Resource
+{
+    protected static ?string $model = Lead::class;
+
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-user-group';
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canEdit($record): bool
+    {
+        return false;
+    }
+
+    public static function canDelete($record): bool
+    {
+        return false;
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('id'),
+                Tables\Columns\TextColumn::make('form.name')
+                    ->label('Form'),
+                Tables\Columns\TextColumn::make('data')
+                    ->formatStateUsing(fn ($state) => json_encode($state, JSON_PRETTY_PRINT))
+                    ->wrap(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable(),
+            ])
+            ->searchable()
+            ->filters([
+                SelectFilter::make('form_id')
+                    ->label('Form')
+                    ->options(\App\Models\Form::pluck('name', 'id')),
+                Filter::make('created_at')
+                    ->form([
+                        Forms\Components\DatePicker::make('created_from'),
+                        Forms\Components\DatePicker::make('created_until'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    }),
+            ])
+            ->actions([
+                \Filament\Actions\ViewAction::make(),
+                \Filament\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                BulkAction::make('delete_selected')
+                    ->label('Delete Selected')
+                    ->color('danger')
+                    ->icon('heroicon-o-trash')
+                    ->requiresConfirmation()
+                    ->action(function (Collection $records) {
+                        $count = $records->count();
+                        $records->each->delete();
+                        Notification::make()
+                            ->success()
+                            ->title('Deleted')
+                            ->body($count . ' items deleted successfully.')
+                            ->send();
+                    }),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListLeads::route('/'),
+            'view' => Pages\ViewLead::route('/{record}'),
+        ];
+    }
+}
