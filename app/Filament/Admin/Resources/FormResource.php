@@ -70,6 +70,7 @@ class FormResource extends Resource
                             ])
                             ->label('Select Dropdown'),
                     ])
+                    ->addActionAlignment('center')
                     ->columnSpanFull(),
                 Forms\Components\Textarea::make('success_message')
                     ->label('Success Message'),

@@ -23,6 +23,12 @@ class AppSetting extends Model
         'toastr_hide_method',
         'app_name',
         'sitemap_enabled',
+        'frontend_url',
+        'blog_prefix',
+        'news_prefix',
+        'page_prefix',
+        'case_study_prefix',
+        'product_prefix',
     ];
 
     protected $casts = [

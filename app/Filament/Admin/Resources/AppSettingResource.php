@@ -56,6 +56,12 @@ class AppSettingResource extends Resource
                 \Filament\Forms\Components\TextInput::make('app_name')
                     ->label('Company Title')
                     ->default('Admin Panel'),
+                \Filament\Forms\Components\TextInput::make('frontend_url')
+                    ->label('Frontend URL')
+                    ->url()
+                    ->placeholder('https://your-frontend-domain.com')
+                    ->helperText('The URL of your frontend website. Used for generating share links in social media posts.')
+                    ->default(''),
                 \App\Filament\Forms\Components\CustomRichEditor::make('organization.about')
                     ->label('About information')
                     ->default(''),
@@ -122,6 +128,33 @@ class AppSettingResource extends Resource
             ]),
             Section::make('SEO Settings')->schema([
                 Toggle::make('sitemap_enabled')->label('Enable Sitemap Generation')->default(true),
+            ]),
+            Section::make('URL Prefixes')->description('Configure URL prefixes for different content types used in social media sharing')->schema([
+                \Filament\Forms\Components\TextInput::make('blog_prefix')
+                    ->label('Blog URL Prefix')
+                    ->placeholder('/blog/')
+                    ->default('/blog/')
+                    ->helperText('URL prefix for blog posts (e.g., /blog/ or /articles/)'),
+                \Filament\Forms\Components\TextInput::make('news_prefix')
+                    ->label('News URL Prefix')
+                    ->placeholder('/news/')
+                    ->default('/news/')
+                    ->helperText('URL prefix for news articles'),
+                \Filament\Forms\Components\TextInput::make('page_prefix')
+                    ->label('Page URL Prefix')
+                    ->placeholder('/pages/')
+                    ->default('/pages/')
+                    ->helperText('URL prefix for static pages'),
+                \Filament\Forms\Components\TextInput::make('case_study_prefix')
+                    ->label('Case Study URL Prefix')
+                    ->placeholder('/case-studies/')
+                    ->default('/case-studies/')
+                    ->helperText('URL prefix for case studies'),
+                \Filament\Forms\Components\TextInput::make('product_prefix')
+                    ->label('Product URL Prefix')
+                    ->placeholder('/products/')
+                    ->default('/products/')
+                    ->helperText('URL prefix for products'),
             ]),
         ]);
     }

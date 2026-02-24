@@ -105,6 +105,43 @@ class ProductResource extends Resource
             SelectFilter::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived']),
             SelectFilter::make('category_id')->relationship('category', 'name'),
         ])->actions([
+            Action::make('share')
+                ->label('Share')
+                ->icon('heroicon-o-share')
+                ->color('success')
+                ->visible(fn ($record) => $record->status === 'published')
+                ->form([
+                    Section::make('URL Preview')
+                        ->description('This is the URL that will be included in your social media posts')
+                        ->schema([
+                            \Filament\Forms\Components\TextInput::make('url_preview')
+                                ->label('Content URL')
+                                ->default(fn ($record) => static::generateShareUrl($record, 'product'))
+                                ->disabled()
+                                ->helperText('This URL will be shared on the selected social media platforms'),
+                        ]),
+                    \Filament\Forms\Components\CheckboxList::make('platforms')
+                        ->label('Share to Platforms')
+                        ->options([
+                            'facebook' => 'Facebook',
+                            'twitter' => 'Twitter (X)',
+                            'linkedin' => 'LinkedIn',
+                        ])
+                        ->default(['facebook', 'twitter', 'linkedin'])
+                        ->required()
+                        ->helperText('Select which social media platforms to share this product on'),
+                ])
+                ->action(function ($record, array $data) {
+                    \App\Jobs\PublishToSocialMedia::dispatch($record, 'product', $data['platforms']);
+
+                    \Filament\Notifications\Notification::make()
+                        ->title('Product shared successfully!')
+                        ->body('The product has been queued for sharing to selected social media platforms.')
+                        ->success()
+                        ->send();
+                })
+                ->modalHeading('Share Product')
+                ->modalSubmitActionLabel('Share Now'),
             Action::make('edit')
                 ->url(fn ($record) => static::getUrl('edit', ['record' => $record]))
                 ->icon('heroicon-o-pencil'),
@@ -185,5 +222,36 @@ class ProductResource extends Resource
             $counter++;
         }
         return $slug;
+    }
+
+    /**
+     * Generate share URL for content preview
+     */
+    protected static function generateShareUrl($record, string $contentType): string
+    {
+        // Get frontend URL from app settings or fallback to app URL
+        $frontendUrl = \App\Models\AppSetting::first()?->frontend_url ?? config('app.url');
+
+        // Ensure frontend URL doesn't end with /
+        $frontendUrl = rtrim($frontendUrl, '/');
+
+        // Get content type prefix from app settings with fallback
+        $prefix = \App\Models\AppSetting::first()?->{$contentType . '_prefix'} ?? match($contentType) {
+            'blog' => '/blog/',
+            'news' => '/news/',
+            'page' => '/pages/',
+            'case_study' => '/case-studies/',
+            'product' => '/products/',
+            default => '/',
+        };
+
+        // Ensure prefix starts and ends with /
+        $prefix = '/' . trim($prefix, '/') . '/';
+
+        // Get slug
+        $slug = $record->slug ?? '';
+
+        // Construct full URL
+        return $frontendUrl . $prefix . $slug;
     }
 }
