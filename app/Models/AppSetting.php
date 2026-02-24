@@ -29,6 +29,8 @@ class AppSetting extends Model
         'page_prefix',
         'case_study_prefix',
         'product_prefix',
+        'ga4_property_id',
+        'ga4_credentials_file',
     ];
 
     protected $casts = [

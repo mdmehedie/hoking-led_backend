@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'ga4' => [
+        'property_id' => env('GA4_PROPERTY_ID'),
+        'credentials_path' => env('GA4_CREDENTIALS_PATH'),
+    ],
+
 ];

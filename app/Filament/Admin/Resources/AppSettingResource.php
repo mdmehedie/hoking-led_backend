@@ -156,6 +156,17 @@ class AppSettingResource extends Resource
                     ->default('/products/')
                     ->helperText('URL prefix for products'),
             ]),
+            Section::make('Google Analytics 4')->description('Configure Google Analytics 4 integration for dashboard metrics')->schema([
+                \Filament\Forms\Components\TextInput::make('ga4_property_id')
+                    ->label('GA4 Property ID')
+                    ->placeholder('123456789')
+                    ->helperText('Your Google Analytics 4 property ID (found in GA4 admin)'),
+                \Filament\Forms\Components\FileUpload::make('ga4_credentials_file')
+                    ->label('GA4 Credentials JSON')
+                    ->acceptedFileTypes(['application/json'])
+                    ->maxSize(2048)
+                    ->helperText('Upload your GA4 service account credentials JSON file'),
+            ]),
         ]);
     }
 

@@ -12,6 +12,11 @@ use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use App\Models\AppSetting;
 use Filament\Widgets\FilamentInfoWidget;
+use App\Filament\Admin\Widgets\PageViewsWidget;
+use App\Filament\Admin\Widgets\TopVisitedPagesWidget;
+use App\Filament\Admin\Widgets\TrafficSourcesWidget;
+use App\Filament\Admin\Widgets\SEODashboardWidget;
+use App\Filament\Admin\Widgets\KeywordRankingWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -49,7 +54,11 @@ class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
             ->widgets([
                 \Filament\Widgets\AccountWidget::class,
-                FilamentInfoWidget::class,
+                PageViewsWidget::class,
+                SEODashboardWidget::class,
+                TopVisitedPagesWidget::class,
+                TrafficSourcesWidget::class,
+                KeywordRankingWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
