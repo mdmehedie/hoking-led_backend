@@ -41,6 +41,7 @@ class SlidersTable
                         '0' => 'Inactive',
                     ]),
             ])
+            ->searchable()
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
