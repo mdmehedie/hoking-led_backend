@@ -26,4 +26,9 @@ class Form extends Model
     {
         return $this->hasMany(Lead::class);
     }
+
+    public function webhooks()
+    {
+        return $this->hasMany(FormWebhook::class);
+    }
 }

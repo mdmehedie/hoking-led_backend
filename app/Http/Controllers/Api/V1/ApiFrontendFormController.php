@@ -8,6 +8,7 @@ use App\Models\Lead;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use App\Jobs\SendWebhook;
 
 class ApiFrontendFormController extends ApiBaseController
 {
@@ -38,6 +39,11 @@ class ApiFrontendFormController extends ApiBaseController
                 'form_id' => $form->id,
                 'data' => $data,
             ]);
+
+            // Dispatch webhook jobs for active webhooks
+            $form->webhooks()->where('active', true)->each(function ($webhook) use ($data) {
+                SendWebhook::dispatch($webhook, $data);
+            });
         }
 
         // Send email notifications if enabled

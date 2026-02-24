@@ -9,7 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-use Filament\Support\Icons\Heroicon;
+use App\Filament\Admin\Resources\FormResource\RelationManagers\WebhooksRelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\DeleteAction;
@@ -137,7 +137,7 @@ class FormResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            WebhooksRelationManager::class,
         ];
     }
 
