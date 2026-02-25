@@ -45,8 +45,11 @@ RUN yarn install --frozen-lockfile
 # Copy application files needed for build
 COPY --chown=www-data:www-data . .
 
+# Allow git operations in this repo when container user differs from file owner
+RUN git config --global --add safe.directory /var/www/html
+
 # Finalize composer and build assets
-RUN composer dump-autoload --optimize --classmap-authoritative \
+RUN composer dump-autoload --optimize --classmap-authoritative --no-scripts \
     && yarn build \
     && yarn cache clean \
     && rm -rf node_modules package-lock.json 

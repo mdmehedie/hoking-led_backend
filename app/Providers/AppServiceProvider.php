@@ -26,7 +26,8 @@ class AppServiceProvider extends ServiceProvider
             \App\Models\Page::observe(\App\Observers\PageObserver::class);
             \App\Models\News::observe(\App\Observers\NewsObserver::class);
             \App\Models\CaseStudy::observe(\App\Observers\CaseStudyObserver::class);
-        } catch (){
+        }  catch(\Exception $e){
+            
         }
     }
 }
