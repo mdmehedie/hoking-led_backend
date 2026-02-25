@@ -31,6 +31,25 @@ class AppSetting extends Model
         'product_prefix',
         'ga4_property_id',
         'ga4_credentials_file',
+        // PWA fields
+        'pwa_enabled',
+        'pwa_display_mode',
+        'pwa_orientation',
+        'pwa_theme_color',
+        'pwa_background_color',
+        'pwa_icon_72',
+        'pwa_icon_96',
+        'pwa_icon_128',
+        'pwa_icon_144',
+        'pwa_icon_192',
+        'pwa_icon_512',
+        'pwa_short_name',
+        'pwa_description',
+        'pwa_categories',
+        'pwa_start_url',
+        'pwa_scope',
+        'pwa_lang',
+        'pwa_dir',
     ];
 
     protected $casts = [

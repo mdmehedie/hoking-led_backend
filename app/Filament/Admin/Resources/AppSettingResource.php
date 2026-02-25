@@ -167,6 +167,139 @@ class AppSettingResource extends Resource
                     ->maxSize(2048)
                     ->helperText('Upload your GA4 service account credentials JSON file'),
             ]),
+            Section::make('Progressive Web App (PWA)')->description('Configure PWA settings for mobile app-like experience')->schema([
+                Toggle::make('pwa_enabled')
+                    ->label('Enable PWA')
+                    ->default(false)
+                    ->helperText('Enable progressive web app features'),
+                \Filament\Forms\Components\TextInput::make('pwa_short_name')
+                    ->label('PWA Short Name')
+                    ->placeholder('App')
+                    ->helperText('Short name displayed on home screen (max 12 characters)')
+                    ->maxLength(12),
+                \Filament\Forms\Components\Textarea::make('pwa_description')
+                    ->label('PWA Description')
+                    ->placeholder('Progressive Web App description')
+                    ->helperText('Description of your PWA app')
+                    ->rows(2),
+                Select::make('pwa_display_mode')
+                    ->label('Display Mode')
+                    ->options([
+                        'standalone' => 'Standalone (App-like)',
+                        'fullscreen' => 'Fullscreen',
+                        'minimal-ui' => 'Minimal UI',
+                        'browser' => 'Browser (No PWA)',
+                    ])
+                    ->default('standalone')
+                    ->helperText('How the app should be displayed when launched'),
+                Select::make('pwa_orientation')
+                    ->label('Orientation')
+                    ->options([
+                        'portrait-primary' => 'Portrait Primary',
+                        'landscape-primary' => 'Landscape Primary',
+                        'portrait' => 'Portrait (Any)',
+                        'landscape' => 'Landscape (Any)',
+                        'any' => 'Any Orientation',
+                    ])
+                    ->default('portrait-primary')
+                    ->helperText('Preferred orientation for the PWA'),
+                ColorPicker::make('pwa_theme_color')
+                    ->label('Theme Color')
+                    ->helperText('Color for browser UI elements (address bar, etc.)'),
+                ColorPicker::make('pwa_background_color')
+                    ->label('Background Color')
+                    ->helperText('Background color shown during app launch'),
+                \Filament\Forms\Components\TextInput::make('pwa_start_url')
+                    ->label('Start URL')
+                    ->placeholder('/')
+                    ->default('/')
+                    ->helperText('URL to load when PWA is launched'),
+                \Filament\Forms\Components\TextInput::make('pwa_scope')
+                    ->label('Scope')
+                    ->placeholder('/')
+                    ->default('/')
+                    ->helperText('URL scope for the PWA (controls which pages can be accessed)'),
+                Select::make('pwa_lang')
+                    ->label('Language')
+                    ->options([
+                        'en-US' => 'English (US)',
+                        'en-GB' => 'English (UK)',
+                        'es-ES' => 'Spanish',
+                        'fr-FR' => 'French',
+                        'de-DE' => 'German',
+                        'it-IT' => 'Italian',
+                        'pt-BR' => 'Portuguese (Brazil)',
+                        'zh-CN' => 'Chinese (Simplified)',
+                        'ja-JP' => 'Japanese',
+                        'ko-KR' => 'Korean',
+                    ])
+                    ->default('en-US')
+                    ->helperText('Primary language of the PWA'),
+                Select::make('pwa_dir')
+                    ->label('Text Direction')
+                    ->options([
+                        'ltr' => 'Left to Right',
+                        'rtl' => 'Right to Left',
+                    ])
+                    ->default('ltr')
+                    ->helperText('Text direction for the PWA'),
+            ]),
+            Section::make('PWA Icons')->description('Upload icons for different device sizes (PNG format recommended)')->schema([
+                FileUpload::make('pwa_icon_72')
+                    ->label('Icon 72x72')
+                    ->image()
+                    ->directory('pwa-icons')
+                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                    ->maxSize(512)
+                    ->imageResizeTargetWidth(72)
+                    ->imageResizeTargetHeight(72)
+                    ->helperText('72x72px icon for iPad (non-retina)'),
+                FileUpload::make('pwa_icon_96')
+                    ->label('Icon 96x96')
+                    ->image()
+                    ->directory('pwa-icons')
+                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                    ->maxSize(512)
+                    ->imageResizeTargetWidth(96)
+                    ->imageResizeTargetHeight(96)
+                    ->helperText('96x96px icon for various devices'),
+                FileUpload::make('pwa_icon_128')
+                    ->label('Icon 128x128')
+                    ->image()
+                    ->directory('pwa-icons')
+                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                    ->maxSize(512)
+                    ->imageResizeTargetWidth(128)
+                    ->imageResizeTargetHeight(128)
+                    ->helperText('128x128px icon for various devices'),
+                FileUpload::make('pwa_icon_144')
+                    ->label('Icon 144x144')
+                    ->image()
+                    ->directory('pwa-icons')
+                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                    ->maxSize(512)
+                    ->imageResizeTargetWidth(144)
+                    ->imageResizeTargetHeight(144)
+                    ->helperText('144x144px icon for Android Chrome'),
+                FileUpload::make('pwa_icon_192')
+                    ->label('Icon 192x192')
+                    ->image()
+                    ->directory('pwa-icons')
+                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                    ->maxSize(512)
+                    ->imageResizeTargetWidth(192)
+                    ->imageResizeTargetHeight(192)
+                    ->helperText('192x192px icon for Android Chrome splash screen'),
+                FileUpload::make('pwa_icon_512')
+                    ->label('Icon 512x512')
+                    ->image()
+                    ->directory('pwa-icons')
+                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
+                    ->maxSize(1024)
+                    ->imageResizeTargetWidth(512)
+                    ->imageResizeTargetHeight(512)
+                    ->helperText('512x512px icon for high-resolution displays and app stores'),
+            ]),
         ]);
     }
 
