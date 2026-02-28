@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\ApiFrontendNewsController;
 use App\Http\Controllers\Api\V1\ApiFrontendPageController;
 use App\Http\Controllers\Api\V1\ApiFrontendAppSettingController;
 use App\Http\Controllers\Api\V1\ApiFrontendCertificationAwardController;
+use App\Http\Controllers\Api\V1\ApiFrontendTestimonialController;
 
 Route::prefix('v1')->group(function () {
     Route::get('sliders', [ApiFrontendSliderController::class, 'index']);
@@ -26,6 +27,7 @@ Route::prefix('v1')->group(function () {
     Route::get('news/{slug}', [ApiFrontendNewsController::class, 'show']);
     Route::get('certifications', [ApiFrontendCertificationAwardController::class, 'index']);
     Route::get('certifications/{slug}', [ApiFrontendCertificationAwardController::class, 'show']);
+    Route::get('testimonials', [ApiFrontendTestimonialController::class, 'index']);
     Route::get('pages', [ApiFrontendPageController::class, 'index']);
     Route::get('pages/{slug}', [ApiFrontendPageController::class, 'show']);
     Route::get('app-settings', [ApiFrontendAppSettingController::class, 'index']);
