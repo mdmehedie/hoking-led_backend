@@ -29,11 +29,11 @@ class AppSettingResource extends Resource
     {
         return $schema->schema([
             Section::make('Logos')->schema([
-                FileUpload::make('logo_light')->image()->directory('settings')->acceptedFileTypes(['image/*']),
-                FileUpload::make('logo_dark')->image()->directory('settings')->acceptedFileTypes(['image/*']),
+                FileUpload::make('logo_light')->image()->directory('settings')->acceptedFileTypes(['image/*'])->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                FileUpload::make('logo_dark')->image()->directory('settings')->acceptedFileTypes(['image/*'])->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
             ]),
             Section::make('Favicon')->schema([
-                FileUpload::make('favicon')->image()->directory('settings')->acceptedFileTypes(['image/*']),
+                FileUpload::make('favicon')->image()->directory('settings')->acceptedFileTypes(['image/*'])->imageEditor()->imageEditorAspectRatios(['1:1']),
             ]),
             Section::make('Brand Colors')->schema([
                 ColorPicker::make('primary_color')->default('#3b82f6')->required(),

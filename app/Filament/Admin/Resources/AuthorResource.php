@@ -38,9 +38,13 @@ class AuthorResource extends Resource
                     ->unique(ignoreRecord: true),
                 Forms\Components\Textarea::make('bio')
                     ->rows(4),
-                Forms\Components\FileUpload::make('avatar')
-                    ->image()
-                    ->directory('authors'),
+                Section::make('Profile Image')->schema([
+                    Forms\Components\FileUpload::make('avatar')
+                        ->image()
+                        ->directory('authors')
+                        ->imageEditor()
+                        ->imageEditorAspectRatios(['1:1']),
+                ]),
                 Forms\Components\Repeater::make('social_links')
                     ->schema([
                         Forms\Components\Select::make('platform')

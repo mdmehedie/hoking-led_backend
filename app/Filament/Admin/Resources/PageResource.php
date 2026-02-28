@@ -70,9 +70,11 @@ class PageResource extends Resource
                         ->required(),
                 ]),
                 Section::make('Media')->schema([
-                    FileUpload::make('image_path')
+                    FileUpload::make('featured_image')
                         ->image()
-                        ->directory('pages'),
+                        ->directory('pages')
+                        ->imageEditor()
+                        ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
                 ]),
                 Section::make('SEO')->schema([
                     TextInput::make('meta_title'),

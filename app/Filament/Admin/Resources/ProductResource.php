@@ -60,8 +60,8 @@ class ProductResource extends Resource
                 \App\Filament\Forms\Components\CustomRichEditor::make('detailed_description'),
             ]),
             Section::make('Media')->schema([
-                FileUpload::make('main_image')->image()->directory('products/main'),
-                FileUpload::make('gallery')->multiple()->image()->directory('products/gallery'),
+                FileUpload::make('main_image')->image()->directory('products/main')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                FileUpload::make('gallery')->multiple()->image()->directory('products/gallery')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
                 Repeater::make('video_embeds')->schema([
                     Select::make('type')->options(['embed' => 'Embed URL', 'file' => 'Self-hosted File'])->required(),
                     TextInput::make('title')->visible(fn ($get) => $get('type') === 'embed'),

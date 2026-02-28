@@ -88,7 +88,9 @@ class NewsResource extends Resource
                 Section::make('Media')->schema([
                     FileUpload::make('image_path')
                         ->image()
-                        ->directory('news'),
+                        ->directory('news')
+                        ->imageEditor()
+                        ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
                 ]),
                 Section::make('SEO')->schema([
                     TextInput::make('meta_title'),
