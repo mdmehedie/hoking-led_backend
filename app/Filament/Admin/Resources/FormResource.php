@@ -27,6 +27,26 @@ class FormResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    public static function canCreate(): bool
+    {
+        return auth()->user()->can('create form');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->can('edit form');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->can('delete form');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view form');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema

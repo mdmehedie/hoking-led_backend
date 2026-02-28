@@ -36,17 +36,22 @@ class NewsResource extends Resource
 
     public static function canCreate(): bool
     {
-        return !auth()->user()->hasRole('Viewer');
+        return auth()->user()->can('create news');
     }
 
     public static function canEdit($record): bool
     {
-        return !auth()->user()->hasRole('Viewer');
+        return auth()->user()->can('edit news');
     }
 
     public static function canDelete($record): bool
     {
-        return !auth()->user()->hasRole('Viewer');
+        return auth()->user()->can('delete news');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view news');
     }
 
     public static function form(Schema $schema): Schema

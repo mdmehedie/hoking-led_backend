@@ -22,6 +22,26 @@ class SliderResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    public static function canCreate(): bool
+    {
+        return auth()->user()->can('create slider');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->can('edit slider');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->can('delete slider');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view slider');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return SliderForm::configure($schema);

@@ -156,24 +156,24 @@ class CertificationAwardResource extends Resource
         ];
     }
 
-    public static function canViewAny(): bool
-    {
-        return true; // Temporarily bypass permission check
-    }
-
     public static function canCreate(): bool
     {
-        return true; // Temporarily bypass permission check
+        return auth()->user()->can('create certificationaward');
     }
 
     public static function canEdit($record): bool
     {
-        return true; // Temporarily bypass permission check
+        return auth()->user()->can('edit certificationaward');
     }
 
     public static function canDelete($record): bool
     {
-        return true; // Temporarily bypass permission check
+        return auth()->user()->can('delete certificationaward');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view certificationaward');
     }
 
     protected static function generateUniqueSlug($title, $id = null)

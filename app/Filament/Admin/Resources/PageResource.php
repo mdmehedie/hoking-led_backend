@@ -35,6 +35,26 @@ class PageResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document';
 
+    public static function canCreate(): bool
+    {
+        return auth()->user()->can('create page');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->can('edit page');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->can('delete page');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view page');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema

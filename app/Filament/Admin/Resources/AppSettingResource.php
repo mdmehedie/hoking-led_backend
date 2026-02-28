@@ -25,6 +25,26 @@ class AppSettingResource extends Resource
 
     protected static ?string $navigationLabel = 'App Settings';
 
+    public static function canCreate(): bool
+    {
+        return auth()->user()->can('create appsetting');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->can('edit appsetting');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->can('delete appsetting');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view appsetting');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([

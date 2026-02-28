@@ -27,6 +27,26 @@ class UserResource extends Resource
         return auth()->user()->hasAnyRole(['Super Admin', 'Admin']);
     }
 
+    public static function canCreate(): bool
+    {
+        return auth()->user()->can('create user');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->can('edit user');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->can('delete user');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view user');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
@@ -51,6 +71,11 @@ class UserResource extends Resource
                     ->relationship('roles', 'name')
                     ->preload()
                     ->required(),
+                Forms\Components\Select::make('permissions')
+                    ->multiple()
+                    ->relationship('permissions', 'name')
+                    ->preload()
+                    ->label('Additional Permissions'),
             ]),
         ]);
     }

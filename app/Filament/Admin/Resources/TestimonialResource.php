@@ -164,21 +164,21 @@ class TestimonialResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return true; // Temporarily bypass permission check
+        return auth()->user()->can('view testimonial');
     }
 
     public static function canCreate(): bool
     {
-        return true; // Temporarily bypass permission check
+        return auth()->user()->can('create testimonial');
     }
 
     public static function canEdit($record): bool
     {
-        return true; // Temporarily bypass permission check
+        return auth()->user()->can('edit testimonial');
     }
 
     public static function canDelete($record): bool
     {
-        return true; // Temporarily bypass permission check
+        return auth()->user()->can('delete testimonial');
     }
 }

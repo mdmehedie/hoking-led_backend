@@ -35,6 +35,26 @@ class CaseStudyResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
 
+    public static function canCreate(): bool
+    {
+        return auth()->user()->can('create casestudy');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->can('edit casestudy');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->can('delete casestudy');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view casestudy');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema

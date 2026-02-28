@@ -23,9 +23,24 @@ class AuthorResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-user-group';
 
-    public static function canAccessResource(): bool
+    public static function canCreate(): bool
     {
-        return auth()->user()->hasAnyRole(['Super Admin', 'Admin']);
+        return auth()->user()->can('create author');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->can('edit author');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->can('delete author');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view author');
     }
 
     public static function form(Schema $schema): Schema

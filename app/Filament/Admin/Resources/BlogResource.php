@@ -37,17 +37,22 @@ class BlogResource extends Resource
 
     public static function canCreate(): bool
     {
-        return !auth()->user()->hasRole('Viewer');
+        return auth()->user()->can('create blog');
     }
 
     public static function canEdit($record): bool
     {
-        return !auth()->user()->hasRole('Viewer');
+        return auth()->user()->can('edit blog');
     }
 
     public static function canDelete($record): bool
     {
-        return !auth()->user()->hasRole('Viewer');
+        return auth()->user()->can('delete blog');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view blog');
     }
 
     public static function form(Schema $schema): Schema

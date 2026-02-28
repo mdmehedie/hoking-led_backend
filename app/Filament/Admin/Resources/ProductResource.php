@@ -38,6 +38,26 @@ class ProductResource extends Resource
 
     protected static ?string $navigationLabel = 'Products';
 
+    public static function canCreate(): bool
+    {
+        return auth()->user()->can('create product');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->can('edit product');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->can('delete product');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view product');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
