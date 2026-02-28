@@ -22,6 +22,11 @@ Route::get('/clear-cache', function () {
     return 'All caches cleared!';
 });
 
+use App\Http\Controllers\RobotsTxtController;
+
+// Robots.txt route
+Route::get('/robots.txt', [RobotsTxtController::class, 'index']);
+
 // PWA routes
 Route::get('/manifest.json', [PWAController::class, 'manifest']);
 Route::get('/sw.js', [PWAController::class, 'serviceWorker']);

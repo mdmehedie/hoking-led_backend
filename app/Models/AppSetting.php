@@ -50,6 +50,9 @@ class AppSetting extends Model
         'pwa_scope',
         'pwa_lang',
         'pwa_dir',
+        // Robots.txt settings
+        'robots_txt_content',
+        'use_default_robots_txt',
     ];
 
     protected $casts = [
