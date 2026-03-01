@@ -10,6 +10,11 @@ class ListCategories extends ListRecords
 {
     protected static string $resource = CategoryResource::class;
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        return auth()->user()->can('view category');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

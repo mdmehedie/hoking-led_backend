@@ -10,6 +10,11 @@ class EditCategory extends EditRecord
 {
     protected static string $resource = CategoryResource::class;
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        return auth()->user()->can('edit category');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
