@@ -13,9 +13,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $setting = AppSetting::first();
-        if ($setting && $setting->sitemap_enabled) {
-            $schedule->command('app:generate-sitemap')->daily();
+        try{
+            $setting = AppSetting::first();
+            if ($setting && $setting->sitemap_enabled) {
+                $schedule->command('app:generate-sitemap')->daily();
+            }
+        }catch(\Exception $e){
+            // Log the exception or handle it as needed
+            \Log::error('Error scheduling sitemap generation: ' . $e->getMessage());
         }
     }
 
