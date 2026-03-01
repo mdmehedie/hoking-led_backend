@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('app_settings', function (Blueprint $table) {
-            $table->string('ga4_property_id')->nullable();
-            $table->string('ga4_credentials_file')->nullable();
+            if (!Schema::hasColumn('app_settings', 'ga4_property_id')) {
+                $table->string('ga4_property_id')->nullable();
+            }
+            if (!Schema::hasColumn('app_settings', 'ga4_credentials_file')) {
+                $table->string('ga4_credentials_file')->nullable();
+            }
         });
     }
 

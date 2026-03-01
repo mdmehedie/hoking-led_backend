@@ -156,11 +156,13 @@ set -e
 FLAG_FILE="/var/www/html/storage/.migrations_done"
 
 if [ ! -f "$FLAG_FILE" ]; then
-    echo "First run detected - Running migrations..."
+echo "First run detected - Running migrations..."
+    trap 'echo "ERROR: Migration failed at line $LINENO! Aborting."; exit 1' ERR
     php artisan storage:link
-    php artisan migrate --force
+    # php artisan migrate --force
     echo "Migrations completed!"
     touch "$FLAG_FILE"
+    trap - ERR  # Reset trap after success
 else
     echo "Migrations already run, skipping..."
 fi
