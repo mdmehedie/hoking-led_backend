@@ -15,11 +15,40 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Run all seeders in the correct order
+        
+        // 1. Basic system seeders
+        $this->call([
+            AdminUserSeeder::class,
+            AppSettingSeeder::class,
+            CreateSuperAdminRoleSeeder::class,
+            RoleSeeder::class,
         ]);
+        
+        // 2. Multilingual seeders
+        // $this->call([
+        //     LocaleSeeder::class,
+        // ]);
+        
+        // 3. Permission seeders
+        $this->call([
+            ComprehensivePermissionsSeeder::class,
+            CertificationPermissionsSeeder::class,
+            TestimonialPermissionsSeeder::class,
+        ]);
+        
+        // 4. Assign Super Admin role to admin user
+        $this->call(AssignSuperAdminRoleSeeder::class);
+        
+        // 5. Test user (optional)
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            ]
+        );
+        
+        $this->command->info('All seeders executed successfully!');
     }
 }

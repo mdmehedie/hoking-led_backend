@@ -13,6 +13,8 @@ class CreateSuperAdminRoleSeeder extends Seeder
      */
     public function run(): void
     {
-        Role::create(['name' => 'Super Admin']);
+        Role::firstOrCreate(['name' => 'Super Admin']);
+        
+        $this->command->info('Super Admin role seeded successfully!');
     }
 }

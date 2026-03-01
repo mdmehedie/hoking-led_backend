@@ -15,11 +15,11 @@ class RoleSeeder extends Seeder
     public function run(): void
     {
         // Create roles
-        $superAdmin = Role::create(['name' => 'Super Admin']);
-        $admin = Role::create(['name' => 'Admin']);
-        $contentManager = Role::create(['name' => 'Content Manager']);
-        $marketingManager = Role::create(['name' => 'Marketing Manager']);
-        $viewer = Role::create(['name' => 'Viewer']);
+        $superAdmin = Role::firstOrCreate(['name' => 'Super Admin']);
+        $admin = Role::firstOrCreate(['name' => 'Admin']);
+        $contentManager = Role::firstOrCreate(['name' => 'Content Manager']);
+        $marketingManager = Role::firstOrCreate(['name' => 'Marketing Manager']);
+        $viewer = Role::firstOrCreate(['name' => 'Viewer']);
 
         // Define resource permissions
         $resources = [
