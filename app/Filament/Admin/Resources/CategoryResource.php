@@ -110,9 +110,24 @@ class CategoryResource extends Resource
         ]);
     }
 
-    public static function canAccessResource(): bool
+    public static function canCreate(): bool
     {
-        return auth()->user()->hasRole('Super Admin');
+        return auth()->user()->can('create category');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->can('edit category');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->can('delete category');
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->can('view category');
     }
 
     public static function getRelations(): array

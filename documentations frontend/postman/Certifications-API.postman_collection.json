@@ -1,0 +1,170 @@
+{
+  "info": {
+    "name": "Certifications & Awards API",
+    "description": "API collection for Certifications & Awards endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "your-user-id"
+  },
+  "item": [
+    {
+      "name": "List Certifications",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/certifications",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "certifications"
+          ]
+        },
+        "description": "Get a paginated list of all visible certifications"
+      },
+      "response": []
+    },
+    {
+      "name": "List Certifications (Custom Pagination)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/certifications?per_page=5",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "certifications"
+          ],
+          "query": [
+            {
+              "key": "per_page",
+              "value": "5",
+              "description": "Number of items per page"
+            }
+          ]
+        },
+        "description": "Get certifications with custom pagination (5 items per page)"
+      },
+      "response": []
+    },
+    {
+      "name": "List Certifications (Filter by Year)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/certifications?year=2024",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "certifications"
+          ],
+          "query": [
+            {
+              "key": "year",
+              "value": "2024",
+              "description": "Filter by award year"
+            }
+          ]
+        },
+        "description": "Get certifications awarded in 2024"
+      },
+      "response": []
+    },
+    {
+      "name": "List Certifications (Year + Pagination)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/certifications?year=2024&per_page=10",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "certifications"
+          ],
+          "query": [
+            {
+              "key": "year",
+              "value": "2024",
+              "description": "Filter by award year"
+            },
+            {
+              "key": "per_page",
+              "value": "10",
+              "description": "Number of items per page"
+            }
+          ]
+        },
+        "description": "Get certifications from 2024 with 10 items per page"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Certification by Slug",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/certifications/{{certification_slug}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "certifications",
+            "{{certification_slug}}"
+          ]
+        },
+        "description": "Get a specific certification by its slug"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Certification by Slug (Example)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/v1/certifications/aws-certified-solutions-architect",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "certifications",
+            "aws-certified-solutions-architect"
+          ]
+        },
+        "description": "Get AWS certification by slug (example)"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "certification_slug",
+      "value": "sample-certification-slug",
+      "type": "string"
+    }
+  ]
+}

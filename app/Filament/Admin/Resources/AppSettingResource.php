@@ -25,15 +25,35 @@ class AppSettingResource extends Resource
 
     protected static ?string $navigationLabel = 'App Settings';
 
+    public static function canCreate(): bool
+    {
+        return auth()->user()->can('create appsetting');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->can('edit appsetting');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->can('delete appsetting');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view appsetting');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
             Section::make('Logos')->schema([
-                FileUpload::make('logo_light')->image()->directory('settings')->acceptedFileTypes(['image/*']),
-                FileUpload::make('logo_dark')->image()->directory('settings')->acceptedFileTypes(['image/*']),
+                FileUpload::make('logo_light')->image()->directory('settings')->acceptedFileTypes(['image/*'])->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                FileUpload::make('logo_dark')->image()->directory('settings')->acceptedFileTypes(['image/*'])->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
             ]),
             Section::make('Favicon')->schema([
-                FileUpload::make('favicon')->image()->directory('settings')->acceptedFileTypes(['image/*']),
+                FileUpload::make('favicon')->image()->directory('settings')->acceptedFileTypes(['image/*'])->imageEditor()->imageEditorAspectRatios(['1:1']),
             ]),
             Section::make('Brand Colors')->schema([
                 ColorPicker::make('primary_color')->default('#3b82f6')->required(),
@@ -128,6 +148,26 @@ class AppSettingResource extends Resource
             ]),
             Section::make('SEO Settings')->schema([
                 Toggle::make('sitemap_enabled')->label('Enable Sitemap Generation')->default(true),
+            ]),
+            Section::make('Robots.txt Settings')->description('Manage robots.txt content for search engine crawlers')->schema([
+                Toggle::make('use_default_robots_txt')
+                    ->label('Use Default Robots.txt')
+                    ->default(true)
+                    ->helperText('When enabled, uses a default robots.txt that allows all crawlers. When disabled, uses custom content below.')
+                    ->reactive(),
+                \Filament\Forms\Components\Textarea::make('robots_txt_content')
+                    ->label('Custom Robots.txt Content')
+                    ->rows(10)
+                    ->placeholder('User-agent: *
+Disallow: /admin/
+Disallow: /storage/private/
+Allow: /
+
+Sitemap: https://your-domain.com/sitemap.xml')
+                    ->helperText('Enter custom robots.txt content. This will be used when "Use Default Robots.txt" is disabled. Make sure to follow proper robots.txt syntax.')
+                    ->disabled(fn ($get) => $get('use_default_robots_txt'))
+                    ->required(fn ($get) => !$get('use_default_robots_txt'))
+                    ->dehydrated(true),
             ]),
             Section::make('URL Prefixes')->description('Configure URL prefixes for different content types used in social media sharing')->schema([
                 \Filament\Forms\Components\TextInput::make('blog_prefix')

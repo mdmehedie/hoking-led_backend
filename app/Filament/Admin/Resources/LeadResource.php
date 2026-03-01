@@ -29,17 +29,22 @@ class LeadResource extends Resource
 
     public static function canCreate(): bool
     {
-        return false;
+        return auth()->user()->can('create lead');
     }
 
     public static function canEdit($record): bool
     {
-        return false;
+        return auth()->user()->can('edit lead');
     }
 
     public static function canDelete($record): bool
     {
-        return false;
+        return auth()->user()->can('delete lead');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view lead');
     }
 
     public static function table(Table $table): Table

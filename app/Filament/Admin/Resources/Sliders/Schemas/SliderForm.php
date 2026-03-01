@@ -35,9 +35,8 @@ class SliderForm
                         ->directory('sliders')
                         ->visibility('public')
                         ->image()
-                        ->imageResizeTargetWidth(1920)
-                        ->imageResizeTargetHeight(1080)
-                        ->imageCropAspectRatio('16:9')
+                        ->imageEditor()
+                        ->imageEditorAspectRatios(['16:9', '4:3', '1:1', '3:2', '2:1'])
                         ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
                         ->visible(fn ($get) => in_array($get('media_type'), ['image', 'gif'])),
                     TextInput::make('video_url')

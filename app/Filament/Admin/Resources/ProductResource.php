@@ -38,6 +38,26 @@ class ProductResource extends Resource
 
     protected static ?string $navigationLabel = 'Products';
 
+    public static function canCreate(): bool
+    {
+        return auth()->user()->can('create product');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->can('edit product');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->can('delete product');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view product');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
@@ -60,8 +80,8 @@ class ProductResource extends Resource
                 \App\Filament\Forms\Components\CustomRichEditor::make('detailed_description'),
             ]),
             Section::make('Media')->schema([
-                FileUpload::make('main_image')->image()->directory('products/main'),
-                FileUpload::make('gallery')->multiple()->image()->directory('products/gallery'),
+                FileUpload::make('main_image')->image()->directory('products/main')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                FileUpload::make('gallery')->multiple()->image()->directory('products/gallery')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
                 Repeater::make('video_embeds')->schema([
                     Select::make('type')->options(['embed' => 'Embed URL', 'file' => 'Self-hosted File'])->required(),
                     TextInput::make('title')->visible(fn ($get) => $get('type') === 'embed'),

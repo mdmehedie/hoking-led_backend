@@ -37,17 +37,22 @@ class BlogResource extends Resource
 
     public static function canCreate(): bool
     {
-        return !auth()->user()->hasRole('Viewer');
+        return auth()->user()->can('create blog');
     }
 
     public static function canEdit($record): bool
     {
-        return !auth()->user()->hasRole('Viewer');
+        return auth()->user()->can('edit blog');
     }
 
     public static function canDelete($record): bool
     {
-        return !auth()->user()->hasRole('Viewer');
+        return auth()->user()->can('delete blog');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view blog');
     }
 
     public static function form(Schema $schema): Schema
@@ -89,7 +94,9 @@ class BlogResource extends Resource
                 Section::make('Media')->schema([
                     FileUpload::make('image_path')
                         ->image()
-                        ->directory('blogs'),
+                        ->directory('blogs')
+                        ->imageEditor()
+                        ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
                 ]),
                 Section::make('SEO')->schema([
                     TextInput::make('meta_title'),
