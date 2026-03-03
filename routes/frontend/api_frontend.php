@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\ApiFrontendAppSettingController;
 use App\Http\Controllers\Api\V1\ApiFrontendCertificationAwardController;
 use App\Http\Controllers\Api\V1\ApiFrontendTestimonialController;
 use App\Http\Controllers\Api\V1\ApiFrontendLocaleController;
+use App\Http\Controllers\Api\V1\ApiFrontendFormController;
 
 Route::prefix('v1')->group(function () {
     Route::get('locales', [ApiFrontendLocaleController::class, 'index']);

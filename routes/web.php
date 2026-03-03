@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\EditorImageUploadController;
 use App\Http\Controllers\PWAController;
 use App\Http\Controllers\RobotsTxtController;
 use App\Http\Controllers\Admin\AdminLocaleController;
+use App\Http\Controllers\AuthDebugController;
 
 $supportedLocales = config('app.supported_locales', []);
 $localePattern = $supportedLocales !== [] ? implode('|', array_map('preg_quote', $supportedLocales)) : '[a-zA-Z\-]+';
@@ -42,5 +43,12 @@ Route::get('/sw.js', [PWAController::class, 'serviceWorker']);
 Route::middleware('auth')->group(function () {
     Route::post('/admin/editor-image-upload', [EditorImageUploadController::class, 'store'])->name('editor.image.upload');
 
+    // Admin locale update
     Route::post('/admin/locale', [AdminLocaleController::class, 'update'])->name('admin.locale.update');
+
+    // Debug routes for production - REMOVE AFTER DEBUGGING
+    Route::prefix('debug')->group(function () {
+        Route::get('/auth', [AuthDebugController::class, 'checkAuth']);
+        Route::get('/env', [AuthDebugController::class, 'checkEnvironment']);
+    });
 });

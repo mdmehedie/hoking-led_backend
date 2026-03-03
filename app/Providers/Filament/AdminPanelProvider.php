@@ -73,6 +73,8 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                // Production debug middleware - REMOVE AFTER DEBUGGING
+                \App\Http\Middleware\ProductionDebugMiddleware::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
