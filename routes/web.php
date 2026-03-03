@@ -15,7 +15,7 @@ Route::group([
     'where' => ['locale' => $localePattern],
 ], function () {
     Route::get('/', function () {
-        return view('welcome');
+        return redirect('/admin');
     });
 });
 
