@@ -41,38 +41,43 @@ class DatabaseTranslationLoader implements Loader
 
     private function loadFromDatabase(string $locale, string $group, string $namespace): array
     {
-        if ($namespace !== '*' || $group === '') {
-            return [];
-        }
-
-        if ($group === '*') {
-            // JSON translations: __('Some sentence')
-            return UiTranslation::query()
-                ->where('locale', $locale)
-                ->where('key', 'not like', '%.%')
-                ->pluck('value', 'key')
-                ->toArray();
-        }
-
-        // Group translations: __('blog.shared') => group=blog, item=shared
-        $prefix = $group . '.';
-
-        $rows = UiTranslation::query()
-            ->where('locale', $locale)
-            ->where('key', 'like', $prefix . '%')
-            ->get(['key', 'value']);
-
-        $lines = [];
-
-        foreach ($rows as $row) {
-            $relativeKey = substr($row->key, strlen($prefix));
-            if ($relativeKey === false || $relativeKey === '') {
-                continue;
+        try {
+            if ($namespace !== '*' || $group === '') {
+                return [];
             }
 
-            Arr::set($lines, $relativeKey, $row->value);
-        }
+            if ($group === '*') {
+                // JSON translations: __('Some sentence')
+                return UiTranslation::query()
+                    ->where('locale', $locale)
+                    ->where('key', 'not like', '%.%')
+                    ->pluck('value', 'key')
+                    ->toArray();
+            }
 
-        return $lines;
+            // Group translations: __('blog.shared') => group=blog, item=shared
+            $prefix = $group . '.';
+
+            $rows = UiTranslation::query()
+                ->where('locale', $locale)
+                ->where('key', 'like', $prefix . '%')
+                ->get(['key', 'value']);
+
+            $lines = [];
+
+            foreach ($rows as $row) {
+                $relativeKey = substr($row->key, strlen($prefix));
+                if ($relativeKey === false || $relativeKey === '') {
+                    continue;
+                }
+
+                Arr::set($lines, $relativeKey, $row->value);
+            }
+
+            return $lines;
+        } catch (\Exception $e) {
+            // Table doesn't exist yet, return empty array
+            return [];
+        }
     }
 }

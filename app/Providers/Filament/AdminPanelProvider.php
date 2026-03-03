@@ -31,7 +31,12 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());
+        $settings = null;
+        try {
+            $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());
+        } catch (\Exception $e) {
+            // Table doesn't exist yet, use null
+        }
 
         return $panel
             ->id('admin')
@@ -80,8 +85,12 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->renderHook('head.end', function () {
-                $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());
-                return $settings && $settings->toastr_enabled ? '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>' : '';
+                try {
+                    $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());
+                    return $settings && $settings->toastr_enabled ? '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>' : '';
+                } catch (\Exception $e) {
+                    return '';
+                }
             })
             ->renderHook('panels::topbar.end', function () {
                 $locales = Locale::query()
@@ -97,9 +106,13 @@ class AdminPanelProvider extends PanelProvider
                 );
             })
             ->renderHook('scripts.after', function () {
-                $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());
-                if (!$settings || !$settings->toastr_enabled) return null;
-                return new \Illuminate\Support\HtmlString("<script> toastr.options = { positionClass: 'toast-{$settings->toastr_position}', timeOut: {$settings->toastr_timeout} * 1000, extendedTimeOut: {$settings->toastr_extended_timeout} * 1000, closeButton: " . ($settings->toastr_close_button ? 'true' : 'false') . ", debug: false, newestOnTop: " . ($settings->toastr_newest_on_top ? 'true' : 'false') . ", progressBar: " . ($settings->toastr_progress_bar ? 'true' : 'false') . ", preventDuplicates: " . ($settings->toastr_prevent_duplicates ? 'true' : 'false') . ", showDuration: {$settings->toastr_show_duration}, hideDuration: {$settings->toastr_hide_duration}, showEasing: '{$settings->toastr_show_easing}', hideEasing: '{$settings->toastr_hide_easing}', showMethod: '{$settings->toastr_show_method}', hideMethod: '{$settings->toastr_hide_method}' }; document.addEventListener('toastr', function(e) { if (typeof toastr !== 'undefined') { toastr[e.detail.type](e.detail.message, e.detail.title); } }); </script>");
+                try {
+                    $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());
+                    if (!$settings || !$settings->toastr_enabled) return null;
+                    return new \Illuminate\Support\HtmlString("<script> toastr.options = { positionClass: 'toast-{$settings->toastr_position}', timeOut: {$settings->toastr_timeout} * 1000, extendedTimeOut: {$settings->toastr_extended_timeout} * 1000, closeButton: " . ($settings->toastr_close_button ? 'true' : 'false') . ", debug: false, newestOnTop: " . ($settings->toastr_newest_on_top ? 'true' : 'false') . ", progressBar: " . ($settings->toastr_progress_bar ? 'true' : 'false') . ", preventDuplicates: " . ($settings->toastr_prevent_duplicates ? 'true' : 'false') . ", showDuration: {$settings->toastr_show_duration}, hideDuration: {$settings->toastr_hide_duration}, showEasing: '{$settings->toastr_show_easing}', hideEasing: '{$settings->toastr_hide_easing}', showMethod: '{$settings->toastr_show_method}', hideMethod: '{$settings->toastr_hide_method}' }; document.addEventListener('toastr', function(e) { if (typeof toastr !== 'undefined') { toastr[e.detail.type](e.detail.message, e.detail.title); } }); </script>");
+                } catch (\Exception $e) {
+                    return null;
+                }
             })
             ->renderHook('scripts.after', function () {
                 return new \Illuminate\Support\HtmlString('
