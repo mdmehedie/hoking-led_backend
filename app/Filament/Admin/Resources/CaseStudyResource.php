@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\CaseStudyResource\Pages;
 use App\Models\CaseStudy;
+use App\Models\Locale;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -24,8 +25,8 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Illuminate\Support\Facades\DB;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tab;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 
 class CaseStudyResource extends Resource
 {
@@ -69,17 +70,12 @@ class CaseStudyResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
+        $activeLocales = Locale::activeCodes();
+        $defaultLocale = Locale::defaultCode();
+
         return $schema
             ->schema([
                 Section::make('General')->schema([
-                    TextInput::make('title')
-                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                            if (blank($get('slug'))) {
-                                $set('slug', static::generateUniqueSlug($state, null));
-                            }
-                        })
-                        ->live()
-                        ->required(),
                     TextInput::make('slug')
                         ->unique(ignoreRecord: true)
                         ->required(),
@@ -95,18 +91,39 @@ class CaseStudyResource extends Resource
                     Hidden::make('author_id')
                         ->default(auth()->id()),
                 ]),
-                Section::make('Content')->schema([
-                    Textarea::make('excerpt'),
-                    \App\Filament\Forms\Components\CustomRichEditor::make('content')
-                        ->required(),
-                ]),
-                Section::make('Media')->schema([
-                    FileUpload::make('image_path')
-                        ->image()
-                        ->directory('case-studies')
-                        ->imageEditor()
-                        ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                ]),
+                Tabs::make('Translations')->tabs(
+                    collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
+                        $isDefault = $locale === $defaultLocale;
+
+                        return Tab::make(strtoupper($locale))
+                            ->schema([
+                                TextInput::make("title.{$locale}")
+                                    ->label(__('Title'))
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
+                                        if (!$isDefault) {
+                                            return;
+                                        }
+
+                                        if (blank($get('slug'))) {
+                                            $set('slug', static::generateUniqueSlug($state, null));
+                                        }
+                                    })
+                                    ->live()
+                                    ->required($isDefault),
+                                Textarea::make("excerpt.{$locale}")
+                                    ->label(__('Excerpt')),
+                                \App\Filament\Forms\Components\CustomRichEditor::make("content.{$locale}")
+                                    ->label(__('Content'))
+                                    ->required($isDefault),
+                                FileUpload::make("image_path.{$locale}")
+                                    ->label(__('Image'))
+                                    ->image()
+                                    ->directory('case-studies')
+                                    ->imageEditor()
+                                    ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                            ]);
+                    })->all()
+                ),
                 Section::make('SEO')->schema([
                     TextInput::make('meta_title'),
                     Textarea::make('meta_description'),

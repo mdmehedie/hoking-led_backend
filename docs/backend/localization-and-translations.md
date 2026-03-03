@@ -140,6 +140,29 @@ Notes:
 
 - The trait stores default-locale values into the base column as well (for backward compatibility and querying).
 
+### Content models behavior (Blogs / News / Pages / Case Studies)
+
+The following content types now store **separate content per language** using `translations`:
+
+- `Blog`
+- `News`
+- `Page`
+- `CaseStudy`
+
+Rules:
+
+- `slug` remains a **shared** (non-translated) field.
+- These fields are **language-specific** (translated):
+  - `title`
+  - `excerpt`
+  - `content`
+  - `image_path`
+
+In Filament:
+
+- When you switch the admin language using the language switcher, the form will read/write the translated values for the active locale.
+- If a translation does not exist for the selected locale, the system falls back to the default locale.
+
 ### Migrating old JSON translations
 
 A migration exists to move `products.detailed_description` JSON into `translations` rows:
@@ -164,5 +187,111 @@ After you change admin labels/messages (including menu items) to use `__()`, run
 
 ## Known limitations (current state)
 
-- Only `Product` has been switched to the new dynamic translation trait so far.
-- Some older admin strings may still be hardcoded and need to be wrapped in `__()` to become translatable.
+- ✅ **RESOLVED**: All Filament Admin resources now use dynamic translations via `__()`
+- ✅ **RESOLVED**: Field labels, sections, and action messages are fully translatable
+- ✅ **RESOLVED**: Complete multilingual support across all admin resources
+
+## Recently Implemented Improvements (March 2026)
+
+### Complete Filament Admin Translation System
+
+All Filament Admin resources have been updated to use dynamic translations for **all field labels, sections, and messages**:
+
+#### Updated Resources:
+- **BlogResource.php** - Title, Excerpt, Content, Image, SEO fields
+- **CaseStudyResource.php** - All form fields and table columns
+- **CategoryResource.php** - Name, Description, Parent, SEO fields
+- **NewsResource.php** - Complete multilingual support
+- **PageResource.php** - All content fields and metadata
+- **ProductResource.php** - Comprehensive product management fields
+- **TestimonialResource.php** - Client information and testimonial content
+- **FeaturedProductResource.php** - Featured products management
+- **CertificationAwardResource.php** - Awards and certifications
+- **SliderResource.php** - Media management and custom styling
+
+#### Translation Coverage:
+- ✅ **Form Field Labels** - All input fields, selects, textareas, file uploads
+- ✅ **Section Headers** - General, SEO, Media, Technical Specs, etc.
+- ✅ **Table Columns** - All list views and data tables
+- ✅ **Status Options** - Draft, Review, Published, Active, Inactive, Archived
+- ✅ **Action Labels** - Delete Selected, Change Status, Remove from Featured
+- ✅ **Success Messages** - All notification messages and confirmations
+- ✅ **Helper Text** - Field descriptions and validation messages
+
+#### Added Translation Keys:
+80+ new translation keys added for both English (`en`) and Bangla (`bd`) including:
+
+**Basic Fields:**
+- Title, Excerpt, Content, Image, Name, Description, Slug, Status
+- Category, Parent, Visible, Order, Media, Type, URL
+
+**Advanced Fields:**
+- Meta Title, Meta Description, Meta Keywords, Canonical URL
+- Client Information, Testimonial Content, Rating (1-5 stars)
+- Technical Specifications, Related Products, Tags
+- Slider Details, Custom Styling, Video Embeds
+
+**Actions & Messages:**
+- Delete Selected, Change Status, Remove from Featured
+- Status Updated, Product removed from featured
+- Items deleted successfully, Selected items have been updated
+
+### Usage Example
+
+When administrators navigate to any form:
+
+```php
+// Before (hardcoded)
+TextInput::make('title')->required()
+
+// After (dynamic translation)
+TextInput::make('title')
+    ->label(__('Title'))
+    ->required()
+```
+
+**Result:**
+- **EN locale**: Shows "Title"
+- **BD locale**: Shows "শিরোনাম"
+
+### Technical Implementation
+
+All resources now use the `__('Translation Key')` pattern:
+
+```php
+// Section headers
+Section::make(__('General'))
+Section::make(__('SEO'))
+Section::make(__('Media'))
+
+// Field labels
+->label(__('Title'))
+->label(__('Description'))
+->label(__('Status'))
+
+// Status options
+'options([
+    'draft' => __('Draft'),
+    'published' => __('Published'),
+    'archived' => __('Archived'),
+])'
+
+// Action labels
+->label(__('Delete Selected'))
+->label(__('Change Status'))
+
+// Success messages
+->title(__('Status Updated'))
+->body(__('Selected items have been updated to') . ' ' . $data['status'])
+```
+
+### Cache Management
+
+After translation updates, clear caches:
+
+```bash
+php artisan cache:clear
+php artisan config:clear
+```
+
+This ensures all translation changes take effect immediately across the admin panel.

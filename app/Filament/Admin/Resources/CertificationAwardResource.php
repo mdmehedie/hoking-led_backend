@@ -47,9 +47,10 @@ class CertificationAwardResource extends Resource
     {
         return $schema
             ->schema([
-                Section::make('Basic Information')
+                Section::make(__('Basic Information'))
                     ->schema([
                         TextInput::make('title')
+                            ->label(__('Title'))
                             ->required()
                             ->maxLength(255)
                             ->live()
@@ -61,20 +62,24 @@ class CertificationAwardResource extends Resource
                             }),
 
                         TextInput::make('slug')
+                            ->label(__('Slug'))
                             ->required()
                             ->maxLength(255)
                             ->unique(CertificationAward::class, 'slug', ignoreRecord: true),
 
                         TextInput::make('issuing_organization')
+                            ->label(__('Issuing Organization'))
                             ->maxLength(255),
 
                         DatePicker::make('date_awarded')
-                            ->label('Date Awarded'),
+                            ->label(__('Date Awarded')),
 
                         Textarea::make('description')
+                            ->label(__('Description'))
                             ->columnSpanFull(),
 
                         FileUpload::make('image_path')
+                            ->label(__('Image'))
                             ->image()
                             ->directory('certifications')
                             ->imageEditor()
@@ -85,28 +90,31 @@ class CertificationAwardResource extends Resource
                             ]),
                     ])->columns(2),
 
-                Section::make('Visibility & Ordering')
+                Section::make(__('Visibility & Ordering'))
                     ->schema([
                         Toggle::make('is_visible')
-                            ->label('Visible')
+                            ->label(__('Visible'))
                             ->default(true),
 
                         TextInput::make('sort_order')
-                            ->label('Sort Order')
+                            ->label(__('Sort Order'))
                             ->numeric()
                             ->default(0)
-                            ->helperText('Lower numbers appear first'),
+                            ->helperText(__('Lower numbers appear first')),
                     ])->columns(2),
 
-                Section::make('SEO')
+                Section::make(__('SEO'))
                     ->schema([
                         TextInput::make('meta_title')
+                            ->label(__('Meta Title'))
                             ->maxLength(255),
 
                         Textarea::make('meta_description')
+                            ->label(__('Meta Description'))
                             ->maxLength(500),
 
-                        Textarea::make('meta_keywords'),
+                        Textarea::make('meta_keywords')
+                            ->label(__('Meta Keywords')),
                     ])->columns(1),
             ]);
     }
@@ -116,23 +124,26 @@ class CertificationAwardResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('title')
+                    ->label(__('Title'))
                     ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('issuing_organization')
+                    ->label(__('Issuing Organization'))
                     ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('date_awarded')
+                    ->label(__('Date Awarded'))
                     ->date()
                     ->sortable(),
 
                 IconColumn::make('is_visible')
-                    ->label('Visible')
+                    ->label(__('Visible'))
                     ->boolean(),
 
                 Tables\Columns\TextColumn::make('sort_order')
-                    ->label('Order')
+                    ->label(__('Order'))
                     ->sortable(),
             ])
             ->filters([

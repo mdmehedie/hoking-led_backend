@@ -8,10 +8,18 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Traits\HasSeo;
+use App\Traits\HasTranslations;
 
 class Blog extends Model implements HasMedia
 {
-    use InteractsWithMedia, HasSeo;
+    use InteractsWithMedia, HasSeo, HasTranslations;
+
+    protected array $translatable = [
+        'title',
+        'excerpt',
+        'content',
+        'image_path',
+    ];
 
     protected $fillable = [
         'title',

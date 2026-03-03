@@ -71,54 +71,56 @@ class ProductResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            Section::make('General')->schema([
-                TextInput::make('title')->afterStateUpdated(function ($state, callable $set, $context) {
-                    $record = $context['record'] ?? null;
-                    if ($record === null) {
-                        $set('slug', static::generateUniqueSlug($state, $record?->id));
-                    }
-                })->live()->required(),
-                TextInput::make('slug')->unique(ignoreRecord: true)->required()->readonly(fn ($get, $record) => $record && $record->exists),
-                Textarea::make('short_description'),
-                Select::make('category_id')->relationship('category', 'name')->nullable(),
-                Select::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])->required(),
+            Section::make(__('General'))->schema([
+                TextInput::make('title')
+                    ->label(__('Title'))
+                    ->afterStateUpdated(function ($state, callable $set, $context) {
+                        $record = $context['record'] ?? null;
+                        if ($record === null) {
+                            $set('slug', static::generateUniqueSlug($state, $record?->id));
+                        }
+                    })->live()->required(),
+                TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required()->readonly(fn ($get, $record) => $record && $record->exists),
+                Textarea::make('short_description')->label(__('Short Description')),
+                Select::make('category_id')->relationship('category', 'name')->label(__('Category'))->nullable(),
+                Select::make('status')->label(__('Status'))->options(['draft' => __('Draft'), 'published' => __('Published'), 'archived' => __('Archived')])->required(),
                 Hidden::make('published_at')
                     ->default(now()),
-                Toggle::make('is_featured')->label('Featured Product'),
+                Toggle::make('is_featured')->label(__('Featured Product')),
             ]),
-            Section::make('Description')->schema([
-                \App\Filament\Forms\Components\CustomRichEditor::make('detailed_description'),
+            Section::make(__('Description'))->schema([
+                \App\Filament\Forms\Components\CustomRichEditor::make('detailed_description')->label(__('Detailed Description')),
             ]),
-            Section::make('Media')->schema([
-                FileUpload::make('main_image')->image()->directory('products/main')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                FileUpload::make('gallery')->multiple()->image()->directory('products/gallery')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                Repeater::make('video_embeds')->schema([
-                    Select::make('type')->options(['embed' => 'Embed URL', 'file' => 'Self-hosted File'])->required(),
-                    TextInput::make('title')->visible(fn ($get) => $get('type') === 'embed'),
-                    TextInput::make('url')->url()->rules(['regex:/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|vimeo\.com)/'])->visible(fn ($get) => $get('type') === 'embed'),
-                    FileUpload::make('video_file')->visible(fn ($get) => $get('type') === 'file'),
+            Section::make(__('Media'))->schema([
+                FileUpload::make('main_image')->label(__('Main Image'))->image()->directory('products/main')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                FileUpload::make('gallery')->label(__('Gallery'))->multiple()->image()->directory('products/gallery')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                Repeater::make('video_embeds')->label(__('Video Embeds'))->schema([
+                    Select::make('type')->label(__('Type'))->options(['embed' => __('Embed URL'), 'file' => __('Self-hosted File')])->required(),
+                    TextInput::make('title')->label(__('Title'))->visible(fn ($get) => $get('type') === 'embed'),
+                    TextInput::make('url')->label(__('URL'))->url()->rules(['regex:/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|vimeo\.com)/'])->visible(fn ($get) => $get('type') === 'embed'),
+                    FileUpload::make('video_file')->label(__('Video File'))->visible(fn ($get) => $get('type') === 'file'),
                 ]),
-                FileUpload::make('downloads')->multiple()->directory('products/downloads'),
+                FileUpload::make('downloads')->label(__('Downloads'))->multiple()->directory('products/downloads'),
             ]),
-            Section::make('Technical Specs')->schema([
-                Repeater::make('technical_specs')->schema([
-                    TextInput::make('key')->required(),
-                    TextInput::make('value')->required(),
-                ]),
-            ]),
-            Section::make('Tags')->schema([
-                Repeater::make('tags')->schema([
-                    TextInput::make('tag')->required(),
+            Section::make(__('Technical Specs'))->schema([
+                Repeater::make('technical_specs')->label(__('Technical Specifications'))->schema([
+                    TextInput::make('key')->label(__('Key'))->required(),
+                    TextInput::make('value')->label(__('Value'))->required(),
                 ]),
             ]),
-            Section::make('Related Products')->schema([
-                Select::make('related_products')->multiple()->relationship('relatedProducts', 'title'),
+            Section::make(__('Tags'))->schema([
+                Repeater::make('tags')->label(__('Tags'))->schema([
+                    TextInput::make('tag')->label(__('Tag'))->required(),
+                ]),
             ]),
-            Section::make('SEO')->schema([
-                TextInput::make('meta_title'),
-                Textarea::make('meta_description'),
-                Textarea::make('meta_keywords'),
-                TextInput::make('canonical_url'),
+            Section::make(__('Related Products'))->schema([
+                Select::make('related_products')->label(__('Related Products'))->multiple()->relationship('relatedProducts', 'title'),
+            ]),
+            Section::make(__('SEO'))->schema([
+                TextInput::make('meta_title')->label(__('Meta Title')),
+                Textarea::make('meta_description')->label(__('Meta Description')),
+                Textarea::make('meta_keywords')->label(__('Meta Keywords')),
+                TextInput::make('canonical_url')->label(__('Canonical URL')),
             ]),
         ]);
     }
@@ -126,10 +128,10 @@ class ProductResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
-            ImageColumn::make('main_image')->label('Image'),
-            TextColumn::make('title')->searchable()->sortable(),
-            SelectColumn::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])->rules(['required'])->sortable()->afterStateUpdated(function ($state, $record) { \Filament\Notifications\Notification::make()->success()->title('Status updated')->body('Product status has been changed to ' . $state . '.')->send(); }),
-            TextColumn::make('category.name')->label('Category')->sortable(),
+            ImageColumn::make('main_image')->label(__('Image')),
+            TextColumn::make('title')->label(__('Title'))->searchable()->sortable(),
+            SelectColumn::make('status')->label(__('Status'))->options(['draft' => __('Draft'), 'published' => __('Published'), 'archived' => __('Archived')])->rules(['required'])->sortable()->afterStateUpdated(function ($state, $record) { \Filament\Notifications\Notification::make()->success()->title(__('Status updated'))->body(__('Product status has been changed to') . ' ' . $state . '.')->send(); }),
+            TextColumn::make('category.name')->label(__('Category'))->sortable(),
             TextColumn::make('published_at')->dateTime()->sortable(),
         ])->filters([
             SelectFilter::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived']),

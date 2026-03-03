@@ -61,8 +61,9 @@ class CategoryResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            Section::make('General')->schema([
+            Section::make(__('General'))->schema([
                 TextInput::make('name')
+                    ->label(__('Name'))
                     ->afterStateUpdated(function ($state, callable $set, $context) {
                         $record = $context['record'] ?? null;
                         if ($record === null) {
@@ -71,16 +72,16 @@ class CategoryResource extends Resource
                     })
                     ->live()
                     ->required(),
-                TextInput::make('slug')->unique(ignoreRecord: true)->required(),
-                Textarea::make('description'),
-                Select::make('parent_id')->relationship('parent', 'name')->nullable(),
-                Toggle::make('is_visible')->default(true),
+                TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required(),
+                Textarea::make('description')->label(__('Description')),
+                Select::make('parent_id')->relationship('parent', 'name')->label(__('Parent Category'))->nullable(),
+                Toggle::make('is_visible')->label(__('Visible'))->default(true),
             ]),
-            Section::make('SEO')->schema([
-                TextInput::make('meta_title'),
-                Textarea::make('meta_description'),
-                Textarea::make('meta_keywords'),
-                TextInput::make('canonical_url'),
+            Section::make(__('SEO'))->schema([
+                TextInput::make('meta_title')->label(__('Meta Title')),
+                Textarea::make('meta_description')->label(__('Meta Description')),
+                Textarea::make('meta_keywords')->label(__('Meta Keywords')),
+                TextInput::make('canonical_url')->label(__('Canonical URL')),
             ]),
         ]);
     }
@@ -90,8 +91,8 @@ class CategoryResource extends Resource
         return $table->columns([
             TextColumn::make('name')->searchable()->sortable(),
             TextColumn::make('slug')->searchable()->sortable(),
-            TextColumn::make('parent.name')->label('Parent')->sortable(),
-            BooleanColumn::make('is_visible')->sortable(),
+            TextColumn::make('parent.name')->label(__('Parent'))->sortable(),
+            BooleanColumn::make('is_visible')->label(__('Visible'))->sortable(),
         ])->actions([
             Action::make('edit')
                 ->url(fn ($record) => static::getUrl('edit', ['record' => $record]))

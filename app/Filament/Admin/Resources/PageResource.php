@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\PageResource\Pages;
 use App\Models\Page;
+use App\Models\Locale;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -24,8 +25,8 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Illuminate\Support\Facades\DB;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tab;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 
 class PageResource extends Resource
 {
@@ -69,25 +70,22 @@ class PageResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
+        $activeLocales = Locale::activeCodes();
+        $defaultLocale = Locale::defaultCode();
+
         return $schema
             ->schema([
-                Section::make('General')->schema([
-                    TextInput::make('title')
-                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                            if (blank($get('slug'))) {
-                                $set('slug', static::generateUniqueSlug($state, null));
-                            }
-                        })
-                        ->live()
-                        ->required(),
+                Section::make(__('General'))->schema([
                     TextInput::make('slug')
+                        ->label(__('Slug'))
                         ->unique(ignoreRecord: true)
                         ->required(),
                     Select::make('status')
+                        ->label(__('Status'))
                         ->options([
-                            'draft' => 'Draft',
-                            'review' => 'Review',
-                            'published' => 'Published',
+                            'draft' => __('Draft'),
+                            'review' => __('Review'),
+                            'published' => __('Published'),
                         ])
                         ->required(),
                     Hidden::make('published_at')
@@ -95,23 +93,44 @@ class PageResource extends Resource
                     Hidden::make('author_id')
                         ->default(auth()->id()),
                 ]),
-                Section::make('Content')->schema([
-                    Textarea::make('excerpt'),
-                    \App\Filament\Forms\Components\CustomRichEditor::make('content')
-                        ->required(),
-                ]),
-                Section::make('Media')->schema([
-                    FileUpload::make('featured_image')
-                        ->image()
-                        ->directory('pages')
-                        ->imageEditor()
-                        ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                ]),
-                Section::make('SEO')->schema([
-                    TextInput::make('meta_title'),
-                    Textarea::make('meta_description'),
-                    Textarea::make('meta_keywords'),
-                    TextInput::make('canonical_url'),
+                Tabs::make('Translations')->tabs(
+                    collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
+                        $isDefault = $locale === $defaultLocale;
+
+                        return Tab::make(strtoupper($locale))
+                            ->schema([
+                                TextInput::make("title.{$locale}")
+                                    ->label(__('Title'))
+                                    ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
+                                        if (!$isDefault) {
+                                            return;
+                                        }
+
+                                        if (blank($get('slug'))) {
+                                            $set('slug', static::generateUniqueSlug($state, null));
+                                        }
+                                    })
+                                    ->live()
+                                    ->required($isDefault),
+                                Textarea::make("excerpt.{$locale}")
+                                    ->label(__('Excerpt')),
+                                \App\Filament\Forms\Components\CustomRichEditor::make("content.{$locale}")
+                                    ->label(__('Content'))
+                                    ->required($isDefault),
+                                FileUpload::make("image_path.{$locale}")
+                                    ->label(__('Image'))
+                                    ->image()
+                                    ->directory('pages')
+                                    ->imageEditor()
+                                    ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                            ]);
+                    })->all()
+                ),
+                Section::make(__('SEO'))->schema([
+                    TextInput::make('meta_title')->label(__('Meta Title')),
+                    Textarea::make('meta_description')->label(__('Meta Description')),
+                    Textarea::make('meta_keywords')->label(__('Meta Keywords')),
+                    TextInput::make('canonical_url')->label(__('Canonical URL')),
                 ]),
             ]);
     }

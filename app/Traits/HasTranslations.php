@@ -12,6 +12,16 @@ trait HasTranslations
 
     public static function bootHasTranslations(): void
     {
+        static::saving(function ($model): void {
+            if (!property_exists($model, 'pendingTranslations') || $model->pendingTranslations === []) {
+                return;
+            }
+
+            if ($model->exists && !$model->isDirty()) {
+                $model->setUpdatedAt($model->freshTimestamp());
+            }
+        });
+
         static::saved(function ($model): void {
             if (!property_exists($model, 'pendingTranslations') || $model->pendingTranslations === []) {
                 return;
@@ -49,6 +59,10 @@ trait HasTranslations
 
         if ($translation) {
             return $translation->value;
+        }
+
+        if (!$fallback) {
+            return null;
         }
 
         if ($fallback) {

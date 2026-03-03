@@ -22,23 +22,24 @@ class SlidersTable
     {
         return $table
             ->columns([
-                TextColumn::make('title')->sortable()->formatStateUsing(fn ($state) => strip_tags($state)),
-                TextColumn::make('media_type')->label('Media Type')->formatStateUsing(fn ($state) => match($state) {
-                    'image' => 'Image',
-                    'gif' => 'GIF (Playable)',
-                    'video_url' => 'Video URL',
-                    'video_file' => 'Uploaded Video',
+                TextColumn::make('title')->label(__('Title'))->sortable()->formatStateUsing(fn ($state) => strip_tags($state)),
+                TextColumn::make('media_type')->label(__('Media Type'))->formatStateUsing(fn ($state) => match($state) {
+                    'image' => __('Image'),
+                    'gif' => __('GIF (Playable)'),
+                    'video_url' => __('Video URL'),
+                    'video_file' => __('Uploaded Video'),
                     default => $state,
                 }),
-                ImageColumn::make('image_path')->label('Media'),
-                BooleanColumn::make('status'),
-                TextColumn::make('order')->sortable(),
+                ImageColumn::make('image_path')->label(__('Media')),
+                BooleanColumn::make('status')->label(__('Status')),
+                TextColumn::make('order')->label(__('Order'))->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')
+                    ->label(__('Status'))
                     ->options([
-                        '1' => 'Active',
-                        '0' => 'Inactive',
+                        '1' => __('Active'),
+                        '0' => __('Inactive'),
                     ]),
             ])
             ->searchable()
@@ -48,7 +49,7 @@ class SlidersTable
             ])
             ->bulkActions([
                 BulkAction::make('delete_selected')
-                    ->label('Delete Selected')
+                    ->label(__('Delete Selected'))
                     ->color('danger')
                     ->icon('heroicon-o-trash')
                     ->requiresConfirmation()
@@ -57,17 +58,18 @@ class SlidersTable
                         $records->each->delete();
                         Notification::make()
                             ->success()
-                            ->title('Deleted')
-                            ->body($count . ' items deleted successfully.')
+                            ->title(__('Deleted'))
+                            ->body($count . ' ' . __('items deleted successfully.'))
                             ->send();
                     }),
                 BulkAction::make('change_status')
-                    ->label('Change Status')
+                    ->label(__('Change Status'))
                     ->form([
                         Select::make('status')
+                            ->label(__('Status'))
                             ->options([
-                                '0' => 'Inactive',
-                                '1' => 'Active',
+                                '0' => __('Inactive'),
+                                '1' => __('Active'),
                             ])
                             ->required(),
                     ])
@@ -75,8 +77,8 @@ class SlidersTable
                         $records->each->update(['status' => $data['status']]);
                         Notification::make()
                             ->success()
-                            ->title('Status Updated')
-                            ->body('Selected items have been updated to ' . ($data['status'] ? 'Active' : 'Inactive') . '.')
+                            ->title(__('Status Updated'))
+                            ->body(__('Selected items have been updated to') . ' ' . ($data['status'] ? __('Active') : __('Inactive')) . '.')
                             ->send();
                     })
                     ->requiresConfirmation()
