@@ -12,8 +12,10 @@ use App\Http\Controllers\Api\V1\ApiFrontendPageController;
 use App\Http\Controllers\Api\V1\ApiFrontendAppSettingController;
 use App\Http\Controllers\Api\V1\ApiFrontendCertificationAwardController;
 use App\Http\Controllers\Api\V1\ApiFrontendTestimonialController;
+use App\Http\Controllers\Api\V1\ApiFrontendLocaleController;
 
 Route::prefix('v1')->group(function () {
+    Route::get('locales', [ApiFrontendLocaleController::class, 'index']);
     Route::get('sliders', [ApiFrontendSliderController::class, 'index']);
     Route::get('blogs', [ApiFrontendBlogController::class, 'index']);
     Route::get('blogs/{slug}', [ApiFrontendBlogController::class, 'show']);

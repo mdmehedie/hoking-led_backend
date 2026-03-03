@@ -19,6 +19,10 @@ class EditProduct extends EditRecord
 
     protected function afterSave(): void
     {
-        $this->dispatch('toastr', ['type' => 'success', 'title' => 'Product updated', 'message' => 'The product has been updated successfully.']);
+        $this->dispatch('toastr', [
+            'type' => 'success',
+            'title' => __('Product updated'),
+            'message' => __('The product has been updated successfully.'),
+        ]);
     }
 }

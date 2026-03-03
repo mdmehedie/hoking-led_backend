@@ -38,6 +38,16 @@ class ProductResource extends Resource
 
     protected static ?string $navigationLabel = 'Products';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Products');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Product Management');
+    }
+
     public static function canCreate(): bool
     {
         return auth()->user()->can('create product');
@@ -132,36 +142,36 @@ class ProductResource extends Resource
                 ->visible(fn ($record) => $record->status === 'published')
                 ->form([
                     Section::make('URL Preview')
-                        ->description('This is the URL that will be included in your social media posts')
+                        ->description(__('This is the URL that will be included in your social media posts'))
                         ->schema([
                             \Filament\Forms\Components\TextInput::make('url_preview')
-                                ->label('Content URL')
+                                ->label(__('Content URL'))
                                 ->default(fn ($record) => static::generateShareUrl($record, 'product'))
                                 ->disabled()
-                                ->helperText('This URL will be shared on the selected social media platforms'),
+                                ->helperText(__('This URL will be shared on the selected social media platforms')),
                         ]),
                     \Filament\Forms\Components\CheckboxList::make('platforms')
-                        ->label('Share to Platforms')
+                        ->label(__('Share to Platforms'))
                         ->options([
-                            'facebook' => 'Facebook',
-                            'twitter' => 'Twitter (X)',
-                            'linkedin' => 'LinkedIn',
+                            'facebook' => __('Facebook'),
+                            'twitter' => __('Twitter (X)'),
+                            'linkedin' => __('LinkedIn'),
                         ])
                         ->default(['facebook', 'twitter', 'linkedin'])
                         ->required()
-                        ->helperText('Select which social media platforms to share this product on'),
+                        ->helperText(__('Select which social media platforms to share this product on')),
                 ])
                 ->action(function ($record, array $data) {
                     \App\Jobs\PublishToSocialMedia::dispatch($record, 'product', $data['platforms']);
 
                     \Filament\Notifications\Notification::make()
-                        ->title('Product shared successfully!')
-                        ->body('The product has been queued for sharing to selected social media platforms.')
+                        ->title(__('Product shared successfully!'))
+                        ->body(__('The product has been queued for sharing to selected social media platforms.'))
                         ->success()
                         ->send();
                 })
-                ->modalHeading('Share Product')
-                ->modalSubmitActionLabel('Share Now'),
+                ->modalHeading(__('Share Product'))
+                ->modalSubmitActionLabel(__('Share Now')),
             Action::make('edit')
                 ->url(fn ($record) => static::getUrl('edit', ['record' => $record]))
                 ->icon('heroicon-o-pencil'),
@@ -173,7 +183,7 @@ class ProductResource extends Resource
         ])
         ->bulkActions([
             BulkAction::make('delete_selected')
-                ->label('Delete Selected')
+                ->label(__('Delete Selected'))
                 ->color('danger')
                 ->icon('heroicon-o-trash')
                 ->requiresConfirmation()
@@ -182,18 +192,18 @@ class ProductResource extends Resource
                     $records->each->delete();
                     Notification::make()
                         ->success()
-                        ->title('Deleted')
-                        ->body($count . ' items deleted successfully.')
+                        ->title(__('Deleted'))
+                        ->body($count . ' ' . __('items deleted successfully.'))
                         ->send();
                 }),
             BulkAction::make('change_status')
-                ->label('Change Status')
+                ->label(__('Change Status'))
                 ->form([
                     Select::make('status')
                         ->options([
-                            'draft' => 'Draft',
-                            'published' => 'Published',
-                            'archived' => 'Archived',
+                            'draft' => __('Draft'),
+                            'published' => __('Published'),
+                            'archived' => __('Archived'),
                         ])
                         ->required(),
                 ])
@@ -201,8 +211,8 @@ class ProductResource extends Resource
                     $records->each->update(['status' => $data['status']]);
                     Notification::make()
                         ->success()
-                        ->title('Status Updated')
-                        ->body('Selected items have been updated to ' . $data['status'] . '.')
+                        ->title(__('Status Updated'))
+                        ->body(__('Selected items have been updated to') . ' ' . $data['status'] . '.')
                         ->send();
                 })
                 ->requiresConfirmation()

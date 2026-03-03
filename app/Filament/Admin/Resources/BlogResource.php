@@ -33,6 +33,16 @@ class BlogResource extends Resource
 
     protected static ?string $navigationLabel = 'Blogs';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Blogs');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Content Management');
+    }
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
     public static function canCreate(): bool

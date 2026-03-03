@@ -151,16 +151,16 @@ class WebhooksRelationManager extends RelationManager
                         FormWebhook::create($data);
 
                         Notification::make()
-                            ->title('Webhook created successfully!')
+                            ->title(__('Webhook created successfully!'))
                             ->success()
                             ->send();
                     })
-                    ->modalHeading('Add New Webhook')
-                    ->modalSubmitActionLabel('Create Webhook'),
+                    ->modalHeading(__('Add New Webhook'))
+                    ->modalSubmitActionLabel(__('Create Webhook')),
             ])
             ->actions([
                 Action::make('edit')
-                    ->label('Edit')
+                    ->label(__('Edit'))
                     ->icon('heroicon-o-pencil')
                     ->color('warning')
                     ->fillForm(function ($record): array {
@@ -173,10 +173,10 @@ class WebhooksRelationManager extends RelationManager
                     })
                     ->form([
                         Forms\Components\TextInput::make('url')
-                            ->label('Webhook URL')
+                            ->label(__('Webhook URL'))
                             ->required()
-                            ->placeholder('https://your-crm.com/webhook or your-crm.com/webhook')
-                            ->helperText('Enter full URL with https:// or just domain - protocol will be added automatically')
+                            ->placeholder(__('https://your-crm.com/webhook or your-crm.com/webhook'))
+                            ->helperText(__('Enter full URL with https:// or just domain - protocol will be added automatically'))
                             ->afterStateUpdated(function ($state, callable $set) {
                                 if ($state && !preg_match('/^https?:\/\//', $state)) {
                                     $set('url', 'https://' . $state);
@@ -184,7 +184,7 @@ class WebhooksRelationManager extends RelationManager
                             }),
 
                         Forms\Components\Select::make('method')
-                            ->label('HTTP Method')
+                            ->label(__('HTTP Method'))
                             ->options([
                                 'POST' => 'POST',
                                 'PUT' => 'PUT',
@@ -192,26 +192,26 @@ class WebhooksRelationManager extends RelationManager
                             ->required(),
 
                         Forms\Components\KeyValue::make('headers')
-                            ->label('Custom Headers')
-                            ->keyLabel('Header Name')
-                            ->valueLabel('Header Value')
-                            ->helperText('Add headers like Authorization, Content-Type, etc.')
+                            ->label(__('Custom Headers'))
+                            ->keyLabel(__('Header Name'))
+                            ->valueLabel(__('Header Value'))
+                            ->helperText(__('Add headers like Authorization, Content-Type, etc.'))
                             ->columnSpanFull(),
 
                         Forms\Components\Toggle::make('active')
-                            ->label('Active')
-                            ->helperText('Only active webhooks will receive data'),
+                            ->label(__('Active'))
+                            ->helperText(__('Only active webhooks will receive data')),
                     ])
                     ->action(function (array $data, $record) {
                         $record->update($data);
 
                         Notification::make()
-                            ->title('Webhook updated successfully!')
+                            ->title(__('Webhook updated successfully!'))
                             ->success()
                             ->send();
                     })
-                    ->modalHeading('Edit Webhook')
-                    ->modalSubmitActionLabel('Update Webhook'),
+                    ->modalHeading(__('Edit Webhook'))
+                    ->modalSubmitActionLabel(__('Update Webhook')),
                 DeleteAction::make(),
             ])
             ->bulkActions([

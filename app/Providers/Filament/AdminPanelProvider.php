@@ -24,6 +24,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\HtmlString;
+use App\Models\Locale;
+use App\Http\Middleware\SetLocale;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -41,11 +43,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->navigationGroups([
-                \Filament\Navigation\NavigationGroup::make('Content Management'),
-                \Filament\Navigation\NavigationGroup::make('Product Management'),
-                \Filament\Navigation\NavigationGroup::make('Marketing'),
-                \Filament\Navigation\NavigationGroup::make('Settings'),
-                \Filament\Navigation\NavigationGroup::make('User Management'),
+                \Filament\Navigation\NavigationGroup::make(__('Content Management')),
+                \Filament\Navigation\NavigationGroup::make(__('Product Management')),
+                \Filament\Navigation\NavigationGroup::make(__('Marketing')),
+                \Filament\Navigation\NavigationGroup::make(__('Settings')),
+                \Filament\Navigation\NavigationGroup::make(__('User Management')),
             ])
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
             ->pages([
@@ -64,6 +66,7 @@ class AdminPanelProvider extends PanelProvider
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
+                SetLocale::class,
                 AuthenticateSession::class,
                 \Illuminate\View\Middleware\ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
@@ -77,6 +80,19 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook('head.end', function () {
                 $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());
                 return $settings && $settings->toastr_enabled ? '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>' : '';
+            })
+            ->renderHook('panels::topbar.end', function () {
+                $locales = Locale::query()
+                    ->where('is_active', true)
+                    ->orderByDesc('is_default')
+                    ->orderBy('code')
+                    ->get(['code', 'name']);
+
+                return new HtmlString(
+                    '<div class="px-4 py-2">' .
+                    view('filament.components.locale-switcher', ['locales' => $locales])->render() .
+                    '</div>'
+                );
             })
             ->renderHook('scripts.after', function () {
                 $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());

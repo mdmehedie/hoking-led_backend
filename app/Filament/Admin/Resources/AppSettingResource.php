@@ -25,6 +25,16 @@ class AppSettingResource extends Resource
 
     protected static ?string $navigationLabel = 'App Settings';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('App Settings');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Settings');
+    }
+
     public static function canCreate(): bool
     {
         return auth()->user()->can('create appsetting');

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Translations\DatabaseTranslationLoader;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,7 +12,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->extend('translation.loader', function ($loader, $app) {
+            return new DatabaseTranslationLoader($loader);
+        });
     }
 
     /**

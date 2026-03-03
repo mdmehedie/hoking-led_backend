@@ -8,12 +8,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Spatie\Translatable\HasTranslations;
 use App\Traits\HasSeo;
+use App\Traits\HasTranslations;
 
 class Product extends Model implements HasMedia
 {
     use HasTranslations, InteractsWithMedia, HasSeo;
+
+    protected $translatable = [
+        'title',
+        'short_description',
+        'detailed_description',
+        'meta_title',
+        'meta_description',
+        'meta_keywords',
+    ];
 
     protected $fillable = [
         'title',
@@ -71,16 +80,6 @@ class Product extends Model implements HasMedia
             ->width(1200)
             ->height(1200)
             ->sharpen(10);
-    }
-
-    public function getDetailedDescriptionAttribute($value)
-    {
-        if (is_string($value) && $decoded = json_decode($value, true)) {
-            if (is_array($decoded) && isset($decoded['en'])) {
-                return $decoded['en'];
-            }
-        }
-        return $value;
     }
 
     public function getUrl(): string

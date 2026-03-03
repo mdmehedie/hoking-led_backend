@@ -21,6 +21,18 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
+## Project Documentation
+
+Localization / Translation docs:
+
+- Backend: `docs/backend/localization-and-translations.md`
+- Frontend: `docs/frontend/localization-and-api-usage.md`
+
+API docs and Postman:
+
+- Frontend API reference: `docs/api/frontend-api.md`
+- Postman collection: `docs/postman/Frontend-API.postman_collection.json`
+
 ## Learning Laravel
 
 Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.

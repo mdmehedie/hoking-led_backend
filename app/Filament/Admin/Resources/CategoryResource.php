@@ -35,6 +35,16 @@ class CategoryResource extends Resource
 
     protected static ?string $navigationLabel = 'Categories';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Categories');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Product Management');
+    }
+
     protected static function generateUniqueSlug($title, $id = null)
     {
         $table = 'categories';

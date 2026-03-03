@@ -4,9 +4,19 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Admin\EditorImageUploadController;
 use App\Http\Controllers\PWAController;
+use App\Http\Controllers\RobotsTxtController;
+use App\Http\Controllers\Admin\AdminLocaleController;
 
-Route::get('/', function () {
-    return view('welcome');
+$supportedLocales = config('app.supported_locales', []);
+$localePattern = $supportedLocales !== [] ? implode('|', array_map('preg_quote', $supportedLocales)) : '[a-zA-Z\-]+';
+
+Route::group([
+    'prefix' => '{locale?}',
+    'where' => ['locale' => $localePattern],
+], function () {
+    Route::get('/', function () {
+        return view('welcome');
+    });
 });
 
 Route::get('/test', function () {
@@ -22,8 +32,6 @@ Route::get('/clear-cache', function () {
     return 'All caches cleared!';
 });
 
-use App\Http\Controllers\RobotsTxtController;
-
 // Robots.txt route
 Route::get('/robots.txt', [RobotsTxtController::class, 'index']);
 
@@ -33,4 +41,6 @@ Route::get('/sw.js', [PWAController::class, 'serviceWorker']);
 
 Route::middleware('auth')->group(function () {
     Route::post('/admin/editor-image-upload', [EditorImageUploadController::class, 'store'])->name('editor.image.upload');
+
+    Route::post('/admin/locale', [AdminLocaleController::class, 'update'])->name('admin.locale.update');
 });
