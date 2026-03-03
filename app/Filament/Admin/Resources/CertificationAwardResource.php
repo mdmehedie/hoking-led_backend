@@ -33,6 +33,16 @@ class CertificationAwardResource extends Resource
 
     protected static ?int $navigationSort = 6;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Certifications & Awards');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Content Management');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema

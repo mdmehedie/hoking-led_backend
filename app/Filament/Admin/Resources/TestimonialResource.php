@@ -26,7 +26,17 @@ class TestimonialResource extends Resource
 
     protected static ?string $navigationLabel = 'Testimonials';
 
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 2;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Testimonials');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Content Management');
+    }
 
     public static function form(Schema $schema): Schema
     {

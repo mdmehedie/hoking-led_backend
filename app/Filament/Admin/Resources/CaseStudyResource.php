@@ -33,6 +33,18 @@ class CaseStudyResource extends Resource
 
     protected static ?string $navigationLabel = 'Case Studies';
 
+    protected static ?int $navigationSort = 3;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Case Studies');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Content Management');
+    }
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
 
     public static function canCreate(): bool

@@ -33,6 +33,18 @@ class PageResource extends Resource
 
     protected static ?string $navigationLabel = 'Pages';
 
+    protected static ?int $navigationSort = 5;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Pages');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Content Management');
+    }
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document';
 
     public static function canCreate(): bool
