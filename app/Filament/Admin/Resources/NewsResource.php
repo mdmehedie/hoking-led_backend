@@ -72,10 +72,9 @@ class NewsResource extends Resource
             ->schema([
                 Section::make('General')->schema([
                     TextInput::make('title')
-                        ->afterStateUpdated(function ($state, callable $set, $context) {
-                            $record = $context['record'] ?? null;
-                            if ($record === null) {
-                                $set('slug', static::generateUniqueSlug($state, $record?->id));
+                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                            if (blank($get('slug'))) {
+                                $set('slug', static::generateUniqueSlug($state, null));
                             }
                         })
                         ->live()
@@ -92,9 +91,8 @@ class NewsResource extends Resource
                         ->required(),
                     Hidden::make('published_at')
                         ->default(now()),
-                    Select::make('author_id')
-                        ->relationship('author', 'name')
-                        ->default(fn() => auth()->user()->hasRole('Content Manager') ? auth()->id() : null)
+                    Hidden::make('author_id')
+                        ->default(fn ($record) => $record?->author_id ?? auth()->id())
                         ->required(),
                 ]),
                 Section::make('Content')->schema([

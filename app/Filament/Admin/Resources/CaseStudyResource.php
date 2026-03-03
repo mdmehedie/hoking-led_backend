@@ -73,10 +73,9 @@ class CaseStudyResource extends Resource
             ->schema([
                 Section::make('General')->schema([
                     TextInput::make('title')
-                        ->afterStateUpdated(function ($state, callable $set, $context) {
-                            $record = $context['record'] ?? null;
-                            if ($record === null) {
-                                $set('slug', static::generateUniqueSlug($state, $record?->id));
+                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                            if (blank($get('slug'))) {
+                                $set('slug', static::generateUniqueSlug($state, null));
                             }
                         })
                         ->live()
