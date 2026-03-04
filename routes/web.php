@@ -15,9 +15,8 @@ Route::group([
     'prefix' => '{locale?}',
     'where' => ['locale' => $localePattern],
 ], function () {
-    Route::get('/', function () {
-        return redirect('/admin');
-    });
+    // Admin panel is now served directly from root
+    // No redirect needed - Filament handles the root route
 });
 
 Route::get('/test', function () {
@@ -41,10 +40,10 @@ Route::get('/manifest.json', [PWAController::class, 'manifest']);
 Route::get('/sw.js', [PWAController::class, 'serviceWorker']);
 
 Route::middleware('auth')->group(function () {
-    Route::post('/admin/editor-image-upload', [EditorImageUploadController::class, 'store'])->name('editor.image.upload');
+    Route::post('/editor-image-upload', [EditorImageUploadController::class, 'store'])->name('editor.image.upload');
 
     // Admin locale update
-    Route::post('/admin/locale', [AdminLocaleController::class, 'update'])->name('admin.locale.update');
+    Route::post('/locale', [AdminLocaleController::class, 'update'])->name('admin.locale.update');
 
     // Debug routes for production - REMOVE AFTER DEBUGGING
     Route::prefix('debug')->group(function () {

@@ -40,7 +40,7 @@ class AdminPanelProvider extends PanelProvider
 
         return $panel
             ->id('admin')
-            ->path('admin')
+            ->path('')
             ->brandName($settings->app_name ?? 'Admin Panel')
             ->login()
             ->colors([
@@ -133,7 +133,7 @@ class AdminPanelProvider extends PanelProvider
                                 form.append("_token", csrfToken.getAttribute("content"));
                             }
                             var xhr = new XMLHttpRequest();
-                            xhr.open("POST", "/admin/editor-image-upload");
+                            xhr.open("POST", "/editor-image-upload");
                             xhr.onload = function() {
                                 if (xhr.status === 200) {
                                     var data = JSON.parse(xhr.responseText);
