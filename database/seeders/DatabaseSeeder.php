@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
         // 2. Multilingual seeders
         $this->call([
             LocaleSeeder::class,
+            UiTranslationSeeder::class,
         ]);
         
         // 3. Permission seeders

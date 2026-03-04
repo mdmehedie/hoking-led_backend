@@ -41,18 +41,25 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->id('admin')
             ->path('')
-            ->brandName($settings->app_name ?? 'Admin Panel')
+            ->brandName(function() {
+                try {
+                    $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());
+                    return $settings ? __($settings->app_name ?? 'Admin Panel') : __('Admin Panel');
+                } catch (\Exception $e) {
+                    return __('Admin Panel');
+                }
+            })
             ->login()
             ->colors([
                 'primary' => Color::Amber,
             ])
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->navigationGroups([
-                \Filament\Navigation\NavigationGroup::make(__('Content Management')),
-                \Filament\Navigation\NavigationGroup::make(__('Product Management')),
-                \Filament\Navigation\NavigationGroup::make(__('Marketing')),
-                \Filament\Navigation\NavigationGroup::make(__('Settings')),
-                \Filament\Navigation\NavigationGroup::make(__('User Management')),
+                \Filament\Navigation\NavigationGroup::make(fn() => __('Content Management')),
+                \Filament\Navigation\NavigationGroup::make(fn() => __('Product Management')),
+                \Filament\Navigation\NavigationGroup::make(fn() => __('Marketing')),
+                \Filament\Navigation\NavigationGroup::make(fn() => __('Settings')),
+                \Filament\Navigation\NavigationGroup::make(fn() => __('User Management')),
             ])
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
             ->pages([
