@@ -154,16 +154,16 @@ class ProductResource extends Resource
             TextColumn::make('category.name')->label(__('Category'))->sortable(),
             TextColumn::make('published_at')->dateTime()->sortable(),
         ])->filters([
-            SelectFilter::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived']),
+            SelectFilter::make('status')->options(['draft' => __('Draft'), 'published' => __('Published'), 'archived' => __('Archived')]),
             SelectFilter::make('category_id')->relationship('category', 'name'),
         ])->actions([
             Action::make('share')
-                ->label('Share')
+                ->label(__('Share'))
                 ->icon('heroicon-o-share')
                 ->color('success')
                 ->visible(fn ($record) => $record->status === 'published')
                 ->form([
-                    Section::make('URL Preview')
+                    Section::make(__('URL Preview'))
                         ->description(__('This is the URL that will be included in your social media posts'))
                         ->schema([
                             \Filament\Forms\Components\TextInput::make('url_preview')
@@ -195,9 +195,11 @@ class ProductResource extends Resource
                 ->modalHeading(__('Share Product'))
                 ->modalSubmitActionLabel(__('Share Now')),
             Action::make('edit')
+                ->label(__('Edit'))
                 ->url(fn ($record) => static::getUrl('edit', ['record' => $record]))
                 ->icon('heroicon-o-pencil'),
             Action::make('delete')
+                ->label(__('Delete'))
                 ->action(fn ($record) => $record->delete())
                 ->requiresConfirmation()
                 ->color('danger')

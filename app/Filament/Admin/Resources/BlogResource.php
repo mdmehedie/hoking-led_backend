@@ -73,15 +73,17 @@ class BlogResource extends Resource
 
         return $schema
             ->schema([
-                Section::make('General')->schema([
+                Section::make(__('General'))->schema([
                     TextInput::make('slug')
+                        ->label(__('Slug'))
                         ->unique(ignoreRecord: true)
                         ->required(),
                     Select::make('status')
+                        ->label(__('Status'))
                         ->options([
-                            'draft' => 'Draft',
-                            'review' => 'Review',
-                            'published' => 'Published',
+                            'draft' => __('Draft'),
+                            'review' => __('Review'),
+                            'published' => __('Published'),
                         ])
                         ->required(),
                     Hidden::make('published_at')
@@ -123,11 +125,15 @@ class BlogResource extends Resource
                             ]);
                     })->all()
                 ),
-                Section::make('SEO')->schema([
-                    TextInput::make('meta_title'),
-                    Textarea::make('meta_description'),
-                    Textarea::make('meta_keywords'),
-                    TextInput::make('canonical_url'),
+                Section::make(__('SEO'))->schema([
+                    TextInput::make('meta_title')
+                        ->label(__('Meta Title')),
+                    Textarea::make('meta_description')
+                        ->label(__('Meta Description')),
+                    Textarea::make('meta_keywords')
+                        ->label(__('Meta Keywords')),
+                    TextInput::make('canonical_url')
+                        ->label(__('Canonical URL')),
                 ]),
             ]);
     }

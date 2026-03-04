@@ -64,28 +64,62 @@ class AppSettingResource extends Resource
         $defaultLocale = Locale::defaultCode();
 
         return $schema->schema([
-            Section::make('Logos')->schema([
-                FileUpload::make('logo_light')->image()->directory('settings')->acceptedFileTypes(['image/*'])->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                FileUpload::make('logo_dark')->image()->directory('settings')->acceptedFileTypes(['image/*'])->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+            Section::make(__('Logos'))->schema([
+                FileUpload::make('logo_light')
+                    ->label(__('Light Logo'))
+                    ->image()
+                    ->directory('settings')
+                    ->acceptedFileTypes(['image/*'])
+                    ->imageEditor()
+                    ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                FileUpload::make('logo_dark')
+                    ->label(__('Dark Logo'))
+                    ->image()
+                    ->directory('settings')
+                    ->acceptedFileTypes(['image/*'])
+                    ->imageEditor()
+                    ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
             ]),
-            Section::make('Favicon')->schema([
-                FileUpload::make('favicon')->image()->directory('settings')->acceptedFileTypes(['image/*'])->imageEditor()->imageEditorAspectRatios(['1:1']),
+            Section::make(__('Favicon'))->schema([
+                FileUpload::make('favicon')
+                    ->label(__('Favicon'))
+                    ->image()
+                    ->directory('settings')
+                    ->acceptedFileTypes(['image/*'])
+                    ->imageEditor()
+                    ->imageEditorAspectRatios(['1:1']),
             ]),
-            Section::make('Brand Colors')->schema([
-                ColorPicker::make('primary_color')->default('#3b82f6')->required(),
-                ColorPicker::make('secondary_color')->default('#10b981')->required(),
-                ColorPicker::make('accent_color')->default('#f59e0b')->required(),
+            Section::make(__('Brand Colors'))->schema([
+                ColorPicker::make('primary_color')
+                    ->label(__('Primary Color'))
+                    ->default('#3b82f6')
+                    ->required(),
+                ColorPicker::make('secondary_color')
+                    ->label(__('Secondary Color'))
+                    ->default('#10b981')
+                    ->required(),
+                ColorPicker::make('accent_color')
+                    ->label(__('Accent Color'))
+                    ->default('#f59e0b')
+                    ->required(),
             ]),
-            Section::make('Typography')->schema([
-                Select::make('font_family')->options([
-                    'Arial' => 'Arial',
-                    'Helvetica' => 'Helvetica',
-                    'Times New Roman' => 'Times New Roman',
-                    'Courier New' => 'Courier New',
-                ])->default('Arial')->required(),
-                \Filament\Forms\Components\TextInput::make('base_font_size')->default('16px')->required(),
+            Section::make(__('Typography'))->schema([
+                Select::make('font_family')
+                    ->label(__('Font Family'))
+                    ->options([
+                        'Arial' => 'Arial',
+                        'Helvetica' => 'Helvetica',
+                        'Times New Roman' => 'Times New Roman',
+                        'Courier New' => 'Courier New',
+                    ])
+                    ->default('Arial')
+                    ->required(),
+                \Filament\Forms\Components\TextInput::make('base_font_size')
+                    ->label(__('Base Font Size'))
+                    ->default('16px')
+                    ->required(),
             ]),
-            Section::make('Organization')->schema([
+            Section::make(__('Organization'))->schema([
                 Tabs::make('Translations')->tabs(
                     collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
                         $isDefault = $locale === $defaultLocale;
@@ -108,37 +142,54 @@ class AppSettingResource extends Resource
                     })->all()
                 ),
                 \Filament\Forms\Components\TextInput::make('frontend_url')
-                    ->label('Frontend URL')
+                    ->label(__('Frontend URL'))
                     ->url()
                     ->placeholder('https://your-frontend-domain.com')
-                    ->helperText('The URL of your frontend website. Used for generating share links in social media posts.')
+                    ->helperText(__('The URL of your frontend website. Used for generating share links in social media posts.'))
                     ->default(''),
                 Repeater::make('organization.contact_emails')
-                    ->label('Contact email(s)')
+                    ->label(__('Contact email(s)'))
                     ->schema([
-                        \Filament\Forms\Components\TextInput::make('email')->email()->required(),
+                        \Filament\Forms\Components\TextInput::make('email')
+                            ->label(__('Email'))
+                            ->email()
+                            ->required(),
                     ])
                     ->default([]),
                 Repeater::make('organization.contact_phones')
-                    ->label('Contact phone number(s)')
+                    ->label(__('Contact phone number(s)'))
                     ->schema([
-                        \Filament\Forms\Components\TextInput::make('phone')->required(),
+                        \Filament\Forms\Components\TextInput::make('phone')
+                            ->label(__('Phone Number'))
+                            ->required(),
                     ])
                     ->default([]),
                 Repeater::make('organization.office_addresses')
-                    ->label('Office addresses')
+                    ->label(__('Office addresses'))
                     ->schema([
-                        \Filament\Forms\Components\TextInput::make('label')->required(),
-                        \Filament\Forms\Components\Textarea::make('street')->rows(2)->required(),
-                        \Filament\Forms\Components\TextInput::make('city')->required(),
-                        \Filament\Forms\Components\TextInput::make('country')->required(),
-                        \Filament\Forms\Components\TextInput::make('map_link')->label('Map link (Google Maps URL)')->url(),
+                        \Filament\Forms\Components\TextInput::make('label')
+                            ->label(__('Label'))
+                            ->required(),
+                        \Filament\Forms\Components\Textarea::make('street')
+                            ->label(__('Street'))
+                            ->rows(2)
+                            ->required(),
+                        \Filament\Forms\Components\TextInput::make('city')
+                            ->label(__('City'))
+                            ->required(),
+                        \Filament\Forms\Components\TextInput::make('country')
+                            ->label(__('Country'))
+                            ->required(),
+                        \Filament\Forms\Components\TextInput::make('map_link')
+                            ->label(__('Map link (Google Maps URL)'))
+                            ->url(),
                     ])
                     ->default([]),
                 Repeater::make('organization.social_links')
-                    ->label('Social media profile links')
+                    ->label(__('Social media profile links'))
                     ->schema([
                         Select::make('platform')
+                            ->label(__('Platform'))
                             ->options([
                                 'facebook' => 'Facebook',
                                 'twitter' => 'Twitter / X',
@@ -151,40 +202,58 @@ class AppSettingResource extends Resource
                             ])
                             ->required(),
                         \Filament\Forms\Components\TextInput::make('url')
-                            ->label('URL')
+                            ->label(__('URL'))
                             ->required(),
                     ])
                     ->default([]),
             ]),
-            Section::make('Toastr Settings')->schema([
-                Toggle::make('toastr_enabled')->label('Enable Toastr Notifications')->default(true),
-                Select::make('toastr_position')->label('Position')->options([
-                    'top-left' => 'Top Left',
-                    'top-right' => 'Top Right',
-                    'bottom-left' => 'Bottom Left',
-                    'bottom-right' => 'Bottom Right',
-                ])->default('top-right'),
-                \Filament\Forms\Components\TextInput::make('toastr_duration')->label('Duration (ms)')->numeric()->default(5000),
-                Select::make('toastr_show_method')->label('Show Method')->options([
-                    'fadeIn' => 'Fade In',
-                    'slideDown' => 'Slide Down',
-                ])->default('fadeIn'),
-                Select::make('toastr_hide_method')->label('Hide Method')->options([
-                    'fadeOut' => 'Fade Out',
-                    'slideUp' => 'Slide Up',
-                ])->default('fadeOut'),
+            Section::make(__('Toastr Settings'))->schema([
+                Toggle::make('toastr_enabled')
+                    ->label(__('Enable Toastr Notifications'))
+                    ->default(true),
+                Select::make('toastr_position')
+                    ->label(__('Position'))
+                    ->options([
+                        'top-left' => __('Top Left'),
+                        'top-right' => __('Top Right'),
+                        'bottom-left' => __('Bottom Left'),
+                        'bottom-right' => __('Bottom Right'),
+                    ])
+                    ->default('top-right'),
+                \Filament\Forms\Components\TextInput::make('toastr_duration')
+                    ->label(__('Duration (ms)'))
+                    ->numeric()
+                    ->default(5000),
+                Select::make('toastr_show_method')
+                    ->label(__('Show Method'))
+                    ->options([
+                        'fadeIn' => __('Fade In'),
+                        'slideDown' => __('Slide Down'),
+                    ])
+                    ->default('fadeIn'),
+                Select::make('toastr_hide_method')
+                    ->label(__('Hide Method'))
+                    ->options([
+                        'fadeOut' => __('Fade Out'),
+                        'slideUp' => __('Slide Up'),
+                    ])
+                    ->default('fadeOut'),
             ]),
-            Section::make('SEO Settings')->schema([
-                Toggle::make('sitemap_enabled')->label('Enable Sitemap Generation')->default(true),
+            Section::make(__('SEO Settings'))->schema([
+                Toggle::make('sitemap_enabled')
+                    ->label(__('Enable Sitemap Generation'))
+                    ->default(true),
             ]),
-            Section::make('Robots.txt Settings')->description('Manage robots.txt content for search engine crawlers')->schema([
+            Section::make(__('Robots.txt Settings'))
+                ->description(__('Manage robots.txt content for search engine crawlers'))
+                ->schema([
                 Toggle::make('use_default_robots_txt')
-                    ->label('Use Default Robots.txt')
+                    ->label(__('Use Default Robots.txt'))
                     ->default(true)
-                    ->helperText('When enabled, uses a default robots.txt that allows all crawlers. When disabled, uses custom content below.')
+                    ->helperText(__('When enabled, uses a default robots.txt that allows all crawlers. When disabled, uses custom content below.'))
                     ->reactive(),
                 \Filament\Forms\Components\Textarea::make('robots_txt_content')
-                    ->label('Custom Robots.txt Content')
+                    ->label(__('Custom Robots.txt Content'))
                     ->rows(10)
                     ->placeholder('User-agent: *
 Disallow: /admin/

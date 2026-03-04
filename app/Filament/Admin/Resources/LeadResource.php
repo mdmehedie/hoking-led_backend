@@ -27,6 +27,16 @@ class LeadResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-user-group';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Leads');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Marketing');
+    }
+
     public static function canCreate(): bool
     {
         return auth()->user()->can('create lead');
@@ -51,25 +61,31 @@ class LeadResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id'),
+                Tables\Columns\TextColumn::make('id')
+                    ->label(__('ID')),
                 Tables\Columns\TextColumn::make('form.name')
-                    ->label('Form'),
+                    ->label(__('Form')),
                 Tables\Columns\TextColumn::make('data')
+                    ->label(__('Data'))
                     ->formatStateUsing(fn ($state) => json_encode($state, JSON_PRETTY_PRINT))
                     ->wrap(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('Created At'))
                     ->dateTime()
                     ->sortable(),
             ])
             ->searchable()
             ->filters([
                 SelectFilter::make('form_id')
-                    ->label('Form')
+                    ->label(__('Form'))
                     ->options(\App\Models\Form::pluck('name', 'id')),
                 Filter::make('created_at')
+                    ->label(__('Created Date'))
                     ->form([
-                        Forms\Components\DatePicker::make('created_from'),
-                        Forms\Components\DatePicker::make('created_until'),
+                        Forms\Components\DatePicker::make('created_from')
+                            ->label(__('From')),
+                        Forms\Components\DatePicker::make('created_until')
+                            ->label(__('Until')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -84,12 +100,14 @@ class LeadResource extends Resource
                     }),
             ])
             ->actions([
-                \Filament\Actions\ViewAction::make(),
-                \Filament\Actions\DeleteAction::make(),
+                \Filament\Actions\ViewAction::make()
+                    ->label(__('View')),
+                \Filament\Actions\DeleteAction::make()
+                    ->label(__('Delete')),
             ])
             ->bulkActions([
                 BulkAction::make('delete_selected')
-                    ->label('Delete Selected')
+                    ->label(__('Delete Selected'))
                     ->color('danger')
                     ->icon('heroicon-o-trash')
                     ->requiresConfirmation()
@@ -98,8 +116,8 @@ class LeadResource extends Resource
                         $records->each->delete();
                         Notification::make()
                             ->success()
-                            ->title('Deleted')
-                            ->body($count . ' items deleted successfully.')
+                            ->title(__('Deleted'))
+                            ->body($count . ' ' . __('items deleted successfully.'))
                             ->send();
                     }),
             ]);

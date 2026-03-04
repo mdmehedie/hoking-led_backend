@@ -20,6 +20,16 @@ class UserResource extends Resource
 
     protected static ?string $navigationLabel = 'Users';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Users');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('User Management');
+    }
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-users';
 
     public static function canAccessResource(): bool

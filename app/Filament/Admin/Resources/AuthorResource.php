@@ -21,6 +21,16 @@ class AuthorResource extends Resource
 
     protected static ?string $navigationLabel = 'Authors';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Authors');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Content Management');
+    }
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-user-group';
 
     public static function canCreate(): bool

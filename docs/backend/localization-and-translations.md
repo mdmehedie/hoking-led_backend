@@ -5,6 +5,33 @@ This project supports multilingual behavior in two areas:
 1. **UI string translations** via `__()` using the database table `ui_translations`.
 2. **Dynamic content translations** (model attributes) via the polymorphic table `translations` and the trait `App\\Traits\\HasTranslations`.
 
+## Quick Reference Commands
+
+### Essential Translation Commands
+
+```bash
+# Sync new translation keys from code and auto-fill English values
+php artisan translations:sync --fill-en
+
+# Update database with all translations (English + Bangla)
+php artisan db:seed --class=UiTranslationSeeder
+
+# Clear all caches to ensure translations take effect
+php artisan optimize:clear
+
+# Seed demo locales (if needed)
+php artisan db:seed --class=LocaleSeeder
+```
+
+### When to Run These Commands
+
+1. **After adding new `__('key')` calls** in your code → `php artisan translations:sync --fill-en`
+2. **After updating the seeder** with new translations → `php artisan db:seed --class=UiTranslationSeeder`
+3. **Before deployment** → Run all three commands in sequence
+4. **When translations don't appear** → `php artisan optimize:clear`
+
+---
+
 ## Locale resolution (how the active language is selected)
 
 Locale is resolved by `App\\Http\\Middleware\\SetLocale` in this priority order:
@@ -94,6 +121,31 @@ You can scan the codebase for translation keys used by `__()` and `@lang()` and 
 
 - Command: `php artisan translations:sync`
 - To auto-fill English values for sentence-style keys: `php artisan translations:sync --fill-en`
+
+#### When to use this command:
+
+1. **After adding new translation keys** - When you add new `__('key')` calls in your code
+2. **After updating existing labels** - When you change hardcoded strings to use `__()`
+3. **During development** - To ensure all translation keys are tracked in the database
+4. **Before deployment** - To verify all translation keys exist in the database
+
+#### Command behavior:
+
+- `php artisan translations:sync` - Scans code and adds missing keys with empty values
+- `php artisan translations:sync --fill-en` - Scans code and auto-fills English values for sentence-style keys (e.g., `__('Some sentence')`)
+
+#### Example usage:
+
+```bash
+# After adding new translation keys to your code
+php artisan translations:sync --fill-en
+
+# Then run the seeder to populate Bangla translations
+php artisan db:seed --class=UiTranslationSeeder
+
+# Clear cache to ensure translations take effect
+php artisan optimize:clear
+```
 
 ### Best practice for keys
 
@@ -188,7 +240,22 @@ A migration exists to move `products.detailed_description` JSON into `translatio
 
 After you change admin labels/messages (including menu items) to use `__()`, run:
 
-- `php artisan translations:sync --fill-en`
+```bash
+# Step 1: Sync new translation keys from code and auto-fill English values
+php artisan translations:sync --fill-en
+
+# Step 2: Update the seeder with any new keys and run it
+php artisan db:seed --class=UiTranslationSeeder
+
+# Step 3: Clear caches to ensure translations take effect
+php artisan optimize:clear
+```
+
+This three-step process ensures:
+1. All new translation keys are detected and added to the database
+2. English values are automatically populated for sentence-style keys
+3. Bangla translations are added via the seeder
+4. All changes are immediately reflected in the admin panel
 
 ## Known limitations (current state)
 

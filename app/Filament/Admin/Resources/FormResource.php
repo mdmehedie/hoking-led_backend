@@ -27,6 +27,16 @@ class FormResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Forms');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Content Management');
+    }
+
     public static function canCreate(): bool
     {
         return auth()->user()->can('create form');
@@ -52,56 +62,78 @@ class FormResource extends Resource
         return $schema
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label(__('Form Name'))
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Builder::make('fields')
+                    ->label(__('Form Fields'))
                     ->blocks([
                         Forms\Components\Builder\Block::make('text')
                             ->schema([
-                                Forms\Components\TextInput::make('label')->required(),
-                                Forms\Components\TextInput::make('placeholder')->label('Placeholder'),
-                                Forms\Components\Toggle::make('required'),
+                                Forms\Components\TextInput::make('label')
+                                    ->label(__('Label'))
+                                    ->required(),
+                                Forms\Components\TextInput::make('placeholder')
+                                    ->label(__('Placeholder')),
+                                Forms\Components\Toggle::make('required')
+                                    ->label(__('Required')),
                             ])
-                            ->label('Text Input'),
+                            ->label(__('Text Input')),
                         Forms\Components\Builder\Block::make('email')
                             ->schema([
-                                Forms\Components\TextInput::make('label')->required(),
-                                Forms\Components\TextInput::make('placeholder')->label('Placeholder'),
-                                Forms\Components\Toggle::make('required'),
+                                Forms\Components\TextInput::make('label')
+                                    ->label(__('Label'))
+                                    ->required(),
+                                Forms\Components\TextInput::make('placeholder')
+                                    ->label(__('Placeholder')),
+                                Forms\Components\Toggle::make('required')
+                                    ->label(__('Required')),
                             ])
-                            ->label('Email Input'),
+                            ->label(__('Email Input')),
                         Forms\Components\Builder\Block::make('textarea')
                             ->schema([
-                                Forms\Components\TextInput::make('label')->required(),
-                                Forms\Components\TextInput::make('placeholder')->label('Placeholder'),
-                                Forms\Components\Toggle::make('required'),
+                                Forms\Components\TextInput::make('label')
+                                    ->label(__('Label'))
+                                    ->required(),
+                                Forms\Components\TextInput::make('placeholder')
+                                    ->label(__('Placeholder')),
+                                Forms\Components\Toggle::make('required')
+                                    ->label(__('Required')),
                             ])
-                            ->label('Textarea'),
+                            ->label(__('Textarea')),
                         Forms\Components\Builder\Block::make('select')
                             ->schema([
-                                Forms\Components\TextInput::make('label')->required(),
+                                Forms\Components\TextInput::make('label')
+                                    ->label(__('Label'))
+                                    ->required(),
                                 Forms\Components\Repeater::make('options')
+                                    ->label(__('Options'))
                                     ->schema([
-                                        Forms\Components\TextInput::make('label')->required(),
-                                        Forms\Components\TextInput::make('value')->required(),
+                                        Forms\Components\TextInput::make('label')
+                                            ->label(__('Label'))
+                                            ->required(),
+                                        Forms\Components\TextInput::make('value')
+                                            ->label(__('Value'))
+                                            ->required(),
                                     ])
                                     ->collapsible(),
-                                Forms\Components\Toggle::make('required'),
+                                Forms\Components\Toggle::make('required')
+                                    ->label(__('Required')),
                             ])
-                            ->label('Select Dropdown'),
+                            ->label(__('Select Dropdown')),
                     ])
                     ->addActionAlignment('center')
                     ->columnSpanFull(),
                 Forms\Components\Textarea::make('success_message')
-                    ->label('Success Message'),
+                    ->label(__('Success Message')),
                 Forms\Components\Toggle::make('email_notifications')
-                    ->label('Enable Email Notifications'),
+                    ->label(__('Enable Email Notifications')),
                 Forms\Components\TagsInput::make('notification_emails')
-                    ->label('Notification Emails')
-                    ->placeholder('Enter email addresses')
+                    ->label(__('Notification Emails'))
+                    ->placeholder(__('Enter email addresses'))
                     ->visible(fn ($get) => $get('email_notifications')),
                 Forms\Components\Toggle::make('store_leads')
-                    ->label('Store Leads')
+                    ->label(__('Store Leads'))
                     ->default(true),
             ]);
     }
@@ -111,31 +143,39 @@ class FormResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label(__('Form Name'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('Created At'))
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\BooleanColumn::make('email_notifications'),
-                Tables\Columns\BooleanColumn::make('store_leads'),
+                Tables\Columns\BooleanColumn::make('email_notifications')
+                    ->label(__('Email Notifications')),
+                Tables\Columns\BooleanColumn::make('store_leads')
+                    ->label(__('Store Leads')),
             ])
             ->recordUrl(fn ($record) => static::getUrl('edit', ['record' => $record]))
             ->filters([
                 SelectFilter::make('email_notifications')
+                    ->label(__('Email Notifications'))
                     ->options([
-                        '0' => 'No',
-                        '1' => 'Yes',
+                        '0' => __('No'),
+                        '1' => __('Yes'),
                     ]),
                 SelectFilter::make('store_leads')
+                    ->label(__('Store Leads'))
                     ->options([
-                        '0' => 'No',
-                        '1' => 'Yes',
+                        '0' => __('No'),
+                        '1' => __('Yes'),
                     ]),
             ])
             ->actions([
                 \Filament\Actions\Action::make('edit')
+                    ->label(__('Edit'))
                     ->url(fn ($record) => static::getUrl('edit', ['record' => $record]))
                     ->icon('heroicon-o-pencil'),
-                \Filament\Actions\DeleteAction::make(),
+                \Filament\Actions\DeleteAction::make()
+                    ->label(__('Delete')),
             ])
             ->bulkActions([
                 BulkAction::make('delete_selected')

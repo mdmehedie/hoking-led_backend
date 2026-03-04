@@ -18,6 +18,16 @@ class RoleResource extends Resource
 
     protected static ?string $navigationLabel = 'Roles';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Roles');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('User Management');
+    }
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-shield-check';
 
     public static function canAccessResource(): bool
@@ -52,15 +62,17 @@ class RoleResource extends Resource
         }
 
         return $schema->schema([
-            Section::make('Role Information')->schema([
+            Section::make(__('Role Information'))->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label(__('Role Name'))
                     ->required()
                     ->unique(ignoreRecord: true),
                 Forms\Components\Textarea::make('description')
+                    ->label(__('Description'))
                     ->maxLength(500),
             ]),
-            Section::make('Permissions')
-                ->description('Select permissions for this role')
+            Section::make(__('Permissions'))
+                ->description(__('Select permissions for this role'))
                 ->schema([
                     Forms\Components\CheckboxList::make('permissions')
                         ->relationship('permissions', 'name')
@@ -68,7 +80,7 @@ class RoleResource extends Resource
                         ->gridDirection('row')
                         ->searchable()
                         ->bulkToggleable()
-                        ->helperText('Permissions assigned to this role'),
+                        ->helperText(__('Permissions assigned to this role')),
                 ]),
         ]);
     }
@@ -78,18 +90,22 @@ class RoleResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label(__('Role Name'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('description')
+                    ->label(__('Description'))
                     ->limit(50),
                 Tables\Columns\TextColumn::make('permissions_count')
                     ->counts('permissions')
-                    ->label('Permissions'),
+                    ->label(__('Permissions')),
                 Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('Created At'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')
+                    ->label(__('Updated At'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -98,8 +114,9 @@ class RoleResource extends Resource
                 //
             ])
             ->actions([
-                \Filament\Actions\EditAction::make(),
+                \Filament\Actions\EditAction::make()->label(__('Edit')),
                 \Filament\Actions\DeleteAction::make()
+                    ->label(__('Delete'))
                     ->requiresConfirmation()
                     ->modalHeading(__('Delete Role'))
                     ->modalDescription(__('Are you sure you want to delete this role? Users assigned to this role will lose their permissions.'))
@@ -108,6 +125,7 @@ class RoleResource extends Resource
             ->bulkActions([
                 \Filament\Actions\BulkActionGroup::make([
                     \Filament\Actions\DeleteBulkAction::make()
+                        ->label(__('Delete Selected'))
                         ->requiresConfirmation(),
                 ]),
             ]);
