@@ -5,6 +5,8 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\ProductResource\Pages;
 use App\Models\Product;
 use Filament\Actions\Action;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DateTimePicker;
@@ -70,27 +72,45 @@ class ProductResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
+        $activeLocales = \App\Models\Locale::activeCodes();
+        $defaultLocale = \App\Models\Locale::defaultCode();
+
         return $schema->schema([
             Section::make(__('General'))->schema([
-                TextInput::make('title')
-                    ->label(__('Title'))
-                    ->afterStateUpdated(function ($state, callable $set, $context) {
-                        $record = $context['record'] ?? null;
-                        if ($record === null) {
-                            $set('slug', static::generateUniqueSlug($state, $record?->id));
-                        }
-                    })->live()->required(),
                 TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required()->readonly(fn ($get, $record) => $record && $record->exists),
-                Textarea::make('short_description')->label(__('Short Description')),
                 Select::make('category_id')->relationship('category', 'name')->label(__('Category'))->nullable(),
                 Select::make('status')->label(__('Status'))->options(['draft' => __('Draft'), 'published' => __('Published'), 'archived' => __('Archived')])->required(),
                 Hidden::make('published_at')
                     ->default(now()),
                 Toggle::make('is_featured')->label(__('Featured Product')),
             ]),
-            Section::make(__('Description'))->schema([
-                \App\Filament\Forms\Components\CustomRichEditor::make('detailed_description')->label(__('Detailed Description')),
-            ]),
+            Tabs::make('Translations')->tabs(
+                collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
+                    $isDefault = $locale === $defaultLocale;
+
+                    return Tab::make(strtoupper($locale))
+                        ->schema([
+                            TextInput::make("title[{$locale}]")
+                                ->label(__('Title'))
+                                ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
+                                    if (!$isDefault) {
+                                        return;
+                                    }
+
+                                    if (blank($get('slug'))) {
+                                        $set('slug', static::generateUniqueSlug($state, null));
+                                    }
+                                })
+                                ->live()
+                                ->required(fn ($record) => !$record && $isDefault),
+                            Textarea::make("short_description[{$locale}]")
+                                ->label(__('Short Description')),
+                            \App\Filament\Forms\Components\CustomRichEditor::make("detailed_description[{$locale}]")
+                                ->label(__('Detailed Description'))
+                                ->required(fn ($record) => !$record && $isDefault),
+                        ]);
+                })->all()
+            ),
             Section::make(__('Media'))->schema([
                 FileUpload::make('main_image')->label(__('Main Image'))->image()->directory('products/main')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
                 FileUpload::make('gallery')->label(__('Gallery'))->multiple()->image()->directory('products/gallery')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),

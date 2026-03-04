@@ -140,7 +140,7 @@ Notes:
 
 - The trait stores default-locale values into the base column as well (for backward compatibility and querying).
 
-### Content models behavior (Blogs / News / Pages / Case Studies)
+### Content models behavior (Blogs / News / Pages / Case Studies / Products)
 
 The following content types now store **separate content per language** using `translations`:
 
@@ -148,20 +148,25 @@ The following content types now store **separate content per language** using `t
 - `News`
 - `Page`
 - `CaseStudy`
+- `Product` ✅ **NEWLY ADDED**
 
 Rules:
 
 - `slug` remains a **shared** (non-translated) field.
 - These fields are **language-specific** (translated):
   - `title`
-  - `excerpt`
-  - `content`
-  - `image_path`
+  - `excerpt` (for Blog/News/CaseStudy)
+  - `content` (for Blog/News/CaseStudy)
+  - `short_description` (for Product)
+  - `detailed_description` (for Product)
+  - `image_path` (for Blog/News/CaseStudy)
+  - `meta_title`, `meta_description`, `meta_keywords` (SEO fields for all)
 
 In Filament:
 
 - When you switch the admin language using the language switcher, the form will read/write the translated values for the active locale.
 - If a translation does not exist for the selected locale, the system falls back to the default locale.
+- **Products now feature multilingual tabs** for title, short description, detailed description, and SEO fields, matching the behavior of blogs and other content types.
 
 ### Migrating old JSON translations
 
