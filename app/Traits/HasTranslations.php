@@ -94,8 +94,16 @@ trait HasTranslations
 
     public function getAttribute($key): mixed
     {
-        if (is_string($key) && $this->isTranslatableAttribute($key)) {
-            return $this->getTranslation($key);
+        if (is_string($key)) {
+            // Check for dotted notation like 'title.en'
+            if (strpos($key, '.') !== false) {
+                [$attribute, $locale] = explode('.', $key, 2);
+                if ($this->isTranslatableAttribute($attribute)) {
+                    return $this->getTranslation($attribute, $locale);
+                }
+            } elseif ($this->isTranslatableAttribute($key)) {
+                return $this->getTranslation($key);
+            }
         }
 
         return parent::getAttribute($key);

@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\AppSettingResource\Pages as Pages;
 use App\Models\AppSetting;
+use App\Models\Locale;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\FileUpload;
@@ -13,6 +14,8 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -50,13 +53,16 @@ class AppSettingResource extends Resource
         return auth()->user()->can('delete appsetting');
     }
 
-    public static function canView($record): bool
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return auth()->user()->can('view appsetting');
+        return parent::getEloquentQuery()->with('translations');
     }
 
     public static function form(Schema $schema): Schema
     {
+        $activeLocales = Locale::activeCodes();
+        $defaultLocale = Locale::defaultCode();
+
         return $schema->schema([
             Section::make('Logos')->schema([
                 FileUpload::make('logo_light')->image()->directory('settings')->acceptedFileTypes(['image/*'])->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
@@ -80,20 +86,32 @@ class AppSettingResource extends Resource
                 \Filament\Forms\Components\TextInput::make('base_font_size')->default('16px')->required(),
             ]),
             Section::make('Organization')->schema([
-                \Filament\Forms\Components\TextInput::make('organization.company_name')
-                    ->label('Company name')
-                    ->default(''),
-                \Filament\Forms\Components\TextInput::make('app_name')
-                    ->label('Company Title')
-                    ->default('Admin Panel'),
+                Tabs::make('Translations')->tabs(
+                    collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
+                        $isDefault = $locale === $defaultLocale;
+
+                        return Tab::make(strtoupper($locale))
+                            ->schema([
+                                \Filament\Forms\Components\TextInput::make("app_name.{$locale}")
+                                    ->label(__('Company Title'))
+                                    ->default('Admin Panel')
+                                    ->required($isDefault),
+                                \Filament\Forms\Components\TextInput::make("company_name.{$locale}")
+                                    ->label(__('Company name'))
+                                    ->default('')
+                                    ->required($isDefault),
+                                \App\Filament\Forms\Components\CustomRichEditor::make("about.{$locale}")
+                                    ->label(__('About information'))
+                                    ->default('')
+                                    ->required($isDefault),
+                            ]);
+                    })->all()
+                ),
                 \Filament\Forms\Components\TextInput::make('frontend_url')
                     ->label('Frontend URL')
                     ->url()
                     ->placeholder('https://your-frontend-domain.com')
                     ->helperText('The URL of your frontend website. Used for generating share links in social media posts.')
-                    ->default(''),
-                \App\Filament\Forms\Components\CustomRichEditor::make('organization.about')
-                    ->label('About information')
                     ->default(''),
                 Repeater::make('organization.contact_emails')
                     ->label('Contact email(s)')
