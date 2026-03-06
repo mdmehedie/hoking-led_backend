@@ -30,7 +30,7 @@ class ApiFrontendProductController extends ApiBaseController
         $product = Product::where('slug', $slug)->where('status', 'published')->first();
 
         if (!$product) {
-            return $this->notFoundResponse([], 'Product not found');
+            return $this->notFoundResponse([], __('Product not found'));
         }
 
         return $this->okResponse(['product' => new ProductResource($product)], __('Product retrieved successfully'));

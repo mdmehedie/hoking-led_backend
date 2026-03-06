@@ -25,7 +25,7 @@ class ApiFrontendNewsController extends ApiBaseController
         $newsItem = News::where('slug', $slug)->where('status', 'published')->first();
 
         if (!$newsItem) {
-            return $this->notFoundResponse([], 'News not found');
+            return $this->notFoundResponse([], __('News not found'));
         }
 
         return $this->okResponse(['news' => new NewsResource($newsItem)], __('News retrieved successfully'));

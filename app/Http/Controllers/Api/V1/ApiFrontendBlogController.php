@@ -25,7 +25,7 @@ class ApiFrontendBlogController extends ApiBaseController
         $blog = Blog::where('slug', $slug)->where('status', 'published')->first();
 
         if (!$blog) {
-            return $this->notFoundResponse([], 'Blog not found');
+            return $this->notFoundResponse([], __('Blog not found'));
         }
 
         return $this->okResponse(['blog' => new BlogResource($blog)], __('Blog retrieved successfully'));

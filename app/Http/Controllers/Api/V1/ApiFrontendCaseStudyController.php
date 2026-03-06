@@ -25,7 +25,7 @@ class ApiFrontendCaseStudyController extends ApiBaseController
         $caseStudy = CaseStudy::where('slug', $slug)->where('status', 'published')->first();
 
         if (!$caseStudy) {
-            return $this->notFoundResponse([], 'Case study not found');
+            return $this->notFoundResponse([], __('Case study not found'));
         }
 
         return $this->okResponse(['case_study' => new CaseStudyResource($caseStudy)], __('Case study retrieved successfully'));

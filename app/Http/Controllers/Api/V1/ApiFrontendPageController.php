@@ -25,7 +25,7 @@ class ApiFrontendPageController extends ApiBaseController
         $page = Page::where('slug', $slug)->where('status', 'published')->first();
 
         if (!$page) {
-            return $this->notFoundResponse([], 'Page not found');
+            return $this->notFoundResponse([], __('Page not found'));
         }
 
         return $this->okResponse(['page' => new PageResource($page)], __('Page retrieved successfully'));
