@@ -437,6 +437,77 @@ Sitemap: https://your-domain.com/sitemap.xml')
                     ->imageResizeTargetHeight(512)
                     ->helperText('512x512px icon for high-resolution displays and app stores'),
             ]),
+            Section::make('Redis Configuration')->description('Configure Redis server settings for caching, sessions, and queue management')->schema([
+                \Filament\Forms\Components\TextInput::make('redis_host')
+                    ->label('Redis Host')
+                    ->default('127.0.0.1')
+                    ->helperText('Redis server hostname or IP address')
+                    ->columnSpan(2),
+                \Filament\Forms\Components\TextInput::make('redis_port')
+                    ->label('Redis Port')
+                    ->numeric()
+                    ->default(6379)
+                    ->helperText('Redis server port number')
+                    ->columnSpan(2),
+                \Filament\Forms\Components\TextInput::make('redis_password')
+                    ->label('Redis Password')
+                    ->password()
+                    ->nullable()
+                    ->helperText('Leave empty if no password is required')
+                    ->columnSpan(2),
+                Select::make('redis_client')
+                    ->label('Redis Client')
+                    ->options([
+                        'phpredis' => 'PHPRedis (PHP Extension)',
+                        'predis' => 'Predis (Pure PHP)',
+                    ])
+                    ->default('phpredis')
+                    ->helperText('Choose Redis client implementation')
+                    ->columnSpan(2),
+                \Filament\Forms\Components\TextInput::make('redis_db')
+                    ->label('Default DB')
+                    ->numeric()
+                    ->default(0)
+                    ->helperText('Default Redis database number'),
+                \Filament\Forms\Components\TextInput::make('redis_cache_db')
+                    ->label('Cache DB')
+                    ->numeric()
+                    ->default(1)
+                    ->helperText('Redis database for cache'),
+                \Filament\Forms\Components\TextInput::make('redis_session_db')
+                    ->label('Session DB')
+                    ->numeric()
+                    ->default(2)
+                    ->helperText('Redis database for sessions'),
+                \Filament\Forms\Components\TextInput::make('redis_queue_db')
+                    ->label('Queue DB')
+                    ->numeric()
+                    ->default(3)
+                    ->helperText('Redis database for queue'),
+                \Filament\Forms\Components\TextInput::make('redis_prefix')
+                    ->label('Key Prefix')
+                    ->default('laravel_')
+                    ->helperText('Prefix for all Redis keys')
+                    ->columnSpan(2),
+                \Filament\Forms\Components\TextInput::make('redis_cache_ttl')
+                    ->label('Cache TTL (seconds)')
+                    ->numeric()
+                    ->default(3600)
+                    ->helperText('Default time-to-live for cache items')
+                    ->columnSpan(2),
+                Toggle::make('redis_cache_enabled')
+                    ->label('Enable Cache')
+                    ->default(true)
+                    ->helperText('Enable Redis for application caching'),
+                Toggle::make('redis_session_enabled')
+                    ->label('Enable Sessions')
+                    ->default(true)
+                    ->helperText('Enable Redis for session storage'),
+                Toggle::make('redis_queue_enabled')
+                    ->label('Enable Queue')
+                    ->default(true)
+                    ->helperText('Enable Redis for queue management'),
+            ])->columns(4),
         ]);
     }
 

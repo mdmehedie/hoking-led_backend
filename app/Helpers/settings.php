@@ -6,7 +6,7 @@ use App\Models\AppSetting;
 if (! function_exists('setting')) {
     function setting($key)
     {
-        $setting = Cache::rememberForever('app_settings', function () {
+        $setting = Cache::tags(['app_settings'])->rememberForever('app_settings', function () {
             return AppSetting::first();
         });
 

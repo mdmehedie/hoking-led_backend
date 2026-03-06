@@ -40,7 +40,7 @@ class GA4Service
      */
     public function getPageViewsLast7Days()
     {
-        return Cache::remember('ga4_page_views_7d', 3600, function () {
+        return Cache::tags(['ga4_analytics', 'page_views'])->remember('ga4_page_views_7d', 3600, function () {
             try {
                 $request = (new RunReportRequest())
                     ->setProperty('properties/' . $this->propertyId)
@@ -73,7 +73,7 @@ class GA4Service
      */
     public function getTopVisitedPages($limit = 10)
     {
-        return Cache::remember('ga4_top_pages_30d', 3600, function () use ($limit) {
+        return Cache::tags(['ga4_analytics', 'top_pages'])->remember('ga4_top_pages_30d', 3600, function () use ($limit) {
             try {
                 $request = (new RunReportRequest())
                     ->setProperty('properties/' . $this->propertyId)
@@ -120,7 +120,7 @@ class GA4Service
      */
     public function getTrafficSources($limit = 10)
     {
-        return Cache::remember('ga4_traffic_sources_30d', 3600, function () use ($limit) {
+        return Cache::tags(['ga4_analytics', 'traffic_sources'])->remember('ga4_traffic_sources_30d', 3600, function () use ($limit) {
             try {
                 $request = (new RunReportRequest())
                     ->setProperty('properties/' . $this->propertyId)
@@ -169,7 +169,7 @@ class GA4Service
      */
     public function getRealtimeUsers()
     {
-        return Cache::remember('ga4_realtime_users', 60, function () {
+        return Cache::tags(['ga4_analytics', 'realtime'])->remember('ga4_realtime_users', 60, function () {
             try {
                 $request = (new \Google\Analytics\Data\V1beta\RunRealtimeReportRequest())
                     ->setProperty('properties/' . $this->propertyId)

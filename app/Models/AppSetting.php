@@ -64,6 +64,21 @@ class AppSetting extends Model
         // Robots.txt settings
         'robots_txt_content',
         'use_default_robots_txt',
+        // Redis configuration
+        'redis_host',
+        'redis_port',
+        'redis_password',
+        'redis_db',
+        'redis_cache_db',
+        'redis_session_db',
+        'redis_queue_db',
+        'redis_prefix',
+        'redis_cache_enabled',
+        'redis_session_enabled',
+        'redis_queue_enabled',
+        'redis_cache_ttl',
+        'redis_session_ttl',
+        'redis_client',
     ];
 
     protected $casts = [
