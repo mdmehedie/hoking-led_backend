@@ -12,7 +12,13 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         then: function () {
             Route::middleware('web')
+                ->group(base_path('routes/web.php'));
+            
+            Route::middleware('web')
                 ->group(base_path('routes/redis.php'));
+            
+            Route::middleware('web')
+                ->group(base_path('routes/analytics.php'));
         },
         health: '/up',
     )
