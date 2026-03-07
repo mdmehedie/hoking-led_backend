@@ -2,23 +2,37 @@
 
 ## 📚 Project Documentation
 
-Welcome to the comprehensive documentation for the Laravel application with Advanced Analytics and Behavior Tracking.
+Welcome to the comprehensive documentation for the Laravel application with Advanced Analytics, Cloudflare CDN, and Performance Optimization.
 
-## 🎯 Analytics System
+## 🎯 Documentation Sections
 
-### **[Analytics Documentation](./analytics/README.md)**
+### **Analytics System**
 Complete documentation for the Advanced Analytics and Behavior Tracking System.
 
 #### Key Documents:
+- **[Analytics Documentation](./analytics/README.md)** - Analytics overview and navigation
 - **[Backend Documentation](./analytics/BACKEND_DOCUMENTATION.md)** - API, services, and database
 - **[Frontend Documentation](./analytics/FRONTEND_DOCUMENTATION.md)** - JavaScript tracking system
 - **[Complete Implementation Guide](./analytics/COMPLETE_ANALYTICS_GUIDE.md)** - Full examples and use cases
 - **[Analytics Summary](./analytics/ANALYTICS_SUMMARY.md)** - Implementation overview
-- **[System Documentation](./analytics/ANALYTICS_DOCUMENTATION.md)** - Technical details
+- **[System Documentation](./analytics/ANALYTICS_DOCUMENTATION.md)** - Complete system docs
 
-## 🔌 API Documentation
+### **CDN & Performance Optimization**
+Complete documentation for Cloudflare CDN integration and performance optimization features.
 
-### **[API Documentation](./api/)**
+#### Key Documents:
+- **[CDN Documentation](./cdn/README.md)** - CDN optimization overview
+- **[Cloudflare Setup Guide](./cdn/CLOUDFLARE_SETUP.md)** - Complete Cloudflare configuration
+- **[Caching System Guide](./cdn/CACHING_SYSTEM.md)** - HTTP and response caching
+- **[Image Optimization Guide](./cdn/IMAGE_OPTIMIZATION.md)** - WebP/AVIF generation and lazy loading
+- **[Asset Optimization Guide](./cdn/ASSET_OPTIMIZATION.md)** - CSS/JS minification and versioning
+- **[Performance Monitoring Guide](./cdn/PERFORMANCE_MONITORING.md)** - Monitoring tools and metrics
+- **[Deployment Guide](./cdn/DEPLOYMENT_GUIDE.md)** - Production deployment procedures
+
+### **API Documentation**
+RESTful API endpoints and integration guides.
+
+- **[API Documentation](./api/)**
 RESTful API endpoints and integration guides.
 
 - **[Backend API](./api/backend/)** - Internal API documentation

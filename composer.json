@@ -10,6 +10,7 @@
         "filament/filament": "5.0",
         "google/analytics-data": "*",
         "google/apiclient": "*",
+        "intervention/image": "*",
         "kalnoy/nestedset": "*",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
@@ -17,8 +18,10 @@
         "maatwebsite/excel": "*",
         "predis/predis": "*",
         "spatie/eloquent-sortable": "*",
+        "spatie/image-optimizer": "*",
         "spatie/laravel-medialibrary": "*",
         "spatie/laravel-permission": "*",
+        "spatie/laravel-responsecache": "*",
         "spatie/laravel-sitemap": "*",
         "spatie/laravel-translatable": "*"
     },
