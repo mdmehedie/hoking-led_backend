@@ -39,7 +39,10 @@ class SetLocale
             }
         }
 
-        $sessionLocale = $request->session()->get('locale');
+        $sessionLocale = null;
+        if ($request->hasSession()) {
+            $sessionLocale = $request->session()->get('locale');
+        }
         if (is_string($sessionLocale)) {
             $sessionLocale = $this->normalize($sessionLocale);
             if ($this->isSupported($sessionLocale, $supported)) {

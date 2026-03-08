@@ -1,12 +1,75 @@
-# Products API Documentation
+# Products API Documentation - Multilingual Support
 
 ## Overview
 
-This API provides endpoints to retrieve product data for the frontend application.
+This API provides endpoints to retrieve product data for the frontend application with comprehensive multilingual support. All responses include localized messages and translations.
 
 ## Base URL
 
 http://localhost:8000/api
+
+## Language Selection
+
+The API supports multiple methods for language selection:
+
+### Method 1: Query Parameter (Recommended)
+```
+GET /v1/products?lang=bd
+```
+
+### Method 2: Accept-Language Header
+```
+GET /v1/products
+Accept-Language: bd, en;q=0.9
+```
+
+### Method 3: Session Locale
+For authenticated users, the API respects the session locale.
+
+## Response Structure
+
+All API responses now include localization support:
+
+```json
+{
+  "status": true,
+  "message": "Products retrieved successfully",
+  "data": { ... },
+  "locale": "en",
+  "translations": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "no_data": "No data available",
+    "not_found": "Not found",
+    "server_error": "Server error",
+    "try_again": "Please try again",
+    "close": "Close",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "page": "Page",
+    "of": "of",
+    "items_per_page": "Items per page",
+    "showing": "Showing",
+    "to": "to",
+    "of_total": "of total",
+    "previous": "Previous",
+    "next": "Next",
+    "first": "First",
+    "last": "Last"
+  }
+}
+```
 
 ## Endpoints
 
@@ -21,11 +84,14 @@ Retrieves a list of all published products, optionally filtered by category.
 - **Query Parameters**:
   - `category_id` (optional): Filter products by category ID
   - `per_page` (optional): Number of items per page (default 10)
-- **Headers**: None required
+  - `lang` (optional): Language code (en, bd)
+- **Headers**:
+  - `Accept`: application/json
+  - `Accept-Language` (optional): Language preference
 
 #### Response
 
-##### Success (200 OK)
+##### Success (200 OK) - English
 
 ```json
 {
@@ -48,6 +114,210 @@ Retrieves a list of all published products, optionally filtered by category.
           "image_path": "http://localhost:8000/storage/products/image.jpg",
           "created_at": "2023-01-01T00:00:00.000000Z",
           "updated_at": "2023-01-01T00:00:00.000000Z"
+        }
+      ],
+      "links": { ... },
+      "meta": { ... }
+    }
+  },
+  "locale": "en",
+  "translations": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    // ... all common translations
+  }
+}
+```
+
+##### Success (200 OK) - Bangla
+
+```json
+{
+  "status": true,
+  "message": "পণ্যসমূহ সফলতাভারভে",
+  "data": {
+    "products": {
+      "data": [
+        {
+          "id": 1,
+          "title": "নমুনা পণ্যের শিরোনাম",
+          "slug": "sample-product-title",
+          "short_description": "সংক্ষিপ্ত বর্ণনা।",
+          "detailed_description": "সম্পূর্ণ বিস্তারিত বর্ণনা।",
+          "category_id": 1,
+          "status": "published",
+          "published_at": "2023-01-01T00:00:00.000000Z",
+          "author_id": 1,
+          "is_featured": false,
+          "image_path": "http://localhost:8000/storage/products/image.jpg",
+          "created_at": "2023-01-01T00:00:00.000000Z",
+          "updated_at": "2023-01-01T00:00:00.000000Z"
+        }
+      ],
+      "links": { ... },
+      "meta": { ... }
+    }
+  },
+  "locale": "bd",
+  "translations": {
+    "loading": "লোড হচ্ছে...",
+    "error": "ত্রুটি",
+    "success": "সফলতা",
+    // ... all common translations in Bangla
+  }
+}
+```
+
+##### Error (404 Not Found)
+
+```json
+{
+  "status": false,
+  "message": "Product not found",
+  "data": {},
+  "locale": "en",
+  "translations": {
+    "error": "Error",
+    "not_found": "Not found",
+    "try_again": "Please try again"
+  }
+}
+```
+
+### Get Single Product
+
+Retrieves a single product by slug.
+
+#### Request
+
+- **Method**: GET
+- **URL**: /v1/products/{slug}
+- **Path Parameters**:
+  - `slug`: Product slug
+- **Query Parameters**:
+  - `lang` (optional): Language code (en, bd)
+- **Headers**:
+  - `Accept`: application/json
+  - `Accept-Language` (optional): Language preference
+
+#### Response
+
+##### Success (200 OK)
+
+```json
+{
+  "status": true,
+  "message": "Product retrieved successfully",
+  "data": {
+    "product": {
+      "id": 1,
+      "title": "Sample Product Title",
+      "slug": "sample-product-title",
+      "short_description": "Brief description.",
+      "detailed_description": "Full detailed description.",
+      "category_id": 1,
+      "status": "published",
+      "published_at": "2023-01-01T00:00:00.000000Z",
+      "author_id": 1,
+      "is_featured": false,
+      "image_path": "http://localhost:8000/storage/products/image.jpg",
+      "created_at": "2023-01-01T00:00:00.000000Z",
+      "updated_at": "2023-01-01T00:00:00.000000Z"
+    }
+  },
+  "locale": "en",
+  "translations": { ... }
+}
+```
+
+##### Error (404 Not Found)
+
+```json
+{
+  "status": false,
+  "message": "Product not found",
+  "data": {},
+  "locale": "en",
+  "translations": { ... }
+}
+```
+
+## Implementation Examples
+
+### JavaScript/React Example
+
+```javascript
+// Get products with language preference
+const getProducts = async (lang = 'en') => {
+  try {
+    const response = await fetch(`/api/v1/products?lang=${lang}`, {
+      headers: {
+        'Accept': 'application/json',
+        'Accept-Language': `${lang}, en;q=0.9`
+      }
+    });
+    
+    const data = await response.json();
+    
+    // Use localized message
+    console.log(data.message); // "Products retrieved successfully" or "পণ্যসমূহ সফলতাভারভে"
+    
+    // Use common translations
+    const translations = data.translations;
+    console.log(translations.loading); // "Loading..." or "লোড হচ্ছে..."
+    
+    return data;
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+```
+
+### cURL Examples
+
+```bash
+# English (default)
+curl "http://localhost:8000/api/v1/products"
+
+# Bangla via query parameter
+curl "http://localhost:8000/api/v1/products?lang=bd"
+
+# Bangla via Accept-Language header
+curl -H "Accept-Language: bd, en;q=0.9" \
+     "http://localhost:8000/api/v1/products"
+
+# Single product in Bangla
+curl -H "Accept-Language: bd" \
+     "http://localhost:8000/api/v1/products/sample-product"
+```
+
+## Supported Languages
+
+- **en** - English (default)
+- **bd** - Bangla
+
+## Error Handling
+
+All error responses include:
+- Localized error messages
+- Current locale
+- Common translations for UI elements
+- Appropriate HTTP status codes
+
+## Best Practices
+
+1. **Always include locale** in API requests for consistent user experience
+2. **Use the translations object** for common UI text to avoid hardcoding
+3. **Handle fallback gracefully** when translations are missing
+4. **Cache locale preferences** in browser storage for better UX
+5. **Test with all supported locales** to ensure consistency
+
+## Rate Limiting & Caching
+
+- API responses are cached based on locale to improve performance
+- Rate limiting is applied per IP address
+- Cache invalidation occurs when translations are updated
         }
       ],
       "links": {

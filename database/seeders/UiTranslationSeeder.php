@@ -527,6 +527,271 @@ class UiTranslationSeeder extends Seeder
                 'value' => 'Yes',
             ],
             [
+                'key' => 'Loading...',
+                'locale' => 'en',
+                'value' => 'Loading...',
+            ],
+            [
+                'key' => 'Error',
+                'locale' => 'en',
+                'value' => 'Error',
+            ],
+            [
+                'key' => 'Success',
+                'locale' => 'en',
+                'value' => 'Success',
+            ],
+            [
+                'key' => 'No data available',
+                'locale' => 'en',
+                'value' => 'No data available',
+            ],
+            [
+                'key' => 'Not found',
+                'locale' => 'en',
+                'value' => 'Not found',
+            ],
+            [
+                'key' => 'Server error',
+                'locale' => 'en',
+                'value' => 'Server error',
+            ],
+            [
+                'key' => 'Please try again',
+                'locale' => 'en',
+                'value' => 'Please try again',
+            ],
+            [
+                'key' => 'Close',
+                'locale' => 'en',
+                'value' => 'Close',
+            ],
+            [
+                'key' => 'Cancel',
+                'locale' => 'en',
+                'value' => 'Cancel',
+            ],
+            [
+                'key' => 'Confirm',
+                'locale' => 'en',
+                'value' => 'Confirm',
+            ],
+            [
+                'key' => 'OK',
+                'locale' => 'en',
+                'value' => 'OK',
+            ],
+            [
+                'key' => 'Save',
+                'locale' => 'en',
+                'value' => 'Save',
+            ],
+            [
+                'key' => 'Search',
+                'locale' => 'en',
+                'value' => 'Search',
+            ],
+            [
+                'key' => 'Filter',
+                'locale' => 'en',
+                'value' => 'Filter',
+            ],
+            [
+                'key' => 'Sort',
+                'locale' => 'en',
+                'value' => 'Sort',
+            ],
+            [
+                'key' => 'Page',
+                'locale' => 'en',
+                'value' => 'Page',
+            ],
+            [
+                'key' => 'of',
+                'locale' => 'en',
+                'value' => 'of',
+            ],
+            [
+                'key' => 'Items per page',
+                'locale' => 'en',
+                'value' => 'Items per page',
+            ],
+            [
+                'key' => 'Showing',
+                'locale' => 'en',
+                'value' => 'Showing',
+            ],
+            [
+                'key' => 'to',
+                'locale' => 'en',
+                'value' => 'to',
+            ],
+            [
+                'key' => 'of total',
+                'locale' => 'en',
+                'value' => 'of total',
+            ],
+            [
+                'key' => 'Previous',
+                'locale' => 'en',
+                'value' => 'Previous',
+            ],
+            [
+                'key' => 'Next',
+                'locale' => 'en',
+                'value' => 'Next',
+            ],
+            [
+                'key' => 'First',
+                'locale' => 'en',
+                'value' => 'First',
+            ],
+            [
+                'key' => 'Last',
+                'locale' => 'en',
+                'value' => 'Last',
+            ],
+            [
+                'key' => 'Locales retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Locales retrieved successfully',
+            ],
+            [
+                'key' => 'Forms retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Forms retrieved successfully',
+            ],
+            [
+                'key' => 'Form submitted successfully',
+                'locale' => 'en',
+                'value' => 'Form submitted successfully',
+            ],
+            [
+                'key' => 'Products retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Products retrieved successfully',
+            ],
+            [
+                'key' => 'Product retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Product retrieved successfully',
+            ],
+            [
+                'key' => 'Product not found',
+                'locale' => 'en',
+                'value' => 'Product not found',
+            ],
+            [
+                'key' => 'Blogs retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Blogs retrieved successfully',
+            ],
+            [
+                'key' => 'Blog retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Blog retrieved successfully',
+            ],
+            [
+                'key' => 'Blog not found',
+                'locale' => 'en',
+                'value' => 'Blog not found',
+            ],
+            [
+                'key' => 'Case studies retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Case studies retrieved successfully',
+            ],
+            [
+                'key' => 'Case study retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Case study retrieved successfully',
+            ],
+            [
+                'key' => 'Case study not found',
+                'locale' => 'en',
+                'value' => 'Case study not found',
+            ],
+            [
+                'key' => 'Categories retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Categories retrieved successfully',
+            ],
+            [
+                'key' => 'Certifications retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Certifications retrieved successfully',
+            ],
+            [
+                'key' => 'Certification retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Certification retrieved successfully',
+            ],
+            [
+                'key' => 'Certification not found',
+                'locale' => 'en',
+                'value' => 'Certification not found',
+            ],
+            [
+                'key' => 'Featured products retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Featured products retrieved successfully',
+            ],
+            [
+                'key' => 'News retrieved successfully',
+                'locale' => 'en',
+                'value' => 'News retrieved successfully',
+            ],
+            [
+                'key' => 'News not found',
+                'locale' => 'en',
+                'value' => 'News not found',
+            ],
+            [
+                'key' => 'Pages retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Pages retrieved successfully',
+            ],
+            [
+                'key' => 'Page retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Page retrieved successfully',
+            ],
+            [
+                'key' => 'Page not found',
+                'locale' => 'en',
+                'value' => 'Page not found',
+            ],
+            [
+                'key' => 'Sliders retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Sliders retrieved successfully',
+            ],
+            [
+                'key' => 'Testimonials retrieved successfully',
+                'locale' => 'en',
+                'value' => 'Testimonials retrieved successfully',
+            ],
+            [
+                'key' => 'App settings retrieved successfully',
+                'locale' => 'en',
+                'value' => 'App settings retrieved successfully',
+            ],
+            [
+                'key' => 'App setting field retrieved successfully',
+                'locale' => 'en',
+                'value' => 'App setting field retrieved successfully',
+            ],
+            [
+                'key' => 'App setting not found',
+                'locale' => 'en',
+                'value' => 'App setting not found',
+            ],
+            [
+                'key' => 'Field not found',
+                'locale' => 'en',
+                'value' => 'Field not found',
+            ],
+            [
                 'key' => 'Language',
                 'locale' => 'en',
                 'value' => 'Language',
@@ -1349,6 +1614,271 @@ class UiTranslationSeeder extends Seeder
                 'key' => 'Yes',
                 'locale' => 'bd',
                 'value' => 'হ্যাঁ',
+            ],
+            [
+                'key' => 'Loading...',
+                'locale' => 'bd',
+                'value' => 'লোড হচ্ছে...',
+            ],
+            [
+                'key' => 'Error',
+                'locale' => 'bd',
+                'value' => 'ত্রুটি',
+            ],
+            [
+                'key' => 'Success',
+                'locale' => 'bd',
+                'value' => 'সফলতা',
+            ],
+            [
+                'key' => 'No data available',
+                'locale' => 'bd',
+                'value' => 'কোনো তথ্য নেই',
+            ],
+            [
+                'key' => 'Not found',
+                'locale' => 'bd',
+                'value' => 'পাওয়া যায়',
+            ],
+            [
+                'key' => 'Server error',
+                'locale' => 'bd',
+                'value' => 'সার্ভার ত্রুটি',
+            ],
+            [
+                'key' => 'Please try again',
+                'locale' => 'bd',
+                'value' => 'অনুগ্রহণ করুন',
+            ],
+            [
+                'key' => 'Close',
+                'locale' => 'bd',
+                'value' => 'বন্ধ করুন',
+            ],
+            [
+                'key' => 'Cancel',
+                'locale' => 'bd',
+                'value' => 'াতিল করুন',
+            ],
+            [
+                'key' => 'Confirm',
+                'locale' => 'bd',
+                'value' => 'নিশ্চিত করুন',
+            ],
+            [
+                'key' => 'OK',
+                'locale' => 'bd',
+                'value' => 'ঠিক আছে',
+            ],
+            [
+                'key' => 'Save',
+                'locale' => 'bd',
+                'value' => 'সংরক্ষণ করুন',
+            ],
+            [
+                'key' => 'Search',
+                'locale' => 'bd',
+                'value' => 'অনুসন্ধান',
+            ],
+            [
+                'key' => 'Filter',
+                'locale' => 'bd',
+                'value' => 'ফিল্টার',
+            ],
+            [
+                'key' => 'Sort',
+                'locale' => 'bd',
+                'value' => 'সাজান',
+            ],
+            [
+                'key' => 'Page',
+                'locale' => 'bd',
+                'value' => 'পৃষ্ঠা',
+            ],
+            [
+                'key' => 'of',
+                'locale' => 'bd',
+                'value' => 'এর',
+            ],
+            [
+                'key' => 'Items per page',
+                'locale' => 'bd',
+                'value' => 'প্রতি পৃষ্ঠায়',
+            ],
+            [
+                'key' => 'Showing',
+                'locale' => 'bd',
+                'value' => 'দেখাচ্ছে',
+            ],
+            [
+                'key' => 'to',
+                'locale' => 'bd',
+                'value' => 'থেকে',
+            ],
+            [
+                'key' => 'of total',
+                'locale' => 'bd',
+                'value' => 'োট',
+            ],
+            [
+                'key' => 'Previous',
+                'locale' => 'bd',
+                'value' => 'আগের',
+            ],
+            [
+                'key' => 'Next',
+                'locale' => 'bd',
+                'value' => 'পরবর্তী',
+            ],
+            [
+                'key' => 'First',
+                'locale' => 'bd',
+                'value' => 'প্রথম',
+            ],
+            [
+                'key' => 'Last',
+                'locale' => 'bd',
+                'value' => 'শেষ',
+            ],
+            [
+                'key' => 'Locales retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'লোকেলগুলি সফলতাভারভে',
+            ],
+            [
+                'key' => 'Forms retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'ফর্মসমূহ সফলতাভারভে',
+            ],
+            [
+                'key' => 'Form submitted successfully',
+                'locale' => 'bd',
+                'value' => 'ফর্ম সফলতাভারভে',
+            ],
+            [
+                'key' => 'Products retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'পণ্যসমূহ সফলতাভারভে',
+            ],
+            [
+                'key' => 'Product retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'পণ্যটি সফলতাভারভে',
+            ],
+            [
+                'key' => 'Product not found',
+                'locale' => 'bd',
+                'value' => 'পণ্যটি পাওয়া যায়',
+            ],
+            [
+                'key' => 'Blogs retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'ব্লগসমূহ সফলতাভারভে',
+            ],
+            [
+                'key' => 'Blog retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'ব্লগ সফলতাভারভে',
+            ],
+            [
+                'key' => 'Blog not found',
+                'locale' => 'bd',
+                'value' => 'ব্লগ পাওয়া যায়',
+            ],
+            [
+                'key' => 'Case studies retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'কেস স্টাডিসমূহ সফলতাভারভে',
+            ],
+            [
+                'key' => 'Case study retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'কেস স্টাডি সফলতাভারভে',
+            ],
+            [
+                'key' => 'Case study not found',
+                'locale' => 'bd',
+                'value' => 'কেস স্টাডি পাওয়া যায়',
+            ],
+            [
+                'key' => 'Categories retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'ক্যাটাগরিসমূহ সফলতাভারভে',
+            ],
+            [
+                'key' => 'Certifications retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'সার্টিফিকেশনসমূহ সফলতাভারভে',
+            ],
+            [
+                'key' => 'Certification retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'সার্টিফিকেশন সফলতাভারভে',
+            ],
+            [
+                'key' => 'Certification not found',
+                'locale' => 'bd',
+                'value' => 'সার্টিফিকেশন পাওয়া যায়',
+            ],
+            [
+                'key' => 'Featured products retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'বৈশিষ্ট্যযুক্ত পণ্যসমূহ সফলতাভারভে',
+            ],
+            [
+                'key' => 'News retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'সংবাদসমূহ সফলতাভারভে',
+            ],
+            [
+                'key' => 'News not found',
+                'locale' => 'bd',
+                'value' => 'সংবাদ পাওয়া যায়',
+            ],
+            [
+                'key' => 'Pages retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'পৃষ্ঠাসমূহ সফলতাভারভে',
+            ],
+            [
+                'key' => 'Page retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'পৃষ্ঠা সফলতাভারভে',
+            ],
+            [
+                'key' => 'Page not found',
+                'locale' => 'bd',
+                'value' => 'পৃষ্ঠা পাওয়া যায়',
+            ],
+            [
+                'key' => 'Sliders retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'স্লাইডারসমূহ সফলতাভারভে',
+            ],
+            [
+                'key' => 'Testimonials retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'সাক্ষ্যদাতাদের তথ্য সফলতাভারভে',
+            ],
+            [
+                'key' => 'App settings retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'অ্যাপ সেটিংস সফলতাভারভে',
+            ],
+            [
+                'key' => 'App setting field retrieved successfully',
+                'locale' => 'bd',
+                'value' => 'অ্যাপ সেটিং ক্ষেত্র সফলতাভারভে',
+            ],
+            [
+                'key' => 'App setting not found',
+                'locale' => 'bd',
+                'value' => 'অ্যাপ সেটিং পাওয়া যায়',
+            ],
+            [
+                'key' => 'Field not found',
+                'locale' => 'bd',
+                'value' => 'ক্ষেত্র পাওয়া যায়',
             ],
             [
                 'key' => 'Language',
