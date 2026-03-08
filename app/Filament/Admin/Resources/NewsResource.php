@@ -35,6 +35,8 @@ class NewsResource extends Resource
 
     protected static ?int $navigationSort = 4;
 
+    protected static ?string $slug = 'news-items';
+
     public static function getNavigationLabel(): string
     {
         return __('News');
@@ -46,6 +48,12 @@ class NewsResource extends Resource
     }
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-newspaper';
+
+    // Override navigation URL to use the correct slug
+    public static function getNavigationUrl(): string
+    {
+        return static::getUrl('index');
+    }
 
     public static function canCreate(): bool
     {

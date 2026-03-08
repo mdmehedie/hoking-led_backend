@@ -13,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Panel;
 use Filament\Support\Icons\Heroicon;
 use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteBulkAction;
@@ -36,6 +37,13 @@ class CaseStudyResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    protected static ?string $slug = 'cases';
+
+    public static function getModelLabel(): string
+    {
+        return 'Case Study';
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('Case Studies');
@@ -47,6 +55,12 @@ class CaseStudyResource extends Resource
     }
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
+
+    // Override navigation URL to use the correct slug
+    public static function getNavigationUrl(): string
+    {
+        return static::getUrl('index');
+    }
 
     public static function canCreate(): bool
     {

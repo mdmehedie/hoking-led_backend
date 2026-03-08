@@ -15,6 +15,15 @@ use App\Http\Controllers\Api\V1\ApiFrontendTestimonialController;
 use App\Http\Controllers\Api\V1\ApiFrontendLocaleController;
 use App\Http\Controllers\Api\V1\ApiFrontendFormController;
 
+// Get active regions for routing
+$regions = [];
+try {
+    $regions = \App\Models\Region::activeCodes();
+} catch (\Exception $e) {
+    $regions = ['us', 'uk', 'eu', 'ca', 'au', 'bd'];
+}
+$regionPattern = !empty($regions) ? implode('|', $regions) : '[a-z]{2}';
+
 Route::prefix('v1')->group(function () {
     Route::get('locales', [ApiFrontendLocaleController::class, 'index']);
     Route::get('sliders', [ApiFrontendSliderController::class, 'index']);
@@ -38,4 +47,17 @@ Route::prefix('v1')->group(function () {
     // Custom Forms API
     Route::get('forms', [ApiFrontendFormController::class, 'index']);
     Route::post('forms/{form}/submit', [ApiFrontendFormController::class, 'store']);
+});
+
+// Region-specific API routes for international SEO
+Route::prefix('v1/{region}')->where(['region' => $regionPattern])->group(function () {
+    Route::get('blogs', [ApiFrontendBlogController::class, 'index']);
+    Route::get('blogs/{slug}', [ApiFrontendBlogController::class, 'show']);
+    Route::get('case-studies', [ApiFrontendCaseStudyController::class, 'index']);
+    Route::get('case-studies/{slug}', [ApiFrontendCaseStudyController::class, 'show']);
+    Route::get('products', [ApiFrontendProductController::class, 'index']);
+    Route::get('products/{slug}', [ApiFrontendProductController::class, 'show']);
+    Route::get('news', [ApiFrontendNewsController::class, 'index']);
+    Route::get('news/{slug}', [ApiFrontendNewsController::class, 'show']);
+    Route::get('pages/{slug}', [ApiFrontendPageController::class, 'show']);
 });

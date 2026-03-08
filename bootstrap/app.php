@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\TrustProxies;
 use App\Http\Middleware\CacheAssets;
+use App\Http\Middleware\RegionDetection;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -33,6 +34,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->api(append: [
             SetLocale::class,
+        ]);
+        
+        // Register alias for region detection middleware
+        $middleware->alias([
+            'region.detection' => RegionDetection::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

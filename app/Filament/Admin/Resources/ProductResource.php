@@ -40,6 +40,8 @@ class ProductResource extends Resource
 
     protected static ?string $navigationLabel = 'Products';
 
+    protected static ?string $slug = 'product-items';
+
     public static function getNavigationLabel(): string
     {
         return __('Products');
@@ -48,6 +50,12 @@ class ProductResource extends Resource
     public static function getNavigationGroup(): ?string
     {
         return __('Product Management');
+    }
+
+    // Override navigation URL to use the correct slug
+    public static function getNavigationUrl(): string
+    {
+        return static::getUrl('index');
     }
 
     public static function canCreate(): bool

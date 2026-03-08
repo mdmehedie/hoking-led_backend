@@ -61,6 +61,11 @@ class Product extends Model implements HasMedia
         return $this->belongsToMany(Product::class, 'product_related', 'product_id', 'related_product_id');
     }
 
+    public function regions(): BelongsToMany
+    {
+        return $this->belongsToMany(Region::class, 'product_regions');
+    }
+
     public function registerMediaCollections(): void
     {
         // No media collections needed, using file uploads to fields
@@ -84,6 +89,52 @@ class Product extends Model implements HasMedia
 
     public function getUrl(): string
     {
-        return url('/products/' . $this->slug);
+        return url('/api/v1/products/' . $this->slug);
+    }
+
+    public function getAlternates(): array
+    {
+        $alternates = [];
+        
+        // Get regions where this product is available
+        $productRegions = $this->regions()->where('is_active', true)->pluck('code')->toArray();
+        
+        // If no regions specified, use default region only
+        if (empty($productRegions)) {
+            $productRegions = [\App\Models\Region::defaultCode()];
+        }
+        
+        // For proper hreflang, generate alternates for each region with its default locale
+        foreach ($productRegions as $region) {
+            $url = $this->getUrl();
+            
+            // Map regions to their typical locales
+            $regionToLocale = [
+                'us' => 'en',
+                'uk' => 'en-GB', 
+                'eu' => 'en',
+                'ca' => 'en-CA',
+                'au' => 'en-AU',
+                'bd' => 'bd'  // Use 'bd' locale code since that's what's in the database
+            ];
+            
+            $locale = $regionToLocale[$region] ?? 'en';
+            
+            // For default region (us), don't add prefix
+            if ($region === \App\Models\Region::defaultCode()) {
+                $alternates[] = [
+                    'locale' => $locale,
+                    'url' => $url
+                ];
+            } else {
+                // Add region prefix for non-default regions
+                $alternates[] = [
+                    'locale' => $locale,
+                    'url' => str_replace(url('/api/v1/products'), url('/api/v1/' . $region . '/products'), $url)
+                ];
+            }
+        }
+        
+        return $alternates;
     }
 }

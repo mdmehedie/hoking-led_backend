@@ -79,6 +79,8 @@ class AppSetting extends Model
         'redis_cache_ttl',
         'redis_session_ttl',
         'redis_client',
+        // International SEO settings
+        'default_region',
     ];
 
     protected $casts = [

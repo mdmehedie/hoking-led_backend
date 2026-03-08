@@ -29,6 +29,7 @@ class ProductResource extends JsonResource
             'image_path' => $this->main_image ? url(Storage::url($this->main_image)) : null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'alternates' => $this->getAlternates(),
         ];
     }
 }

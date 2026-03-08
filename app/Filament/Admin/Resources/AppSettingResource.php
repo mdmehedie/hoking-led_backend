@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\AppSettingResource\Pages as Pages;
 use App\Models\AppSetting;
 use App\Models\Locale;
+use App\Models\Region;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\FileUpload;
@@ -508,6 +509,14 @@ Sitemap: https://your-domain.com/sitemap.xml')
                     ->default(true)
                     ->helperText('Enable Redis for queue management'),
             ])->columns(4),
+            Section::make('International SEO')->description('Configure international SEO settings for multilingual and regional targeting')->schema([
+                Select::make('default_region')
+                    ->label('Default Region')
+                    ->options(Region::where('is_active', true)->pluck('name', 'code'))
+                    ->placeholder('Select default region')
+                    ->helperText('Default region for users when no region is specified')
+                    ->nullable(),
+            ]),
         ]);
     }
 
