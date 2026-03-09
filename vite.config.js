@@ -21,10 +21,8 @@ export default defineConfig({
         sourcemap: false,
         rollupOptions: {
             output: {
+                // Separate analytics tracker
                 manualChunks: {
-                    // Separate vendor chunks
-                    vendor: ['@headlessui/vue', '@inertiajs/vue3'],
-                    // Separate analytics tracker
                     analytics: ['./resources/js/analytics-tracker.js'],
                     // Separate lazy loader
                     lazyloader: ['./resources/js/lazy-image-loader.js'],
