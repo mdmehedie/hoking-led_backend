@@ -98,7 +98,7 @@ class ProductResource extends Resource
 
                     return Tab::make(strtoupper($locale))
                         ->schema([
-                            TextInput::make("title[{$locale}]")
+                            TextInput::make("title.{$locale}")
                                 ->label(__('Title'))
                                 ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
                                     if (!$isDefault) {
@@ -111,9 +111,9 @@ class ProductResource extends Resource
                                 })
                                 ->live()
                                 ->required(fn ($record) => !$record && $isDefault),
-                            Textarea::make("short_description[{$locale}]")
+                            Textarea::make("short_description.{$locale}")
                                 ->label(__('Short Description')),
-                            \App\Filament\Forms\Components\CustomRichEditor::make("detailed_description[{$locale}]")
+                            \App\Filament\Forms\Components\CustomRichEditor::make("detailed_description.{$locale}")
                                 ->label(__('Detailed Description'))
                                 ->required(fn ($record) => !$record && $isDefault),
                         ]);
