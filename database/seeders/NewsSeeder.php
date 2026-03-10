@@ -109,21 +109,31 @@ class NewsSeeder extends Seeder
         ];
 
         foreach ($newsArticles as $newsData) {
-            News::updateOrCreate(
-                ['slug' => $newsData['slug']],
-                [
-                    'title' => json_encode($newsData['title']),
-                    'excerpt' => json_encode($newsData['excerpt']),
-                    'content' => json_encode($newsData['content']),
-                    'image_path' => json_encode($newsData['image_path'] ?? ['en' => 'news-placeholder.jpg', 'bd' => 'news-placeholder.jpg']),
-                    'status' => $newsData['status'],
-                    'author_id' => $newsData['author_id'],
-                    'published_at' => $newsData['published_at'],
-                    'meta_title' => json_encode($newsData['meta_title'] ?? []),
-                    'meta_description' => json_encode($newsData['meta_description'] ?? []),
-                    'meta_keywords' => json_encode($newsData['meta_keywords'] ?? [])
-                ]
-            );
+            $news = News::create([
+                'title' => $newsData['title']['en'], // Default to English for database
+                'slug' => $newsData['slug'],
+                'excerpt' => $newsData['excerpt']['en'], // Default to English
+                'content' => $newsData['content']['en'], // Default to English
+                'status' => $newsData['status'],
+                'author_id' => $newsData['author_id'],
+                'published_at' => $newsData['published_at'],
+            ]);
+            
+            // Set translatable attributes
+            foreach (['title', 'excerpt', 'content'] as $field) {
+                if (isset($newsData[$field]) && is_array($newsData[$field])) {
+                    foreach ($newsData[$field] as $locale => $value) {
+                        $news->setTranslation($field, $locale, $value);
+                    }
+                }
+            }
+            
+            // Set meta fields as plain strings (use English version)
+            $news->update([
+                'meta_title' => $newsData['meta_title']['en'] ?? '',
+                'meta_description' => $newsData['meta_description']['en'] ?? '',
+                'meta_keywords' => $newsData['meta_keywords']['en'] ?? '',
+            ]);
         }
 
         $this->command->info('News articles seeded successfully!');

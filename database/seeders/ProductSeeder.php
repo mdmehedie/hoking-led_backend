@@ -239,25 +239,23 @@ class ProductSeeder extends Seeder
         ];
 
         foreach ($products as $productData) {
-            Product::updateOrCreate(
-                ['slug' => $productData['slug']],
-                [
-                    'title' => $productData['title'],
-                    'short_description' => $productData['short_description'],
-                    'detailed_description' => $productData['detailed_description'],
-                    'status' => $productData['status'],
-                    'category_id' => $productData['category_id'],
-                    'is_featured' => $productData['is_featured'],
-                    'technical_specs' => $productData['technical_specs'] ?? [],
-                    'tags' => $productData['tags'] ?? [],
-                    'video_embeds' => $productData['video_embeds'] ?? [],
-                    'downloads' => $productData['downloads'] ?? [],
-                    'published_at' => $productData['published_at'] ?? now(),
-                    'meta_title' => $productData['meta_title'] ?? [],
-                    'meta_description' => $productData['meta_description'] ?? [],
-                    'meta_keywords' => $productData['meta_keywords'] ?? []
-                ]
-            );
+            Product::create([
+                'title' => $productData['title'],
+                'slug' => $productData['slug'],
+                'short_description' => $productData['short_description'],
+                'detailed_description' => $productData['detailed_description'],
+                'status' => $productData['status'],
+                'category_id' => $productData['category_id'],
+                'is_featured' => $productData['is_featured'],
+                'technical_specs' => $productData['technical_specs'] ?? [],
+                'tags' => $productData['tags'] ?? [],
+                'video_embeds' => $productData['video_embeds'] ?? [],
+                'downloads' => $productData['downloads'] ?? [],
+                'published_at' => now(),
+                'meta_title' => $productData['meta_title'] ?? [],
+                'meta_description' => $productData['meta_description'] ?? [],
+                'meta_keywords' => $productData['meta_keywords'] ?? []
+            ]);
         }
 
         $this->command->info('Products seeded successfully!');

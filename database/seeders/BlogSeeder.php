@@ -109,21 +109,31 @@ class BlogSeeder extends Seeder
         ];
 
         foreach ($blogs as $blogData) {
-            Blog::updateOrCreate(
-                ['slug' => $blogData['slug']],
-                [
-                    'title' => json_encode($blogData['title']),
-                    'excerpt' => json_encode($blogData['excerpt']),
-                    'content' => json_encode($blogData['content']),
-                    'image_path' => json_encode($blogData['image_path'] ?? ['en' => 'blog-placeholder.jpg', 'bd' => 'blog-placeholder.jpg']),
-                    'status' => $blogData['status'],
-                    'author_id' => $blogData['author_id'],
-                    'published_at' => $blogData['published_at'],
-                    'meta_title' => json_encode($blogData['meta_title'] ?? []),
-                    'meta_description' => json_encode($blogData['meta_description'] ?? []),
-                    'meta_keywords' => json_encode($blogData['meta_keywords'] ?? [])
-                ]
-            );
+            $blog = Blog::create([
+                'title' => $blogData['title']['en'], // Default to English for database
+                'slug' => $blogData['slug'],
+                'excerpt' => $blogData['excerpt']['en'], // Default to English
+                'content' => $blogData['content']['en'], // Default to English
+                'status' => $blogData['status'],
+                'author_id' => $blogData['author_id'],
+                'published_at' => $blogData['published_at'],
+            ]);
+            
+            // Set translatable attributes
+            foreach (['title', 'excerpt', 'content'] as $field) {
+                if (isset($blogData[$field]) && is_array($blogData[$field])) {
+                    foreach ($blogData[$field] as $locale => $value) {
+                        $blog->setTranslation($field, $locale, $value);
+                    }
+                }
+            }
+            
+            // Set meta fields as plain strings (use English version)
+            $blog->update([
+                'meta_title' => $blogData['meta_title']['en'] ?? '',
+                'meta_description' => $blogData['meta_description']['en'] ?? '',
+                'meta_keywords' => $blogData['meta_keywords']['en'] ?? '',
+            ]);
         }
 
         $this->command->info('Blogs seeded successfully!');
