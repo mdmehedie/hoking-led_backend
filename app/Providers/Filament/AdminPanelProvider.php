@@ -106,8 +106,22 @@ class AdminPanelProvider extends PanelProvider
                     ->orderBy('code')
                     ->get(['code', 'name']);
 
-                return new HtmlString(
-                    '<div class="px-4 py-2">' .
+                return new HtmlString('
+                    <style>
+                        .locale-switcher-wrapper {
+                            position: absolute;
+                            right: 320px;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            z-index: 10;
+                        }
+                        @media (max-width: 768px) {
+                            .locale-switcher-wrapper {
+                                right: 200px;
+                            }
+                        }
+                    </style>
+                    <div class="locale-switcher-wrapper">' .
                     view('filament.components.locale-switcher', ['locales' => $locales])->render() .
                     '</div>'
                 );
