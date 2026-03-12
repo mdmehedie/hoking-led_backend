@@ -150,9 +150,7 @@ class ProductResource extends Resource
                     ]),
                 ]),
                 Tab::make(__('Tags & Relations'))->schema([
-                    Repeater::make('tags')->label(__('Tags'))->schema([
-                        TextInput::make('tag')->label(__('Tag'))->required(),
-                    ]),
+                    \Filament\Forms\Components\TagsInput::make('tags')->label(__('Tags')),
                     Select::make('related_products')->label(__('Related Products'))->multiple()->relationship('relatedProducts', 'title'),
                 ]),
                 Tab::make(__('SEO'))->schema([
