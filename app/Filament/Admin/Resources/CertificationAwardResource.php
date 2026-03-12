@@ -65,7 +65,18 @@ class CertificationAwardResource extends Resource
                             ->label(__('Slug'))
                             ->required()
                             ->maxLength(255)
-                            ->unique(CertificationAward::class, 'slug', ignoreRecord: true),
+                            ->unique(CertificationAward::class, 'slug', ignoreRecord: true)
+                            ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
+                            ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                // Convert spaces to hyphens and ensure only valid characters
+                                $slug = strtolower(str_replace(' ', '-', $state));
+                                $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
+                                $slug = preg_replace('/-+/', '-', $slug); // Replace multiple hyphens with single
+                                $slug = trim($slug, '-'); // Remove leading/trailing hyphens
+                                $set('slug', $slug);
+                            })
+                            ->live(debounce: 300),
 
                         TextInput::make('issuing_organization')
                             ->label(__('Issuing Organization'))

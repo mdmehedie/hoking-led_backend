@@ -85,7 +85,18 @@ class ProductResource extends Resource
 
         return $schema->schema([
             Section::make(__('General'))->schema([
-                TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required()->readonly(fn ($get, $record) => $record && $record->exists),
+                TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required()->readonly(fn ($get, $record) => $record && $record->exists)
+                    ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
+                    ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        // Convert spaces to hyphens and ensure only valid characters
+                        $slug = strtolower(str_replace(' ', '-', $state));
+                        $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
+                        $slug = preg_replace('/-+/', '-', $slug); // Replace multiple hyphens with single
+                        $slug = trim($slug, '-'); // Remove leading/trailing hyphens
+                        $set('slug', $slug);
+                    })
+                    ->live(debounce: 300),
                 Select::make('category_id')->relationship('category', 'name')->label(__('Category'))->nullable(),
                 Select::make('status')->label(__('Status'))->options(['draft' => __('Draft'), 'published' => __('Published'), 'archived' => __('Archived')])->required(),
                 Hidden::make('published_at')

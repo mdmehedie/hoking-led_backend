@@ -72,7 +72,18 @@ class CategoryResource extends Resource
                     })
                     ->live()
                     ->required(),
-                TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required(),
+                TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required()
+                    ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
+                    ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        // Convert spaces to hyphens and ensure only valid characters
+                        $slug = strtolower(str_replace(' ', '-', $state));
+                        $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
+                        $slug = preg_replace('/-+/', '-', $slug); // Replace multiple hyphens with single
+                        $slug = trim($slug, '-'); // Remove leading/trailing hyphens
+                        $set('slug', $slug);
+                    })
+                    ->live(debounce: 300),
                 Textarea::make('description')->label(__('Description')),
                 Select::make('parent_id')->relationship('parent', 'name')->label(__('Parent Category'))->nullable(),
                 Toggle::make('is_visible')->label(__('Visible'))->default(true),

@@ -26,6 +26,15 @@ class AppServiceProvider extends ServiceProvider
             \URL::forceScheme('https');
         }
 
+        // Custom validation rule for slugs without spaces
+        \Validator::extend('no_spaces', function ($attribute, $value, $parameters, $validator) {
+            return !str_contains($value, ' ');
+        });
+
+        \Validator::replacer('no_spaces', function ($message, $attribute, $rule, $parameters) {
+            return str_replace(':attribute', $attribute, 'The :attribute field cannot contain spaces. Use hyphens (-) instead.');
+        });
+
         
         try {
             // Register model observers
