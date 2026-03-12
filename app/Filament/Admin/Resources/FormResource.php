@@ -6,6 +6,8 @@ use App\Filament\Admin\Resources\FormResource\Pages;
 use App\Models\Form;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -61,80 +63,86 @@ class FormResource extends Resource
     {
         return $schema
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label(__('Form Name'))
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Builder::make('fields')
-                    ->label(__('Form Fields'))
-                    ->blocks([
-                        Forms\Components\Builder\Block::make('text')
-                            ->schema([
-                                Forms\Components\TextInput::make('label')
-                                    ->label(__('Label'))
-                                    ->required(),
-                                Forms\Components\TextInput::make('placeholder')
-                                    ->label(__('Placeholder')),
-                                Forms\Components\Toggle::make('required')
-                                    ->label(__('Required')),
-                            ])
-                            ->label(__('Text Input')),
-                        Forms\Components\Builder\Block::make('email')
-                            ->schema([
-                                Forms\Components\TextInput::make('label')
-                                    ->label(__('Label'))
-                                    ->required(),
-                                Forms\Components\TextInput::make('placeholder')
-                                    ->label(__('Placeholder')),
-                                Forms\Components\Toggle::make('required')
-                                    ->label(__('Required')),
-                            ])
-                            ->label(__('Email Input')),
-                        Forms\Components\Builder\Block::make('textarea')
-                            ->schema([
-                                Forms\Components\TextInput::make('label')
-                                    ->label(__('Label'))
-                                    ->required(),
-                                Forms\Components\TextInput::make('placeholder')
-                                    ->label(__('Placeholder')),
-                                Forms\Components\Toggle::make('required')
-                                    ->label(__('Required')),
-                            ])
-                            ->label(__('Textarea')),
-                        Forms\Components\Builder\Block::make('select')
-                            ->schema([
-                                Forms\Components\TextInput::make('label')
-                                    ->label(__('Label'))
-                                    ->required(),
-                                Forms\Components\Repeater::make('options')
-                                    ->label(__('Options'))
+                Tabs::make('Form Builder Tabs')->tabs([
+                    Tab::make(__('Basic Settings'))->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label(__('Form Name'))
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\Textarea::make('success_message')
+                            ->label(__('Success Message')),
+                        Forms\Components\Toggle::make('email_notifications')
+                            ->label(__('Enable Email Notifications')),
+                        Forms\Components\TagsInput::make('notification_emails')
+                            ->label(__('Notification Emails'))
+                            ->placeholder(__('Enter email addresses'))
+                            ->visible(fn ($get) => $get('email_notifications')),
+                        Forms\Components\Toggle::make('store_leads')
+                            ->label(__('Store Leads'))
+                            ->default(true),
+                    ]),
+                    Tab::make(__('Form Fields'))->schema([
+                        Forms\Components\Builder::make('fields')
+                            ->label(__('Form Fields'))
+                            ->blocks([
+                                Forms\Components\Builder\Block::make('text')
                                     ->schema([
                                         Forms\Components\TextInput::make('label')
                                             ->label(__('Label'))
                                             ->required(),
-                                        Forms\Components\TextInput::make('value')
-                                            ->label(__('Value'))
-                                            ->required(),
+                                        Forms\Components\TextInput::make('placeholder')
+                                            ->label(__('Placeholder')),
+                                        Forms\Components\Toggle::make('required')
+                                            ->label(__('Required')),
                                     ])
-                                    ->collapsible(),
-                                Forms\Components\Toggle::make('required')
-                                    ->label(__('Required')),
+                                    ->label(__('Text Input')),
+                                Forms\Components\Builder\Block::make('email')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('label')
+                                            ->label(__('Label'))
+                                            ->required(),
+                                        Forms\Components\TextInput::make('placeholder')
+                                            ->label(__('Placeholder')),
+                                        Forms\Components\Toggle::make('required')
+                                            ->label(__('Required')),
+                                    ])
+                                    ->label(__('Email Input')),
+                                Forms\Components\Builder\Block::make('textarea')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('label')
+                                            ->label(__('Label'))
+                                            ->required(),
+                                        Forms\Components\TextInput::make('placeholder')
+                                            ->label(__('Placeholder')),
+                                        Forms\Components\Toggle::make('required')
+                                            ->label(__('Required')),
+                                    ])
+                                    ->label(__('Textarea')),
+                                Forms\Components\Builder\Block::make('select')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('label')
+                                            ->label(__('Label'))
+                                            ->required(),
+                                        Forms\Components\Repeater::make('options')
+                                            ->label(__('Options'))
+                                            ->schema([
+                                                Forms\Components\TextInput::make('label')
+                                                    ->label(__('Label'))
+                                                    ->required(),
+                                                Forms\Components\TextInput::make('value')
+                                                    ->label(__('Value'))
+                                                    ->required(),
+                                            ])
+                                            ->collapsible(),
+                                        Forms\Components\Toggle::make('required')
+                                            ->label(__('Required')),
+                                    ])
+                                    ->label(__('Select Dropdown')),
                             ])
-                            ->label(__('Select Dropdown')),
-                    ])
-                    ->addActionAlignment('center')
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('success_message')
-                    ->label(__('Success Message')),
-                Forms\Components\Toggle::make('email_notifications')
-                    ->label(__('Enable Email Notifications')),
-                Forms\Components\TagsInput::make('notification_emails')
-                    ->label(__('Notification Emails'))
-                    ->placeholder(__('Enter email addresses'))
-                    ->visible(fn ($get) => $get('email_notifications')),
-                Forms\Components\Toggle::make('store_leads')
-                    ->label(__('Store Leads'))
-                    ->default(true),
+                            ->addActionAlignment('center')
+                            ->columnSpanFull(),
+                    ]),
+                ])->columnSpanFull(),
             ]);
     }
 

@@ -11,10 +11,11 @@ use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Filament\Support\Icons\Heroicon;
-use Filament\Schemas\Components\Section;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 
 class RegionResource extends Resource
@@ -31,8 +32,8 @@ class RegionResource extends Resource
     {
         return $schema
             ->schema([
-                Section::make('Region Information')
-                    ->schema([
+                Tabs::make('Region Settings Tabs')->tabs([
+                    Tab::make(__('Region Information'))->schema([
                         Forms\Components\TextInput::make('code')
                             ->label('Region Code')
                             ->required()
@@ -55,10 +56,8 @@ class RegionResource extends Resource
                             ->label('Language')
                             ->maxLength(10)
                             ->helperText('e.g., en, en-US'),
-                    ])
-                    ->columns(2),
-                Section::make('Settings')
-                    ->schema([
+                    ])->columns(2),
+                    Tab::make(__('Settings'))->schema([
                         Forms\Components\Toggle::make('is_active')
                             ->label('Active')
                             ->default(true)
@@ -72,8 +71,8 @@ class RegionResource extends Resource
                             ->numeric()
                             ->default(0)
                             ->helperText('Order in which regions appear'),
-                    ])
-                    ->columns(3),
+                    ])->columns(3),
+                ])->columnSpanFull(),
             ]);
     }
 

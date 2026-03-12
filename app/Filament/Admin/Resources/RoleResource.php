@@ -7,6 +7,8 @@ use Spatie\Permission\Models\Role;
 use Filament\Forms;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -62,18 +64,17 @@ class RoleResource extends Resource
         }
 
         return $schema->schema([
-            Section::make(__('Role Information'))->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label(__('Role Name'))
-                    ->required()
-                    ->unique(ignoreRecord: true),
-                Forms\Components\Textarea::make('description')
-                    ->label(__('Description'))
-                    ->maxLength(500),
-            ]),
-            Section::make(__('Permissions'))
-                ->description(__('Select permissions for this role'))
-                ->schema([
+            Tabs::make('Role Management Tabs')->tabs([
+                Tab::make(__('Role Information'))->schema([
+                    Forms\Components\TextInput::make('name')
+                        ->label(__('Role Name'))
+                        ->required()
+                        ->unique(ignoreRecord: true),
+                    Forms\Components\Textarea::make('description')
+                        ->label(__('Description'))
+                        ->maxLength(500),
+                ]),
+                Tab::make(__('Permissions'))->schema([
                     Forms\Components\CheckboxList::make('permissions')
                         ->relationship('permissions', 'name')
                         ->columns(3)
@@ -82,6 +83,7 @@ class RoleResource extends Resource
                         ->bulkToggleable()
                         ->helperText(__('Permissions assigned to this role')),
                 ]),
+            ])->columnSpanFull(),
         ]);
     }
 

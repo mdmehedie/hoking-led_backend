@@ -84,83 +84,84 @@ class ProductResource extends Resource
         $defaultLocale = \App\Models\Locale::defaultCode();
 
         return $schema->schema([
-            Section::make(__('General'))->schema([
-                TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required()->readonly(fn ($get, $record) => $record && $record->exists)
-                    ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
-                    ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
-                    ->afterStateUpdated(function ($state, callable $set) {
-                        // Convert spaces to hyphens and ensure only valid characters
-                        $slug = strtolower(str_replace(' ', '-', $state));
-                        $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
-                        $slug = preg_replace('/-+/', '-', $slug); // Replace multiple hyphens with single
-                        $slug = trim($slug, '-'); // Remove leading/trailing hyphens
-                        $set('slug', $slug);
-                    })
-                    ->live(debounce: 300),
-                Select::make('category_id')->relationship('category', 'name')->label(__('Category'))->nullable(),
-                Select::make('status')->label(__('Status'))->options(['draft' => __('Draft'), 'published' => __('Published'), 'archived' => __('Archived')])->required(),
-                Hidden::make('published_at')
-                    ->default(now()),
-                Toggle::make('is_featured')->label(__('Featured Product')),
-            ]),
-            Tabs::make('Translations')->tabs(
-                collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
-                    $isDefault = $locale === $defaultLocale;
+            Tabs::make('Product Tabs')->tabs([
+                Tab::make(__('General Information'))->schema([
+                    TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required()->readonly(fn ($get, $record) => $record && $record->exists)
+                        ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
+                        ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            // Convert spaces to hyphens and ensure only valid characters
+                            $slug = strtolower(str_replace(' ', '-', $state));
+                            $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
+                            $slug = preg_replace('/-+/', '-', $slug); // Replace multiple hyphens with single
+                            $slug = trim($slug, '-'); // Remove leading/trailing hyphens
+                            $set('slug', $slug);
+                        })
+                        ->live(debounce: 300),
+                    Select::make('category_id')->relationship('category', 'name')->label(__('Category'))->nullable(),
+                    Select::make('status')->label(__('Status'))->options(['draft' => __('Draft'), 'published' => __('Published'), 'archived' => __('Archived')])->required(),
+                    Hidden::make('published_at')->default(now()),
+                    Toggle::make('is_featured')->label(__('Featured Product')),
+                ]),
+                Tab::make(__('Translations'))->schema([
+                    Tabs::make('Language Tabs')->tabs(
+                        collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
+                            $isDefault = $locale === $defaultLocale;
 
-                    return Tab::make(strtoupper($locale))
-                        ->schema([
-                            TextInput::make("title.{$locale}")
-                                ->label(__('Title'))
-                                ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
-                                    if (!$isDefault) {
-                                        return;
-                                    }
+                            return Tab::make(strtoupper($locale))
+                                ->schema([
+                                    TextInput::make("title.{$locale}")
+                                        ->label(__('Title'))
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
+                                            if (!$isDefault) {
+                                                return;
+                                            }
 
-                                    if (blank($get('slug'))) {
-                                        $set('slug', static::generateUniqueSlug($state, null));
-                                    }
-                                })
-                                ->live()
-                                ->required(fn ($record) => !$record && $isDefault),
-                            Textarea::make("short_description.{$locale}")
-                                ->label(__('Short Description')),
-                            \App\Filament\Forms\Components\CustomRichEditor::make("detailed_description.{$locale}")
-                                ->label(__('Detailed Description'))
-                                ->required(fn ($record) => !$record && $isDefault),
-                        ]);
-                })->all()
-            ),
-            Section::make(__('Media'))->schema([
-                FileUpload::make('main_image')->label(__('Main Image'))->image()->directory('products/main')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                FileUpload::make('gallery')->label(__('Gallery'))->multiple()->image()->directory('products/gallery')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                Repeater::make('video_embeds')->label(__('Video Embeds'))->schema([
-                    Select::make('type')->label(__('Type'))->options(['embed' => __('Embed URL'), 'file' => __('Self-hosted File')])->required(),
-                    TextInput::make('title')->label(__('Title'))->visible(fn ($get) => $get('type') === 'embed'),
-                    TextInput::make('url')->label(__('URL'))->url()->rules(['regex:/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|vimeo\.com)/'])->visible(fn ($get) => $get('type') === 'embed'),
-                    FileUpload::make('video_file')->label(__('Video File'))->visible(fn ($get) => $get('type') === 'file'),
+                                            if (blank($get('slug'))) {
+                                                $set('slug', static::generateUniqueSlug($state, null));
+                                            }
+                                        })
+                                        ->live()
+                                        ->required(fn ($record) => !$record && $isDefault),
+                                    Textarea::make("short_description.{$locale}")
+                                        ->label(__('Short Description')),
+                                    \App\Filament\Forms\Components\CustomRichEditor::make("detailed_description.{$locale}")
+                                        ->label(__('Detailed Description'))
+                                        ->required(fn ($record) => !$record && $isDefault),
+                                ]);
+                        })->all()
+                    ),
                 ]),
-                FileUpload::make('downloads')->label(__('Downloads'))->multiple()->directory('products/downloads'),
-            ]),
-            Section::make(__('Technical Specs'))->schema([
-                Repeater::make('technical_specs')->label(__('Technical Specifications'))->schema([
-                    TextInput::make('key')->label(__('Key'))->required(),
-                    TextInput::make('value')->label(__('Value'))->required(),
+                Tab::make(__('Media'))->schema([
+                    FileUpload::make('main_image')->label(__('Main Image'))->image()->directory('products/main')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                    FileUpload::make('gallery')->label(__('Gallery'))->multiple()->image()->directory('products/gallery')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                    Repeater::make('video_embeds')->label(__('Video Embeds'))->schema([
+                        Select::make('type')->label(__('Type'))->options(['embed' => __('Embed URL'), 'file' => __('Self-hosted File')])->required(),
+                        TextInput::make('title')->label(__('Title'))->visible(fn ($get) => $get('type') === 'embed'),
+                        TextInput::make('url')->label(__('URL'))->url()->rules(['regex:/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|vimeo\.com)/'])->visible(fn ($get) => $get('type') === 'embed'),
+                        FileUpload::make('video_file')->label(__('Video File'))->visible(fn ($get) => $get('type') === 'file'),
+                    ]),
+                    FileUpload::make('downloads')->label(__('Downloads'))->multiple()->directory('products/downloads'),
                 ]),
-            ]),
-            Section::make(__('Tags'))->schema([
-                Repeater::make('tags')->label(__('Tags'))->schema([
-                    TextInput::make('tag')->label(__('Tag'))->required(),
+                Tab::make(__('Technical Specifications'))->schema([
+                    Repeater::make('technical_specs')->label(__('Technical Specifications'))->schema([
+                        TextInput::make('key')->label(__('Key'))->required(),
+                        TextInput::make('value')->label(__('Value'))->required(),
+                    ]),
                 ]),
-            ]),
-            Section::make(__('Related Products'))->schema([
-                Select::make('related_products')->label(__('Related Products'))->multiple()->relationship('relatedProducts', 'title'),
-            ]),
-            Section::make(__('SEO'))->schema([
-                TextInput::make('meta_title')->label(__('Meta Title')),
-                Textarea::make('meta_description')->label(__('Meta Description')),
-                Textarea::make('meta_keywords')->label(__('Meta Keywords')),
-                TextInput::make('canonical_url')->label(__('Canonical URL')),
-            ]),
+                Tab::make(__('Tags & Relations'))->schema([
+                    Repeater::make('tags')->label(__('Tags'))->schema([
+                        TextInput::make('tag')->label(__('Tag'))->required(),
+                    ]),
+                    Select::make('related_products')->label(__('Related Products'))->multiple()->relationship('relatedProducts', 'title'),
+                ]),
+                Tab::make(__('SEO'))->schema([
+                    TextInput::make('meta_title')->label(__('Meta Title')),
+                    Textarea::make('meta_description')->label(__('Meta Description')),
+                    Textarea::make('meta_keywords')->label(__('Meta Keywords')),
+                    TextInput::make('canonical_url')->label(__('Canonical URL')),
+                ]),
+            ])->columnSpanFull(),
         ]);
     }
 

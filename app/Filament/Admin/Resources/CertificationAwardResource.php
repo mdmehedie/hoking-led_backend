@@ -13,6 +13,8 @@ use Filament\Schemas\Components\Section;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -47,8 +49,8 @@ class CertificationAwardResource extends Resource
     {
         return $schema
             ->schema([
-                Section::make(__('Basic Information'))
-                    ->schema([
+                Tabs::make('Certification & Award Tabs')->tabs([
+                    Tab::make(__('Basic Information'))->schema([
                         TextInput::make('title')
                             ->label(__('Title'))
                             ->required()
@@ -99,10 +101,8 @@ class CertificationAwardResource extends Resource
                                 '4:3',
                                 '1:1',
                             ]),
-                    ])->columns(2),
-
-                Section::make(__('Visibility & Ordering'))
-                    ->schema([
+                    ]),
+                    Tab::make(__('Visibility & SEO'))->schema([
                         Toggle::make('is_visible')
                             ->label(__('Visible'))
                             ->default(true),
@@ -112,10 +112,7 @@ class CertificationAwardResource extends Resource
                             ->numeric()
                             ->default(0)
                             ->helperText(__('Lower numbers appear first')),
-                    ])->columns(2),
 
-                Section::make(__('SEO'))
-                    ->schema([
                         TextInput::make('meta_title')
                             ->label(__('Meta Title'))
                             ->maxLength(255),
@@ -126,7 +123,8 @@ class CertificationAwardResource extends Resource
 
                         Textarea::make('meta_keywords')
                             ->label(__('Meta Keywords')),
-                    ])->columns(1),
+                    ]),
+                ])->columnSpanFull(),
             ]);
     }
 

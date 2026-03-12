@@ -8,6 +8,8 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Actions;
@@ -43,27 +45,33 @@ class AnalyticsEventResource extends Resource
     {
         return $schema
             ->schema([
-                Forms\Components\TextInput::make('event_name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('page')
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('url')
-                    ->maxLength(500),
-                Forms\Components\Textarea::make('user_agent')
-                    ->rows(3),
-                Forms\Components\KeyValue::make('parameters')
-                    ->label('Event Parameters')
-                    ->keyLabel('Parameter')
-                    ->valueLabel('Value')
-                    ->addable()
-                    ->deletable(),
-                Forms\Components\Select::make('user_id')
-                    ->relationship('user', 'name')
-                    ->searchable()
-                    ->nullable(),
-                Forms\Components\DateTimePicker::make('event_time')
-                    ->required(),
+                Tabs::make('Analytics Event Tabs')->tabs([
+                    Tab::make(__('Event Information'))->schema([
+                        Forms\Components\TextInput::make('event_name')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('page')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('url')
+                            ->maxLength(500),
+                        Forms\Components\DateTimePicker::make('event_time')
+                            ->required(),
+                    ]),
+                    Tab::make(__('Technical Details'))->schema([
+                        Forms\Components\Textarea::make('user_agent')
+                            ->rows(3),
+                        Forms\Components\KeyValue::make('parameters')
+                            ->label('Event Parameters')
+                            ->keyLabel('Parameter')
+                            ->valueLabel('Value')
+                            ->addable()
+                            ->deletable(),
+                        Forms\Components\Select::make('user_id')
+                            ->relationship('user', 'name')
+                            ->searchable()
+                            ->nullable(),
+                    ]),
+                ])->columnSpanFull(),
             ]);
     }
 

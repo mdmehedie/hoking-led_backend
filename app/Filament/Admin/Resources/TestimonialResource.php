@@ -13,6 +13,8 @@ use Filament\Forms\Components\TextInput as FormTextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -42,8 +44,8 @@ class TestimonialResource extends Resource
     {
         return $schema
             ->schema([
-                Section::make(__('Client Information'))
-                    ->schema([
+                Tabs::make('Testimonial Tabs')->tabs([
+                    Tab::make(__('Client Information'))->schema([
                         TextInput::make('client_name')
                             ->label(__('Client Name'))
                             ->required()
@@ -56,8 +58,7 @@ class TestimonialResource extends Resource
                             ->maxLength(255),
                     ])->columns(2),
 
-                Section::make(__('Testimonial Content'))
-                    ->schema([
+                    Tab::make(__('Testimonial Content'))->schema([
                         Textarea::make('testimonial')
                             ->label(__('Testimonial'))
                             ->required()
@@ -75,8 +76,7 @@ class TestimonialResource extends Resource
                             ->required(),
                     ]),
 
-                Section::make(__('Media'))
-                    ->schema([
+                    Tab::make(__('Media'))->schema([
                         FileUpload::make('image_path')
                             ->label(__('Image'))
                             ->image()
@@ -89,8 +89,7 @@ class TestimonialResource extends Resource
                             ]),
                     ]),
 
-                Section::make(__('Visibility & Ordering'))
-                    ->schema([
+                    Tab::make(__('Visibility & Ordering'))->schema([
                         Toggle::make('is_visible')
                             ->label(__('Visible'))
                             ->default(true),
@@ -101,8 +100,7 @@ class TestimonialResource extends Resource
                             ->required(),
                     ])->columns(2),
 
-                Section::make(__('SEO'))
-                    ->schema([
+                    Tab::make(__('SEO'))->schema([
                         TextInput::make('meta_title')
                             ->label(__('Meta Title'))
                             ->maxLength(255),
@@ -112,6 +110,7 @@ class TestimonialResource extends Resource
                         Textarea::make('meta_keywords')
                             ->label(__('Meta Keywords')),
                     ]),
+                ])->columnSpanFull(),
             ]);
     }
 

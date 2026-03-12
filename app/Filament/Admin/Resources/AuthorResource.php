@@ -7,6 +7,8 @@ use App\Models\Author;
 use Filament\Forms;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -56,40 +58,44 @@ class AuthorResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            Section::make('Author Information')->schema([
-                Forms\Components\Select::make('user_id')
-                    ->relationship('user', 'name')
-                    ->required()
-                    ->unique(ignoreRecord: true),
-                Forms\Components\Textarea::make('bio')
-                    ->rows(4),
-                Section::make('Profile Image')->schema([
+            Tabs::make('Author Tabs')->tabs([
+                Tab::make(__('Author Information'))->schema([
+                    Forms\Components\Select::make('user_id')
+                        ->relationship('user', 'name')
+                        ->required()
+                        ->unique(ignoreRecord: true),
+                    Forms\Components\Textarea::make('bio')
+                        ->rows(4),
+                ]),
+                Tab::make(__('Profile Image'))->schema([
                     Forms\Components\FileUpload::make('avatar')
                         ->image()
                         ->directory('authors')
                         ->imageEditor()
                         ->imageEditorAspectRatios(['1:1']),
                 ]),
-                Forms\Components\Repeater::make('social_links')
-                    ->schema([
-                        Forms\Components\Select::make('platform')
-                            ->options([
-                                'facebook' => 'Facebook',
-                                'twitter' => 'Twitter / X',
-                                'linkedin' => 'LinkedIn',
-                                'instagram' => 'Instagram',
-                                'youtube' => 'YouTube',
-                                'tiktok' => 'TikTok',
-                                'github' => 'GitHub',
-                                'website' => 'Website',
-                            ])
-                            ->required(),
-                        Forms\Components\TextInput::make('url')
-                            ->rules(['regex:/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i'])
-                            ->required(),
-                    ])
-                    ->default([]),
-            ]),
+                Tab::make(__('Social Links'))->schema([
+                    Forms\Components\Repeater::make('social_links')
+                        ->schema([
+                            Forms\Components\Select::make('platform')
+                                ->options([
+                                    'facebook' => 'Facebook',
+                                    'twitter' => 'Twitter / X',
+                                    'linkedin' => 'LinkedIn',
+                                    'instagram' => 'Instagram',
+                                    'youtube' => 'YouTube',
+                                    'tiktok' => 'TikTok',
+                                    'github' => 'GitHub',
+                                    'website' => 'Website',
+                                ])
+                                ->required(),
+                            Forms\Components\TextInput::make('url')
+                                ->rules(['regex:/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i'])
+                                ->required(),
+                        ])
+                        ->default([]),
+                ]),
+            ])->columnSpanFull(),
         ]);
     }
 
