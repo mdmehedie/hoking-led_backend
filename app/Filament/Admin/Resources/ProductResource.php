@@ -86,7 +86,7 @@ class ProductResource extends Resource
         return $schema->schema([
             Tabs::make('Product Tabs')->tabs([
                 Tab::make(__('General Information'))->schema([
-                    TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required()->readonly(fn ($get, $record) => $record && $record->exists)
+                    TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required()
                         ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
                         ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
                         ->afterStateUpdated(function ($state, callable $set) {
