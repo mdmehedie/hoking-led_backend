@@ -20,7 +20,7 @@ class ApiFrontendProductController extends ApiBaseController
             $this->setLocaleForRegion($region);
         }
 
-        $products = Product::with(['category', 'regions'])
+        $products = Product::with(['category', 'regions', 'relatedProducts'])
             ->where('status', 'published')
             ->when($region, function ($query, $region) {
                 // Filter products that are available in this region
@@ -44,7 +44,7 @@ class ApiFrontendProductController extends ApiBaseController
             $this->setLocaleForRegion($region);
         }
         
-        $product = Product::with(['category', 'regions'])
+        $product = Product::with(['category', 'regions', 'relatedProducts'])
             ->where('slug', $slug)
             ->where('status', 'published')
             ->when($region, function ($query, $region) {
