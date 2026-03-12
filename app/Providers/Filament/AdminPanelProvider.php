@@ -191,7 +191,7 @@ class AdminPanelProvider extends PanelProvider
                     <style>
                         .locale-switcher-wrapper {
                             position: absolute;
-                            right: 360px;
+                            right: 400px;
                             top: 50%;
                             transform: translateY(-50%);
                             z-index: 10;
