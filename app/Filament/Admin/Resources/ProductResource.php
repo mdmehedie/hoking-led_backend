@@ -122,12 +122,12 @@ class ProductResource extends Resource
                                             }
                                         })
                                         ->live()
-                                        ->required(fn ($record) => !$record && $isDefault),
+                                        ->required(),
                                     Textarea::make("short_description.{$locale}")
                                         ->label(__('Short Description')),
                                     \App\Filament\Forms\Components\CustomRichEditor::make("detailed_description.{$locale}")
                                         ->label(__('Detailed Description'))
-                                        ->required(fn ($record) => !$record && $isDefault),
+                                        ->required(),
                                 ]);
                         })->all()
                     ),
