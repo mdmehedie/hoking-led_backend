@@ -52,7 +52,7 @@ RUN git config --global --add safe.directory /var/www/html
 RUN composer dump-autoload --optimize --classmap-authoritative --no-scripts \
     && yarn build \
     && yarn cache clean \
-    && rm -rf node_modules package-lock.json 
+    && rm -rf node_modules package-lock.json
 
 
 # Set permissions
@@ -75,6 +75,7 @@ server {
 
     index index.php;
     charset utf-8;
+    client_max_body_size 100M;
 
     location / {
         try_files $uri $uri/ /index.php?$query_string;
