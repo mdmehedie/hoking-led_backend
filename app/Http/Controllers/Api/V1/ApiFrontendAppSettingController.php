@@ -24,16 +24,16 @@ class ApiFrontendAppSettingController extends ApiBaseController
         $appSetting = AppSetting::first(); // Assuming there's only one app setting record
 
         if (!$appSetting) {
-            return $this->notFoundResponse([], 'App setting not found');
+            return $this->notFoundResponse([], __('App setting not found'));
         }
 
-        $allowedColumns = array_merge($appSetting->getFillable(), ['company_name', 'about', 'contact_emails', 'contact_phones', 'office_addresses', 'social_links']);
+        $allowedColumns = array_merge($appSetting->getFillable(), ['contact_emails', 'contact_phones', 'office_addresses', 'social_links']);
 
         if (!in_array($column, $allowedColumns)) {
-            return $this->notFoundResponse([], 'Field not found');
+            return $this->notFoundResponse([], __('Field not found'));
         }
 
-        if (in_array($column, ['company_name', 'about', 'contact_emails', 'contact_phones', 'office_addresses', 'social_links'])) {
+        if (in_array($column, ['contact_emails', 'contact_phones', 'office_addresses', 'social_links'])) {
             $value = $appSetting->organization[$column] ?? null;
         } else {
             $value = $appSetting->$column;

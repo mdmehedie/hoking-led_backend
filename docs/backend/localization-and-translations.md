@@ -5,6 +5,33 @@ This project supports multilingual behavior in two areas:
 1. **UI string translations** via `__()` using the database table `ui_translations`.
 2. **Dynamic content translations** (model attributes) via the polymorphic table `translations` and the trait `App\\Traits\\HasTranslations`.
 
+## Quick Reference Commands
+
+### Essential Translation Commands
+
+```bash
+# Sync new translation keys from code and auto-fill English values
+php artisan translations:sync --fill-en
+
+# Update database with all translations (English + Bangla)
+php artisan db:seed --class=UiTranslationSeeder
+
+# Clear all caches to ensure translations take effect
+php artisan optimize:clear
+
+# Seed demo locales (if needed)
+php artisan db:seed --class=LocaleSeeder
+```
+
+### When to Run These Commands
+
+1. **After adding new `__('key')` calls** in your code → `php artisan translations:sync --fill-en`
+2. **After updating the seeder** with new translations → `php artisan db:seed --class=UiTranslationSeeder`
+3. **Before deployment** → Run all three commands in sequence
+4. **When translations don't appear** → `php artisan optimize:clear`
+
+---
+
 ## Locale resolution (how the active language is selected)
 
 Locale is resolved by `App\\Http\\Middleware\\SetLocale` in this priority order:
@@ -95,6 +122,31 @@ You can scan the codebase for translation keys used by `__()` and `@lang()` and 
 - Command: `php artisan translations:sync`
 - To auto-fill English values for sentence-style keys: `php artisan translations:sync --fill-en`
 
+#### When to use this command:
+
+1. **After adding new translation keys** - When you add new `__('key')` calls in your code
+2. **After updating existing labels** - When you change hardcoded strings to use `__()`
+3. **During development** - To ensure all translation keys are tracked in the database
+4. **Before deployment** - To verify all translation keys exist in the database
+
+#### Command behavior:
+
+- `php artisan translations:sync` - Scans code and adds missing keys with empty values
+- `php artisan translations:sync --fill-en` - Scans code and auto-fills English values for sentence-style keys (e.g., `__('Some sentence')`)
+
+#### Example usage:
+
+```bash
+# After adding new translation keys to your code
+php artisan translations:sync --fill-en
+
+# Then run the seeder to populate Bangla translations
+php artisan db:seed --class=UiTranslationSeeder
+
+# Clear cache to ensure translations take effect
+php artisan optimize:clear
+```
+
 ### Best practice for keys
 
 Prefer **key-based** translations:
@@ -140,6 +192,34 @@ Notes:
 
 - The trait stores default-locale values into the base column as well (for backward compatibility and querying).
 
+### Content models behavior (Blogs / News / Pages / Case Studies / Products)
+
+The following content types now store **separate content per language** using `translations`:
+
+- `Blog`
+- `News`
+- `Page`
+- `CaseStudy`
+- `Product` ✅ **NEWLY ADDED**
+
+Rules:
+
+- `slug` remains a **shared** (non-translated) field.
+- These fields are **language-specific** (translated):
+  - `title`
+  - `excerpt` (for Blog/News/CaseStudy)
+  - `content` (for Blog/News/CaseStudy)
+  - `short_description` (for Product)
+  - `detailed_description` (for Product)
+  - `image_path` (for Blog/News/CaseStudy)
+  - `meta_title`, `meta_description`, `meta_keywords` (SEO fields for all)
+
+In Filament:
+
+- When you switch the admin language using the language switcher, the form will read/write the translated values for the active locale.
+- If a translation does not exist for the selected locale, the system falls back to the default locale.
+- **Products now feature multilingual tabs** for title, short description, detailed description, and SEO fields, matching the behavior of blogs and other content types.
+
 ### Migrating old JSON translations
 
 A migration exists to move `products.detailed_description` JSON into `translations` rows:
@@ -160,9 +240,130 @@ A migration exists to move `products.detailed_description` JSON into `translatio
 
 After you change admin labels/messages (including menu items) to use `__()`, run:
 
-- `php artisan translations:sync --fill-en`
+```bash
+# Step 1: Sync new translation keys from code and auto-fill English values
+php artisan translations:sync --fill-en
+
+# Step 2: Update the seeder with any new keys and run it
+php artisan db:seed --class=UiTranslationSeeder
+
+# Step 3: Clear caches to ensure translations take effect
+php artisan optimize:clear
+```
+
+This three-step process ensures:
+1. All new translation keys are detected and added to the database
+2. English values are automatically populated for sentence-style keys
+3. Bangla translations are added via the seeder
+4. All changes are immediately reflected in the admin panel
 
 ## Known limitations (current state)
 
-- Only `Product` has been switched to the new dynamic translation trait so far.
-- Some older admin strings may still be hardcoded and need to be wrapped in `__()` to become translatable.
+- ✅ **RESOLVED**: All Filament Admin resources now use dynamic translations via `__()`
+- ✅ **RESOLVED**: Field labels, sections, and action messages are fully translatable
+- ✅ **RESOLVED**: Complete multilingual support across all admin resources
+
+## Recently Implemented Improvements (March 2026)
+
+### Complete Filament Admin Translation System
+
+All Filament Admin resources have been updated to use dynamic translations for **all field labels, sections, and messages**:
+
+#### Updated Resources:
+- **BlogResource.php** - Title, Excerpt, Content, Image, SEO fields
+- **CaseStudyResource.php** - All form fields and table columns
+- **CategoryResource.php** - Name, Description, Parent, SEO fields
+- **NewsResource.php** - Complete multilingual support
+- **PageResource.php** - All content fields and metadata
+- **ProductResource.php** - Comprehensive product management fields
+- **TestimonialResource.php** - Client information and testimonial content
+- **FeaturedProductResource.php** - Featured products management
+- **CertificationAwardResource.php** - Awards and certifications
+- **SliderResource.php** - Media management and custom styling
+
+#### Translation Coverage:
+- ✅ **Form Field Labels** - All input fields, selects, textareas, file uploads
+- ✅ **Section Headers** - General, SEO, Media, Technical Specs, etc.
+- ✅ **Table Columns** - All list views and data tables
+- ✅ **Status Options** - Draft, Review, Published, Active, Inactive, Archived
+- ✅ **Action Labels** - Delete Selected, Change Status, Remove from Featured
+- ✅ **Success Messages** - All notification messages and confirmations
+- ✅ **Helper Text** - Field descriptions and validation messages
+
+#### Added Translation Keys:
+80+ new translation keys added for both English (`en`) and Bangla (`bd`) including:
+
+**Basic Fields:**
+- Title, Excerpt, Content, Image, Name, Description, Slug, Status
+- Category, Parent, Visible, Order, Media, Type, URL
+
+**Advanced Fields:**
+- Meta Title, Meta Description, Meta Keywords, Canonical URL
+- Client Information, Testimonial Content, Rating (1-5 stars)
+- Technical Specifications, Related Products, Tags
+- Slider Details, Custom Styling, Video Embeds
+
+**Actions & Messages:**
+- Delete Selected, Change Status, Remove from Featured
+- Status Updated, Product removed from featured
+- Items deleted successfully, Selected items have been updated
+
+### Usage Example
+
+When administrators navigate to any form:
+
+```php
+// Before (hardcoded)
+TextInput::make('title')->required()
+
+// After (dynamic translation)
+TextInput::make('title')
+    ->label(__('Title'))
+    ->required()
+```
+
+**Result:**
+- **EN locale**: Shows "Title"
+- **BD locale**: Shows "শিরোনাম"
+
+### Technical Implementation
+
+All resources now use the `__('Translation Key')` pattern:
+
+```php
+// Section headers
+Section::make(__('General'))
+Section::make(__('SEO'))
+Section::make(__('Media'))
+
+// Field labels
+->label(__('Title'))
+->label(__('Description'))
+->label(__('Status'))
+
+// Status options
+'options([
+    'draft' => __('Draft'),
+    'published' => __('Published'),
+    'archived' => __('Archived'),
+])'
+
+// Action labels
+->label(__('Delete Selected'))
+->label(__('Change Status'))
+
+// Success messages
+->title(__('Status Updated'))
+->body(__('Selected items have been updated to') . ' ' . $data['status'])
+```
+
+### Cache Management
+
+After translation updates, clear caches:
+
+```bash
+php artisan cache:clear
+php artisan config:clear
+```
+
+This ensures all translation changes take effect immediately across the admin panel.

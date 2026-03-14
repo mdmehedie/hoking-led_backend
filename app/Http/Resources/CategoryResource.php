@@ -18,7 +18,13 @@ class CategoryResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
+            'translations' => $this->translations,
+            'url' => $this->getUrl(),
             'status' => $this->status,
+            'meta_title' => $this->meta_title,
+            'meta_description' => $this->meta_description,
+            'meta_keywords' => $this->meta_keywords,
+            'canonical_url' => $this->canonical_url,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

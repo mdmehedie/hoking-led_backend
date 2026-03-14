@@ -29,6 +29,6 @@ class AdminLocaleController extends Controller
 
         $request->session()->put('locale', $code);
 
-        return back();
+        return redirect()->back()->with('success', 'Language updated successfully.');
     }
 }

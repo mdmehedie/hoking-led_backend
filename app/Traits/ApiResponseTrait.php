@@ -30,9 +30,10 @@ trait ApiResponseTrait
 
         return response()->json([
             'status' => $successStatus,
-            // 'code' => $statusCode,
             'message' => $message,
             'data' => $data,
+            'locale' => app()->getLocale(),
+            'translations' => $this->getCommonTranslations(),
         ], $statusCode);
     }
 
@@ -218,5 +219,46 @@ trait ApiResponseTrait
     public function serviceUnavailableResponse(array $data = [], string $message = ''): JsonResponse
     {
         return $this->errorResponse($data, Response::HTTP_SERVICE_UNAVAILABLE, $message);
+    }
+
+    /**
+     * Get common translations for the current locale.
+     *
+     * @return array
+     */
+    protected function getCommonTranslations(): array
+    {
+        return [
+            'loading' => __('Loading...'),
+            'error' => __('Error'),
+            'success' => __('Success'),
+            'no_data' => __('No data available'),
+            'not_found' => __('Not found'),
+            'server_error' => __('Server error'),
+            'try_again' => __('Please try again'),
+            'close' => __('Close'),
+            'cancel' => __('Cancel'),
+            'confirm' => __('Confirm'),
+            'yes' => __('Yes'),
+            'no' => __('No'),
+            'ok' => __('OK'),
+            'save' => __('Save'),
+            'edit' => __('Edit'),
+            'delete' => __('Delete'),
+            'view' => __('View'),
+            'search' => __('Search'),
+            'filter' => __('Filter'),
+            'sort' => __('Sort'),
+            'page' => __('Page'),
+            'of' => __('of'),
+            'items_per_page' => __('Items per page'),
+            'showing' => __('Showing'),
+            'to' => __('to'),
+            'of_total' => __('of total'),
+            'previous' => __('Previous'),
+            'next' => __('Next'),
+            'first' => __('First'),
+            'last' => __('Last'),
+        ];
     }
 }

@@ -5,6 +5,8 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\ProductResource\Pages;
 use App\Models\Product;
 use Filament\Actions\Action;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DateTimePicker;
@@ -38,6 +40,8 @@ class ProductResource extends Resource
 
     protected static ?string $navigationLabel = 'Products';
 
+    protected static ?string $slug = 'product-items';
+
     public static function getNavigationLabel(): string
     {
         return __('Products');
@@ -46,6 +50,12 @@ class ProductResource extends Resource
     public static function getNavigationGroup(): ?string
     {
         return __('Product Management');
+    }
+
+    // Override navigation URL to use the correct slug
+    public static function getNavigationUrl(): string
+    {
+        return static::getUrl('index');
     }
 
     public static function canCreate(): bool
@@ -70,78 +80,108 @@ class ProductResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
+        $activeLocales = \App\Models\Locale::activeCodes();
+        $defaultLocale = \App\Models\Locale::defaultCode();
+
         return $schema->schema([
-            Section::make('General')->schema([
-                TextInput::make('title')->afterStateUpdated(function ($state, callable $set, $context) {
-                    $record = $context['record'] ?? null;
-                    if ($record === null) {
-                        $set('slug', static::generateUniqueSlug($state, $record?->id));
-                    }
-                })->live()->required(),
-                TextInput::make('slug')->unique(ignoreRecord: true)->required()->readonly(fn ($get, $record) => $record && $record->exists),
-                Textarea::make('short_description'),
-                Select::make('category_id')->relationship('category', 'name')->nullable(),
-                Select::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])->required(),
-                Hidden::make('published_at')
-                    ->default(now()),
-                Toggle::make('is_featured')->label('Featured Product'),
-            ]),
-            Section::make('Description')->schema([
-                \App\Filament\Forms\Components\CustomRichEditor::make('detailed_description'),
-            ]),
-            Section::make('Media')->schema([
-                FileUpload::make('main_image')->image()->directory('products/main')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                FileUpload::make('gallery')->multiple()->image()->directory('products/gallery')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                Repeater::make('video_embeds')->schema([
-                    Select::make('type')->options(['embed' => 'Embed URL', 'file' => 'Self-hosted File'])->required(),
-                    TextInput::make('title')->visible(fn ($get) => $get('type') === 'embed'),
-                    TextInput::make('url')->url()->rules(['regex:/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|vimeo\.com)/'])->visible(fn ($get) => $get('type') === 'embed'),
-                    FileUpload::make('video_file')->visible(fn ($get) => $get('type') === 'file'),
+            Tabs::make('Product Tabs')->tabs([
+                Tab::make(__('General Information'))->schema([
+                    TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required()
+                        ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
+                        ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            // Convert spaces to hyphens and ensure only valid characters
+                            $slug = strtolower(str_replace(' ', '-', $state));
+                            $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
+                            $slug = preg_replace('/-+/', '-', $slug); // Replace multiple hyphens with single
+                            $slug = trim($slug, '-'); // Remove leading/trailing hyphens
+                            $set('slug', $slug);
+                        })
+                        ->live(debounce: 300),
+                    Select::make('category_id')->relationship('category', 'name')->label(__('Category'))->nullable(),
+                    Select::make('status')->label(__('Status'))->options(['draft' => __('Draft'), 'published' => __('Published'), 'archived' => __('Archived')])->required(),
+                    Hidden::make('published_at')->default(now()),
+                    Toggle::make('is_featured')->label(__('Featured Product')),
                 ]),
-                FileUpload::make('downloads')->multiple()->directory('products/downloads'),
-            ]),
-            Section::make('Technical Specs')->schema([
-                Repeater::make('technical_specs')->schema([
-                    TextInput::make('key')->required(),
-                    TextInput::make('value')->required(),
+                Tab::make(__('Translations'))->schema([
+                    Tabs::make('Language Tabs')->tabs(
+                        collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
+                            $isDefault = $locale === $defaultLocale;
+
+                            return Tab::make(strtoupper($locale))
+                                ->schema([
+                                    TextInput::make("title.{$locale}")
+                                        ->label(__('Title'))
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
+                                            if (!$isDefault) {
+                                                return;
+                                            }
+
+                                            if (blank($get('slug'))) {
+                                                $set('slug', static::generateUniqueSlug($state, null));
+                                            }
+                                        })
+                                        ->live()
+                                        ->required(),
+                                    Textarea::make("short_description.{$locale}")
+                                        ->label(__('Short Description')),
+                                    \App\Filament\Forms\Components\CustomRichEditor::make("detailed_description.{$locale}")
+                                        ->label(__('Detailed Description'))
+                                        ->required(),
+                                ]);
+                        })->all()
+                    ),
                 ]),
-            ]),
-            Section::make('Tags')->schema([
-                Repeater::make('tags')->schema([
-                    TextInput::make('tag')->required(),
+                Tab::make(__('Media'))->schema([
+                    FileUpload::make('main_image')->label(__('Main Image'))->image()->directory('products/main')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                    FileUpload::make('gallery')->label(__('Gallery'))->multiple()->image()->directory('products/gallery')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                    Repeater::make('video_embeds')->label(__('Video Embeds'))->schema([
+                        Select::make('type')->label(__('Type'))->options(['embed' => __('Embed URL'), 'file' => __('Self-hosted File')])->required(),
+                        TextInput::make('title')->label(__('Title'))->visible(fn ($get) => $get('type') === 'embed'),
+                        TextInput::make('url')->label(__('URL'))->url()->rules(['regex:/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|vimeo\.com)/'])->visible(fn ($get) => $get('type') === 'embed'),
+                        FileUpload::make('video_file')->label(__('Video File'))->visible(fn ($get) => $get('type') === 'file'),
+                    ]),
+                    FileUpload::make('downloads')->label(__('Downloads'))->multiple()->directory('products/downloads'),
                 ]),
-            ]),
-            Section::make('Related Products')->schema([
-                Select::make('related_products')->multiple()->relationship('relatedProducts', 'title'),
-            ]),
-            Section::make('SEO')->schema([
-                TextInput::make('meta_title'),
-                Textarea::make('meta_description'),
-                Textarea::make('meta_keywords'),
-                TextInput::make('canonical_url'),
-            ]),
+                Tab::make(__('Technical Specifications'))->schema([
+                    Repeater::make('technical_specs')->label(__('Technical Specifications'))->schema([
+                        TextInput::make('key')->label(__('Key'))->required(),
+                        TextInput::make('value')->label(__('Value'))->required(),
+                    ]),
+                ]),
+                Tab::make(__('Tags & Relations'))->schema([
+                    \Filament\Forms\Components\TagsInput::make('tags')->label(__('Tags')),
+                    Select::make('related_products')->label(__('Related Products'))->multiple()->relationship('relatedProducts', 'title'),
+                ]),
+                Tab::make(__('SEO'))->schema([
+                    TextInput::make('meta_title')->label(__('Meta Title')),
+                    Textarea::make('meta_description')->label(__('Meta Description')),
+                    Textarea::make('meta_keywords')->label(__('Meta Keywords')),
+                    TextInput::make('canonical_url')->label(__('Canonical URL')),
+                ]),
+            ])->columnSpanFull(),
         ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table->columns([
-            ImageColumn::make('main_image')->label('Image'),
-            TextColumn::make('title')->searchable()->sortable(),
-            SelectColumn::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived'])->rules(['required'])->sortable()->afterStateUpdated(function ($state, $record) { \Filament\Notifications\Notification::make()->success()->title('Status updated')->body('Product status has been changed to ' . $state . '.')->send(); }),
-            TextColumn::make('category.name')->label('Category')->sortable(),
+            ImageColumn::make('main_image')->label(__('Image')),
+            TextColumn::make('title')->label(__('Title'))->searchable()->sortable(),
+            SelectColumn::make('status')->label(__('Status'))->options(['draft' => __('Draft'), 'published' => __('Published'), 'archived' => __('Archived')])->rules(['required'])->sortable()->afterStateUpdated(function ($state, $record) { \Filament\Notifications\Notification::make()->success()->title(__('Status updated'))->body(__('Product status has been changed to') . ' ' . $state . '.')->send(); }),
+            TextColumn::make('category.name')->label(__('Category'))->sortable(),
             TextColumn::make('published_at')->dateTime()->sortable(),
         ])->filters([
-            SelectFilter::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived']),
+            SelectFilter::make('status')->options(['draft' => __('Draft'), 'published' => __('Published'), 'archived' => __('Archived')]),
             SelectFilter::make('category_id')->relationship('category', 'name'),
         ])->actions([
             Action::make('share')
-                ->label('Share')
+                ->label(__('Share'))
                 ->icon('heroicon-o-share')
                 ->color('success')
                 ->visible(fn ($record) => $record->status === 'published')
                 ->form([
-                    Section::make('URL Preview')
+                    Section::make(__('URL Preview'))
                         ->description(__('This is the URL that will be included in your social media posts'))
                         ->schema([
                             \Filament\Forms\Components\TextInput::make('url_preview')
@@ -173,9 +213,11 @@ class ProductResource extends Resource
                 ->modalHeading(__('Share Product'))
                 ->modalSubmitActionLabel(__('Share Now')),
             Action::make('edit')
+                ->label(__('Edit'))
                 ->url(fn ($record) => static::getUrl('edit', ['record' => $record]))
                 ->icon('heroicon-o-pencil'),
             Action::make('delete')
+                ->label(__('Delete'))
                 ->action(fn ($record) => $record->delete())
                 ->requiresConfirmation()
                 ->color('danger')

@@ -13,6 +13,8 @@ use Filament\Schemas\Components\Section;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -47,9 +49,10 @@ class CertificationAwardResource extends Resource
     {
         return $schema
             ->schema([
-                Section::make('Basic Information')
-                    ->schema([
+                Tabs::make('Certification & Award Tabs')->tabs([
+                    Tab::make(__('Basic Information'))->schema([
                         TextInput::make('title')
+                            ->label(__('Title'))
                             ->required()
                             ->maxLength(255)
                             ->live()
@@ -61,20 +64,35 @@ class CertificationAwardResource extends Resource
                             }),
 
                         TextInput::make('slug')
+                            ->label(__('Slug'))
                             ->required()
                             ->maxLength(255)
-                            ->unique(CertificationAward::class, 'slug', ignoreRecord: true),
+                            ->unique(CertificationAward::class, 'slug', ignoreRecord: true)
+                            ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
+                            ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                // Convert spaces to hyphens and ensure only valid characters
+                                $slug = strtolower(str_replace(' ', '-', $state));
+                                $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
+                                $slug = preg_replace('/-+/', '-', $slug); // Replace multiple hyphens with single
+                                $slug = trim($slug, '-'); // Remove leading/trailing hyphens
+                                $set('slug', $slug);
+                            })
+                            ->live(debounce: 300),
 
                         TextInput::make('issuing_organization')
+                            ->label(__('Issuing Organization'))
                             ->maxLength(255),
 
                         DatePicker::make('date_awarded')
-                            ->label('Date Awarded'),
+                            ->label(__('Date Awarded')),
 
                         Textarea::make('description')
+                            ->label(__('Description'))
                             ->columnSpanFull(),
 
                         FileUpload::make('image_path')
+                            ->label(__('Image'))
                             ->image()
                             ->directory('certifications')
                             ->imageEditor()
@@ -83,31 +101,30 @@ class CertificationAwardResource extends Resource
                                 '4:3',
                                 '1:1',
                             ]),
-                    ])->columns(2),
-
-                Section::make('Visibility & Ordering')
-                    ->schema([
+                    ]),
+                    Tab::make(__('Visibility & SEO'))->schema([
                         Toggle::make('is_visible')
-                            ->label('Visible')
+                            ->label(__('Visible'))
                             ->default(true),
 
                         TextInput::make('sort_order')
-                            ->label('Sort Order')
+                            ->label(__('Sort Order'))
                             ->numeric()
                             ->default(0)
-                            ->helperText('Lower numbers appear first'),
-                    ])->columns(2),
+                            ->helperText(__('Lower numbers appear first')),
 
-                Section::make('SEO')
-                    ->schema([
                         TextInput::make('meta_title')
+                            ->label(__('Meta Title'))
                             ->maxLength(255),
 
                         Textarea::make('meta_description')
+                            ->label(__('Meta Description'))
                             ->maxLength(500),
 
-                        Textarea::make('meta_keywords'),
-                    ])->columns(1),
+                        Textarea::make('meta_keywords')
+                            ->label(__('Meta Keywords')),
+                    ]),
+                ])->columnSpanFull(),
             ]);
     }
 
@@ -116,23 +133,26 @@ class CertificationAwardResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('title')
+                    ->label(__('Title'))
                     ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('issuing_organization')
+                    ->label(__('Issuing Organization'))
                     ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('date_awarded')
+                    ->label(__('Date Awarded'))
                     ->date()
                     ->sortable(),
 
                 IconColumn::make('is_visible')
-                    ->label('Visible')
+                    ->label(__('Visible'))
                     ->boolean(),
 
                 Tables\Columns\TextColumn::make('sort_order')
-                    ->label('Order')
+                    ->label(__('Order'))
                     ->sortable(),
             ])
             ->filters([

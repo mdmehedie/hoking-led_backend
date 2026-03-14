@@ -1,39 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
     <url>
-    <loc>http://localhost:8000/products/demo-product</loc>
-    <lastmod>2026-02-24T06:42:00+00:00</lastmod>
-            </url>
-    <url>
-    <loc>http://localhost:8000/products/sdvsd</loc>
-    <lastmod>2026-02-22T05:20:32+00:00</lastmod>
-            </url>
-    <url>
-    <loc>http://localhost:8000/categories/demo</loc>
-    <lastmod>2026-02-17T19:55:59+00:00</lastmod>
-            </url>
-    <url>
-    <loc>http://localhost:8000/categories/demo-child</loc>
-    <lastmod>2026-02-17T20:08:04+00:00</lastmod>
-            </url>
-    <url>
-    <loc>http://localhost:8000/blog/demo-blog</loc>
-    <lastmod>2026-02-23T05:54:59+00:00</lastmod>
-            </url>
-    <url>
-    <loc>http://localhost:8000/blog/sdcsdvd-fdds</loc>
-    <lastmod>2026-02-19T09:26:40+00:00</lastmod>
-            </url>
-    <url>
-    <loc>http://localhost:8000/case-studies/demo-case-study</loc>
-    <lastmod>2026-02-23T05:48:25+00:00</lastmod>
-            </url>
-    <url>
-    <loc>http://localhost:8000/news/demo-news</loc>
-    <lastmod>2026-02-22T05:38:21+00:00</lastmod>
-            </url>
-    <url>
-    <loc>http://localhost:8000/pages/demo-page</loc>
-    <lastmod>2026-02-22T06:11:28+00:00</lastmod>
+    <loc>http://localhost/api/v1/blogs/fvdjv-d</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="http://localhost/api/v1/blogs/fvdjv-d" />
+    <xhtml:link rel="alternate" hreflang="bd" href="http://localhost/api/v1/bd/blogs/fvdjv-d" />
+    <lastmod>2026-03-08T20:18:04+00:00</lastmod>
             </url>
 </urlset>

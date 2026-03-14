@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\CaseStudyResource\Pages;
 use App\Models\CaseStudy;
+use App\Models\Locale;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
@@ -12,6 +13,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Panel;
 use Filament\Support\Icons\Heroicon;
 use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteBulkAction;
@@ -24,8 +26,8 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Filament\Schemas\Components\Section;
 use Illuminate\Support\Facades\DB;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tab;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 
 class CaseStudyResource extends Resource
 {
@@ -34,6 +36,13 @@ class CaseStudyResource extends Resource
     protected static ?string $navigationLabel = 'Case Studies';
 
     protected static ?int $navigationSort = 3;
+
+    protected static ?string $slug = 'cases';
+
+    public static function getModelLabel(): string
+    {
+        return 'Case Study';
+    }
 
     public static function getNavigationLabel(): string
     {
@@ -46,6 +55,12 @@ class CaseStudyResource extends Resource
     }
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
+
+    // Override navigation URL to use the correct slug
+    public static function getNavigationUrl(): string
+    {
+        return static::getUrl('index');
+    }
 
     public static function canCreate(): bool
     {
@@ -69,50 +84,81 @@ class CaseStudyResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
+        $activeLocales = Locale::activeCodes();
+        $defaultLocale = Locale::defaultCode();
+
         return $schema
             ->schema([
-                Section::make('General')->schema([
-                    TextInput::make('title')
-                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                            if (blank($get('slug'))) {
-                                $set('slug', static::generateUniqueSlug($state, null));
-                            }
-                        })
-                        ->live()
-                        ->required(),
-                    TextInput::make('slug')
-                        ->unique(ignoreRecord: true)
-                        ->required(),
-                    Select::make('status')
-                        ->options([
-                            'draft' => 'Draft',
-                            'review' => 'Review',
-                            'published' => 'Published',
-                        ])
-                        ->required(),
-                    Hidden::make('published_at')
-                        ->default(now()),
-                    Hidden::make('author_id')
-                        ->default(auth()->id()),
-                ]),
-                Section::make('Content')->schema([
-                    Textarea::make('excerpt'),
-                    \App\Filament\Forms\Components\CustomRichEditor::make('content')
-                        ->required(),
-                ]),
-                Section::make('Media')->schema([
-                    FileUpload::make('image_path')
-                        ->image()
-                        ->directory('case-studies')
-                        ->imageEditor()
-                        ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                ]),
-                Section::make('SEO')->schema([
-                    TextInput::make('meta_title'),
-                    Textarea::make('meta_description'),
-                    Textarea::make('meta_keywords'),
-                    TextInput::make('canonical_url'),
-                ]),
+                Tabs::make('Case Study Tabs')->tabs([
+                    Tab::make(__('General Information'))->schema([
+                        TextInput::make('slug')
+                            ->unique(ignoreRecord: true)
+                            ->required()
+                            ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
+                            ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                // Convert spaces to hyphens and ensure only valid characters
+                                $slug = strtolower(str_replace(' ', '-', $state));
+                                $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
+                                $slug = preg_replace('/-+/', '-', $slug); // Replace multiple hyphens with single
+                                $slug = trim($slug, '-'); // Remove leading/trailing hyphens
+                                $set('slug', $slug);
+                            })
+                            ->live(debounce: 300),
+                        Select::make('status')
+                            ->options([
+                                'draft' => 'Draft',
+                                'review' => 'Review',
+                                'published' => 'Published',
+                            ])
+                            ->required(),
+                        Hidden::make('published_at')
+                            ->default(now()),
+                        Hidden::make('author_id')
+                            ->default(auth()->id()),
+                    ]),
+                    Tab::make(__('Translations'))->schema([
+                        Tabs::make('Language Tabs')->tabs(
+                            collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
+                                $isDefault = $locale === $defaultLocale;
+
+                                return Tab::make(strtoupper($locale))
+                                    ->schema([
+                                        TextInput::make("title.{$locale}")
+                                            ->label(__('Title'))
+                                            ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
+                                                if (!$isDefault) {
+                                                    return;
+                                                }
+
+                                                if (blank($get('slug'))) {
+                                                    $set('slug', static::generateUniqueSlug($state, null));
+                                                }
+                                            })
+                                            ->live()
+                                            ->required($isDefault),
+                                        Textarea::make("excerpt.{$locale}")
+                                            ->label(__('Excerpt')),
+                                        \App\Filament\Forms\Components\CustomRichEditor::make("content.{$locale}")
+                                            ->label(__('Content'))
+                                            ->required($isDefault),
+                                        FileUpload::make("image_path.{$locale}")
+                                            ->label(__('Image'))
+                                            ->image()
+                                            ->directory('case-studies')
+                                            ->imageEditor()
+                                            ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                                    ]);
+                            })->all()
+                        ),
+                    ]),
+                    Tab::make('SEO')->schema([
+                        TextInput::make('meta_title'),
+                        Textarea::make('meta_description'),
+                        Textarea::make('meta_keywords'),
+                        TextInput::make('canonical_url'),
+                    ]),
+                ])->columnSpanFull(),
             ]);
     }
 

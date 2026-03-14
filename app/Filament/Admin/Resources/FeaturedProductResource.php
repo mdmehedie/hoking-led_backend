@@ -19,6 +19,16 @@ class FeaturedProductResource extends Resource
 
     protected static ?string $navigationLabel = 'Featured Products';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Featured Products');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Product Management');
+    }
+
     protected static ?string $modelLabel = 'Featured Product';
 
     protected static ?string $pluralModelLabel = 'Featured Products';
@@ -28,21 +38,21 @@ class FeaturedProductResource extends Resource
         return $table
             ->query(Product::where('is_featured', true))
             ->columns([
-                TextColumn::make('title')->searchable(),
-                TextColumn::make('status'),
-                TextColumn::make('category.name')->label('Category'),
+                TextColumn::make('title')->label(__('Title'))->searchable(),
+                TextColumn::make('status')->label(__('Status')),
+                TextColumn::make('category.name')->label(__('Category')),
             ])
             ->filters([
-                \Filament\Tables\Filters\SelectFilter::make('status')->options(['draft' => 'Draft', 'published' => 'Published', 'archived' => 'Archived']),
-                \Filament\Tables\Filters\SelectFilter::make('category_id')->relationship('category', 'name'),
+                \Filament\Tables\Filters\SelectFilter::make('status')->label(__('Status'))->options(['draft' => __('Draft'), 'published' => __('Published'), 'archived' => __('Archived')]),
+                \Filament\Tables\Filters\SelectFilter::make('category_id')->label(__('Category'))->relationship('category', 'name'),
             ])
             ->actions([
                 Action::make('remove_featured')
-                    ->label('Remove from Featured')
+                    ->label(__('Remove from Featured'))
                     ->icon('heroicon-o-x-mark')
                     ->action(function ($record) {
                         $record->update(['is_featured' => false]);
-                        \Filament\Notifications\Notification::make()->success()->title('Product removed from featured')->body('The product has been removed from featured products.')->send();
+                        \Filament\Notifications\Notification::make()->success()->title(__('Product removed from featured'))->body(__('The product has been removed from featured products.'))->send();
                     })
                     ->requiresConfirmation(),
             ]);

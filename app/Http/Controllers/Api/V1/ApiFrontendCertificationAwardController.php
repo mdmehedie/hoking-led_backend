@@ -30,7 +30,7 @@ class ApiFrontendCertificationAwardController extends ApiBaseController
         $certification = CertificationAward::where('slug', $slug)->where('is_visible', true)->first();
 
         if (!$certification) {
-            return $this->notFoundResponse([], 'Certification not found');
+            return $this->notFoundResponse([], __('Certification not found'));
         }
 
         return $this->okResponse(['certification' => $certification], __('Certification retrieved successfully'));

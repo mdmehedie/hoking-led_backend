@@ -57,6 +57,19 @@ Each locale object includes:
 
 For translatable attributes (like `title`, `short_description`, `detailed_description`), the API returns the value for the requested locale (with fallback).
 
+### Content (Blogs / News / Pages / Case Studies)
+
+For content endpoints (blogs/news/pages/case studies), the backend now stores and returns **language-specific content** based on the requested locale.
+
+Rules:
+
+- `slug` is shared (same for all languages)
+- These fields are returned in the requested locale (with fallback to default locale):
+  - `title`
+  - `excerpt`
+  - `content`
+  - `image_path`
+
 ## Postman
 
 Import the Postman collection:

@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
         // 2. Multilingual seeders
         $this->call([
             LocaleSeeder::class,
+            UiTranslationSeeder::class,
         ]);
         
         // 3. Permission seeders
@@ -40,7 +41,14 @@ class DatabaseSeeder extends Seeder
         // 4. Assign Super Admin role to admin user
         $this->call(AssignSuperAdminRoleSeeder::class);
         
-        // 5. Test user (optional)
+        // 5. Content seeders
+        $this->call([
+            ProductSeeder::class,
+            BlogSeeder::class,
+            NewsSeeder::class,
+        ]);
+        
+        // 6. Test user (optional)
         User::firstOrCreate(
             ['email' => 'test@example.com'],
             [

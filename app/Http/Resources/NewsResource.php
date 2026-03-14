@@ -22,12 +22,19 @@ class NewsResource extends JsonResource
             'excerpt' => $this->excerpt,
             'description' => $this->description,
             'content' => $this->content,
+            'translations' => $this->translations,
+            'url' => $this->getUrl(),
             'image_path' => $this->image_path ? url(Storage::url($this->image_path)) : null,
             'published_at' => $this->published_at,
             'author_id' => $this->author_id,
             'status' => $this->status,
+            'meta_title' => $this->meta_title,
+            'meta_description' => $this->meta_description,
+            'meta_keywords' => $this->meta_keywords,
+            'canonical_url' => $this->canonical_url,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'alternates' => $this->getAlternates(),
         ];
     }
 }

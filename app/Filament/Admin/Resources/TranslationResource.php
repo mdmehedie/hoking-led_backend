@@ -9,7 +9,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -38,19 +39,21 @@ class TranslationResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            Section::make(__('Translation'))->schema([
-                TextInput::make('key')
-                    ->required()
-                    ->unique(ignoreRecord: true, modifyRuleUsing: function ($rule, $get) {
-                        return $rule->where('locale', $get('locale'));
-                    }),
-                Select::make('locale')
-                    ->required()
-                    ->options(fn () => array_combine(config('app.supported_locales', ['en']), config('app.supported_locales', ['en']))),
-                Textarea::make('value')
-                    ->rows(4)
-                    ->nullable(),
-            ]),
+            Tabs::make('Translation Settings Tabs')->tabs([
+                Tab::make(__('Translation'))->schema([
+                    TextInput::make('key')
+                        ->required()
+                        ->unique(ignoreRecord: true, modifyRuleUsing: function ($rule, $get) {
+                            return $rule->where('locale', $get('locale'));
+                        }),
+                    Select::make('locale')
+                        ->required()
+                        ->options(fn () => array_combine(config('app.supported_locales', ['en']), config('app.supported_locales', ['en']))),
+                    Textarea::make('value')
+                        ->rows(4)
+                        ->nullable(),
+                ]),
+            ])->columnSpanFull(),
         ]);
     }
 

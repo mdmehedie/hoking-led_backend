@@ -61,27 +61,41 @@ class CategoryResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            Section::make('General')->schema([
-                TextInput::make('name')
-                    ->afterStateUpdated(function ($state, callable $set, $context) {
-                        $record = $context['record'] ?? null;
-                        if ($record === null) {
-                            $set('slug', static::generateUniqueSlug($state, $record?->id));
-                        }
-                    })
-                    ->live()
-                    ->required(),
-                TextInput::make('slug')->unique(ignoreRecord: true)->required(),
-                Textarea::make('description'),
-                Select::make('parent_id')->relationship('parent', 'name')->nullable(),
-                Toggle::make('is_visible')->default(true),
-            ]),
-            Section::make('SEO')->schema([
-                TextInput::make('meta_title'),
-                Textarea::make('meta_description'),
-                Textarea::make('meta_keywords'),
-                TextInput::make('canonical_url'),
-            ]),
+            Tabs::make('Category Tabs')->tabs([
+                Tab::make(__('General Information'))->schema([
+                    TextInput::make('name')
+                        ->label(__('Name'))
+                        ->afterStateUpdated(function ($state, callable $set, $context) {
+                            $record = $context['record'] ?? null;
+                            if ($record === null) {
+                                $set('slug', static::generateUniqueSlug($state, $record?->id));
+                            }
+                        })
+                        ->live()
+                        ->required(),
+                    TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required()
+                        ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
+                        ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
+                        ->afterStateUpdated(function ($state, callable $set) {
+                            // Convert spaces to hyphens and ensure only valid characters
+                            $slug = strtolower(str_replace(' ', '-', $state));
+                            $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
+                            $slug = preg_replace('/-+/', '-', $slug); // Replace multiple hyphens with single
+                            $slug = trim($slug, '-'); // Remove leading/trailing hyphens
+                            $set('slug', $slug);
+                        })
+                        ->live(debounce: 300),
+                    Textarea::make('description')->label(__('Description')),
+                    Select::make('parent_id')->relationship('parent', 'name')->label(__('Parent Category'))->nullable(),
+                    Toggle::make('is_visible')->label(__('Visible'))->default(true),
+                ]),
+                Tab::make(__('SEO'))->schema([
+                    TextInput::make('meta_title')->label(__('Meta Title')),
+                    Textarea::make('meta_description')->label(__('Meta Description')),
+                    Textarea::make('meta_keywords')->label(__('Meta Keywords')),
+                    TextInput::make('canonical_url')->label(__('Canonical URL')),
+                ]),
+            ])->columnSpanFull(),
         ]);
     }
 
@@ -90,8 +104,8 @@ class CategoryResource extends Resource
         return $table->columns([
             TextColumn::make('name')->searchable()->sortable(),
             TextColumn::make('slug')->searchable()->sortable(),
-            TextColumn::make('parent.name')->label('Parent')->sortable(),
-            BooleanColumn::make('is_visible')->sortable(),
+            TextColumn::make('parent.name')->label(__('Parent'))->sortable(),
+            BooleanColumn::make('is_visible')->label(__('Visible'))->sortable(),
         ])->actions([
             Action::make('edit')
                 ->url(fn ($record) => static::getUrl('edit', ['record' => $record]))

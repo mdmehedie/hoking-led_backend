@@ -13,6 +13,8 @@ use Filament\Forms\Components\TextInput as FormTextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
@@ -42,37 +44,41 @@ class TestimonialResource extends Resource
     {
         return $schema
             ->schema([
-                Section::make('Client Information')
-                    ->schema([
+                Tabs::make('Testimonial Tabs')->tabs([
+                    Tab::make(__('Client Information'))->schema([
                         TextInput::make('client_name')
+                            ->label(__('Client Name'))
                             ->required()
                             ->maxLength(255),
                         TextInput::make('client_position')
+                            ->label(__('Client Position'))
                             ->maxLength(255),
                         TextInput::make('client_company')
+                            ->label(__('Client Company'))
                             ->maxLength(255),
                     ])->columns(2),
 
-                Section::make('Testimonial Content')
-                    ->schema([
+                    Tab::make(__('Testimonial Content'))->schema([
                         Textarea::make('testimonial')
+                            ->label(__('Testimonial'))
                             ->required()
                             ->columnSpanFull(),
                         Select::make('rating')
+                            ->label(__('Rating'))
                             ->options([
-                                1 => '⭐ (1 star)',
-                                2 => '⭐⭐ (2 stars)',
-                                3 => '⭐⭐⭐ (3 stars)',
-                                4 => '⭐⭐⭐⭐ (4 stars)',
-                                5 => '⭐⭐⭐⭐⭐ (5 stars)',
+                                1 => '⭐ ' . __('(1 star)'),
+                                2 => '⭐⭐ ' . __('(2 stars)'),
+                                3 => '⭐⭐⭐ ' . __('(3 stars)'),
+                                4 => '⭐⭐⭐⭐ ' . __('(4 stars)'),
+                                5 => '⭐⭐⭐⭐⭐ ' . __('(5 stars)'),
                             ])
                             ->default(5)
                             ->required(),
                     ]),
 
-                Section::make('Media')
-                    ->schema([
+                    Tab::make(__('Media'))->schema([
                         FileUpload::make('image_path')
+                            ->label(__('Image'))
                             ->image()
                             ->directory('testimonials')
                             ->imageEditor()
@@ -83,25 +89,28 @@ class TestimonialResource extends Resource
                             ]),
                     ]),
 
-                Section::make('Visibility & Ordering')
-                    ->schema([
+                    Tab::make(__('Visibility & Ordering'))->schema([
                         Toggle::make('is_visible')
-                            ->label('Visible')
+                            ->label(__('Visible'))
                             ->default(true),
                         TextInput::make('sort_order')
+                            ->label(__('Sort Order'))
                             ->numeric()
                             ->default(0)
                             ->required(),
                     ])->columns(2),
 
-                Section::make('SEO')
-                    ->schema([
+                    Tab::make(__('SEO'))->schema([
                         TextInput::make('meta_title')
+                            ->label(__('Meta Title'))
                             ->maxLength(255),
                         Textarea::make('meta_description')
+                            ->label(__('Meta Description'))
                             ->maxLength(500),
-                        Textarea::make('meta_keywords'),
+                        Textarea::make('meta_keywords')
+                            ->label(__('Meta Keywords')),
                     ]),
+                ])->columnSpanFull(),
             ]);
     }
 
@@ -110,16 +119,21 @@ class TestimonialResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('client_name')
+                    ->label(__('Client Name'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('client_position')
+                    ->label(__('Client Position'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('client_company')
+                    ->label(__('Client Company'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('rating')
+                    ->label(__('Rating'))
                     ->formatStateUsing(fn (string $state): string => str_repeat('⭐', $state))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('testimonial')
+                    ->label(__('Testimonial'))
                     ->limit(50)
                     ->tooltip(function (Tables\Columns\TextColumn $column): ?string {
                         $state = $column->getState();
@@ -129,8 +143,10 @@ class TestimonialResource extends Resource
                         return $state;
                     }),
                 Tables\Columns\IconColumn::make('is_visible')
+                    ->label(__('Visible'))
                     ->boolean(),
                 Tables\Columns\TextColumn::make('sort_order')
+                    ->label(__('Sort Order'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

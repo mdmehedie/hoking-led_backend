@@ -12,6 +12,16 @@ trait HasTranslations
 
     public static function bootHasTranslations(): void
     {
+        static::saving(function ($model): void {
+            if (!property_exists($model, 'pendingTranslations') || $model->pendingTranslations === []) {
+                return;
+            }
+
+            if ($model->exists && !$model->isDirty()) {
+                $model->setUpdatedAt($model->freshTimestamp());
+            }
+        });
+
         static::saved(function ($model): void {
             if (!property_exists($model, 'pendingTranslations') || $model->pendingTranslations === []) {
                 return;
@@ -51,6 +61,10 @@ trait HasTranslations
             return $translation->value;
         }
 
+        if (!$fallback) {
+            return null;
+        }
+
         if ($fallback) {
             $default = Locale::defaultCode();
             if ($default !== $locale) {
@@ -80,8 +94,16 @@ trait HasTranslations
 
     public function getAttribute($key): mixed
     {
-        if (is_string($key) && $this->isTranslatableAttribute($key)) {
-            return $this->getTranslation($key);
+        if (is_string($key)) {
+            // Check for dotted notation like 'title.en'
+            if (strpos($key, '.') !== false) {
+                [$attribute, $locale] = explode('.', $key, 2);
+                if ($this->isTranslatableAttribute($attribute)) {
+                    return $this->getTranslation($attribute, $locale);
+                }
+            } elseif ($this->isTranslatableAttribute($key)) {
+                return $this->getTranslation($key);
+            }
         }
 
         return parent::getAttribute($key);
