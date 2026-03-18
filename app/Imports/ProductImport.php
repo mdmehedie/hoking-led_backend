@@ -24,6 +24,23 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
         $category = Category::where('name', $row['category'])->orWhere('slug', $row['category'])->first();
         $product = Product::where('slug', $slug)->first();
 
+        // Parse technical_specs from JSON - expect [{key, values}] format
+        $technicalSpecs = [];
+        if (isset($row['technical_specs'])) {
+            $decoded = json_decode($row['technical_specs'], true);
+            if (is_array($decoded)) {
+                // Validate and normalize to [{key, values}] format
+                foreach ($decoded as $spec) {
+                    if (isset($spec['key']) && isset($spec['values'])) {
+                        $technicalSpecs[] = [
+                            'key' => $spec['key'],
+                            'values' => is_array($spec['values']) ? $spec['values'] : [$spec['values']],
+                        ];
+                    }
+                }
+            }
+        }
+
         $data = [
             'title' => $row['title'],
             'slug' => $slug,
@@ -31,7 +48,7 @@ class ProductImport implements ToModel, WithHeadingRow, WithValidation, SkipsOnF
             'detailed_description' => $row['detailed_description'] ?? null,
             'status' => $row['status'] ?? 'draft',
             'published_at' => isset($row['published_at']) ? Carbon::parse($row['published_at']) : null,
-            'technical_specs' => isset($row['technical_specs']) ? json_decode($row['technical_specs'], true) : [],
+            'technical_specs' => $technicalSpecs,
             'tags' => isset($row['tags']) ? explode(',', $row['tags']) : [],
             'category_id' => $category->id ?? null,
         ];
