@@ -2,12 +2,15 @@
 
 namespace App\Filament\Admin\Resources;
 
+use App\Filament\Admin\Resources\CategoryResource\Form\CategoryForm;
 use App\Filament\Admin\Resources\CategoryResource\Pages;
 use App\Models\Category;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Support\Facades\DB;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -24,8 +27,10 @@ use Filament\Tables\Columns\BooleanColumn;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\BulkAction;
 use Filament\Support\Icons\Heroicon;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tab;
+use Illuminate\Support\Collection;
+use Filament\Notifications\Notification;
+//use Filament\Forms\Components\Tabs;
+//use Filament\Forms\Components\Tab;
 
 class CategoryResource extends Resource
 {
@@ -45,58 +50,9 @@ class CategoryResource extends Resource
         return __('Product Management');
     }
 
-    protected static function generateUniqueSlug($title, $id = null)
-    {
-        $table = 'categories';
-        $baseSlug = \Illuminate\Support\Str::slug($title);
-        $slug = $baseSlug;
-        $counter = 1;
-        while (DB::table($table)->where('slug', $slug)->where('id', '!=', $id)->exists()) {
-            $slug = $baseSlug . '-' . $counter;
-            $counter++;
-        }
-        return $slug;
-    }
-
     public static function form(Schema $schema): Schema
     {
-        return $schema->schema([
-            Tabs::make('Category Tabs')->tabs([
-                Tab::make(__('General Information'))->schema([
-                    TextInput::make('name')
-                        ->label(__('Name'))
-                        ->afterStateUpdated(function ($state, callable $set, $context) {
-                            $record = $context['record'] ?? null;
-                            if ($record === null) {
-                                $set('slug', static::generateUniqueSlug($state, $record?->id));
-                            }
-                        })
-                        ->live()
-                        ->required(),
-                    TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required()
-                        ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
-                        ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
-                        ->afterStateUpdated(function ($state, callable $set) {
-                            // Convert spaces to hyphens and ensure only valid characters
-                            $slug = strtolower(str_replace(' ', '-', $state));
-                            $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
-                            $slug = preg_replace('/-+/', '-', $slug); // Replace multiple hyphens with single
-                            $slug = trim($slug, '-'); // Remove leading/trailing hyphens
-                            $set('slug', $slug);
-                        })
-                        ->live(debounce: 300),
-                    Textarea::make('description')->label(__('Description')),
-                    Select::make('parent_id')->relationship('parent', 'name')->label(__('Parent Category'))->nullable(),
-                    Toggle::make('is_visible')->label(__('Visible'))->default(true),
-                ]),
-                Tab::make(__('SEO'))->schema([
-                    TextInput::make('meta_title')->label(__('Meta Title')),
-                    Textarea::make('meta_description')->label(__('Meta Description')),
-                    Textarea::make('meta_keywords')->label(__('Meta Keywords')),
-                    TextInput::make('canonical_url')->label(__('Canonical URL')),
-                ]),
-            ])->columnSpanFull(),
-        ]);
+        return CategoryForm::form($schema);
     }
 
     public static function table(Table $table): Table
@@ -104,9 +60,11 @@ class CategoryResource extends Resource
         return $table->columns([
             TextColumn::make('name')->searchable()->sortable(),
             TextColumn::make('slug')->searchable()->sortable(),
-            TextColumn::make('parent.name')->label(__('Parent'))->sortable(),
+            TextColumn::make('parent.name')->label(__('Parent'))->sortable()->placeholder('-'),
             BooleanColumn::make('is_visible')->label(__('Visible'))->sortable(),
-        ])->actions([
+        ])
+        ->defaultSort('name')
+        ->actions([
             Action::make('edit')
                 ->url(fn ($record) => static::getUrl('edit', ['record' => $record]))
                 ->icon('heroicon-o-pencil'),
@@ -132,6 +90,11 @@ class CategoryResource extends Resource
                         ->send();
                 }),
         ]);
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->with('parent');
     }
 
     public static function canCreate(): bool

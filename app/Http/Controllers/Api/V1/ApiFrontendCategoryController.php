@@ -15,7 +15,7 @@ class ApiFrontendCategoryController extends ApiBaseController
     {
         $perPage = $request->get('per_page', 10);
 
-        $categories = Category::orderBy('name')->paginate($perPage);
+        $categories = Category::with('parent')->orderBy('name')->paginate($perPage);
 
         return $this->okResponse(['categories' => CategoryResource::collection($categories)], __('Categories retrieved successfully'));
     }

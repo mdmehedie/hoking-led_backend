@@ -12,13 +12,31 @@ class SetLocale
     public function handle(Request $request, Closure $next): Response
     {
         $supported = config('app.supported_locales', []);
-        $default = Locale::defaultCode();
+        $default = $this->getDefaultLocale();
 
         $locale = $this->determineLocale($request, $supported, $default);
 
         app()->setLocale($locale);
 
         return $next($request);
+    }
+
+    private function getDefaultLocale(): string
+    {
+        // Use config value as fallback to avoid model loading during middleware
+        $default = config('app.locale', 'en');
+        
+        // Try to get from database only if app is fully booted
+        try {
+            $dbDefault = Locale::query()->where('is_default', true)->value('code');
+            if ($dbDefault) {
+                return $dbDefault;
+            }
+        } catch (\Throwable $e) {
+            // If database isn't ready or model fails to load, use config default
+        }
+        
+        return $default;
     }
 
     private function determineLocale(Request $request, array $supported, string $default): string
