@@ -118,8 +118,7 @@ class ProductForm
                                     'file' => __('Self-hosted File'),
                                 ])
                                 ->default('embed')
-                                ->live()
-                                ->required(),
+                                ->live(),
                             TextInput::make('title')
                                 ->label(__('Title'))
                                 ->visible(fn ($get) => $get('type') === 'embed'),
@@ -127,17 +126,16 @@ class ProductForm
                                 ->label(__('URL'))
                                 ->url()
                                 ->rules(['regex:/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|vimeo\.com)/'])
-                                ->visible(fn ($get) => $get('type') === 'embed')
-                                ->required(fn ($get) => $get('type') === 'embed'),
+                                ->visible(fn ($get) => $get('type') === 'embed'),
                             FileUpload::make('video_file')
                                 ->label(__('Video File'))
                                 ->visible(fn ($get) => $get('type') === 'file')
                                 ->disk('public')
                                 ->directory('products/videos')
-                                ->visibility('public')
-                                ->required(fn ($get) => $get('type') === 'file'),
+                                ->visibility('public'),
                         ])
-                        ->collapsible(),
+                        ->collapsible()
+                        ->required(false),
                     FileUpload::make('downloads')
                         ->label(__('Downloads'))
                         ->multiple()
@@ -146,22 +144,10 @@ class ProductForm
                         ->visibility('public'),
                 ]),
                 Tab::make(__('Technical Specifications'))->schema([
-                    Repeater::make('technical_specs')
-                        ->label(__('Technical Specifications'))
-                        ->schema([
-                            TextInput::make('key')
-                                ->label(__('Key'))
-                                ->required(),
-                            TagsInput::make('values')
-                                ->label(__('Values'))
-                                ->required()
-                                ->splitKeys(['Enter'])
-                                ->helperText(__('Enter multiple values. Press Enter to add each value.')),
-                        ])
-                        ->collapsible()
-                        ->itemLabel(fn (array $state): ?string => $state['key'] ? ucfirst($state['key']) : null)
-                        ->reorderable()
-                        ->reorderableWithDragAndDrop(),
+                    \App\Filament\Forms\Components\TableBuilder::make('technical_specs')
+                        ->label(__('Technical Specifications Table'))
+                        ->initialRows(3)
+                        ->initialColumns(2),
                 ]),
                 Tab::make(__('Tags & Relations'))->schema([
                     TagsInput::make('tags')
