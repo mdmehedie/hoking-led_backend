@@ -2,32 +2,22 @@
 
 namespace App\Filament\Admin\Resources;
 
+use App\Filament\Admin\Resources\CaseStudyResource\Form\CaseStudyForm;
 use App\Filament\Admin\Resources\CaseStudyResource\Pages;
 use App\Models\CaseStudy;
-use App\Models\Locale;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Resource;
-use Filament\Panel;
-use Filament\Support\Icons\Heroicon;
 use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Collection;
-use Filament\Notifications\Notification;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Illuminate\Support\Facades\DB;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
 
 class CaseStudyResource extends Resource
 {
@@ -84,82 +74,7 @@ class CaseStudyResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $activeLocales = Locale::activeCodes();
-        $defaultLocale = Locale::defaultCode();
-
-        return $schema
-            ->schema([
-                Tabs::make('Case Study Tabs')->tabs([
-                    Tab::make(__('General Information'))->schema([
-                        TextInput::make('slug')
-                            ->unique(ignoreRecord: true)
-                            ->required()
-                            ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
-                            ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
-                            ->afterStateUpdated(function ($state, callable $set) {
-                                // Convert spaces to hyphens and ensure only valid characters
-                                $slug = strtolower(str_replace(' ', '-', $state));
-                                $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
-                                $slug = preg_replace('/-+/', '-', $slug); // Replace multiple hyphens with single
-                                $slug = trim($slug, '-'); // Remove leading/trailing hyphens
-                                $set('slug', $slug);
-                            })
-                            ->live(debounce: 300),
-                        Select::make('status')
-                            ->options([
-                                'draft' => 'Draft',
-                                'review' => 'Review',
-                                'published' => 'Published',
-                            ])
-                            ->required(),
-                        Hidden::make('published_at')
-                            ->default(now()),
-                        Hidden::make('author_id')
-                            ->default(auth()->id()),
-                    ]),
-                    Tab::make(__('Translations'))->schema([
-                        Tabs::make('Language Tabs')->tabs(
-                            collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
-                                $isDefault = $locale === $defaultLocale;
-
-                                return Tab::make(strtoupper($locale))
-                                    ->schema([
-                                        TextInput::make("title.{$locale}")
-                                            ->label(__('Title'))
-                                            ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
-                                                if (!$isDefault) {
-                                                    return;
-                                                }
-
-                                                if (blank($get('slug'))) {
-                                                    $set('slug', static::generateUniqueSlug($state, null));
-                                                }
-                                            })
-                                            ->live()
-                                            ->required($isDefault),
-                                        Textarea::make("excerpt.{$locale}")
-                                            ->label(__('Excerpt')),
-                                        \App\Filament\Forms\Components\CustomRichEditor::make("content.{$locale}")
-                                            ->label(__('Content'))
-                                            ->required($isDefault),
-                                        FileUpload::make("image_path.{$locale}")
-                                            ->label(__('Image'))
-                                            ->image()
-                                            ->directory('case-studies')
-                                            ->imageEditor()
-                                            ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                                    ]);
-                            })->all()
-                        ),
-                    ]),
-                    Tab::make('SEO')->schema([
-                        TextInput::make('meta_title'),
-                        Textarea::make('meta_description'),
-                        Textarea::make('meta_keywords'),
-                        TextInput::make('canonical_url'),
-                    ]),
-                ])->columnSpanFull(),
-            ]);
+        return CaseStudyForm::form($schema);
     }
 
     public static function table(Table $table): Table
@@ -282,6 +197,11 @@ class CaseStudyResource extends Resource
         ];
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->with('translations');
+    }
+
     public static function getPages(): array
     {
         return [
@@ -289,19 +209,6 @@ class CaseStudyResource extends Resource
             'create' => Pages\CreateCaseStudy::route('/create'),
             'edit' => Pages\EditCaseStudy::route('/{record}/edit'),
         ];
-    }
-
-    protected static function generateUniqueSlug($title, $id = null)
-    {
-        $table = 'case_studies';
-        $baseSlug = \Illuminate\Support\Str::slug($title);
-        $slug = $baseSlug;
-        $counter = 1;
-        while (DB::table($table)->where('slug', $slug)->where('id', '!=', $id)->exists()) {
-            $slug = $baseSlug . '-' . $counter;
-            $counter++;
-        }
-        return $slug;
     }
 
     /**

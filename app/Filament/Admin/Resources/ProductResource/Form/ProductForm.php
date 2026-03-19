@@ -151,16 +151,7 @@ class ProductForm
                         ->schema([
                             TextInput::make('key')
                                 ->label(__('Key'))
-                                ->required()
-                                ->live()
-                                ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                    // Normalize key to lowercase, alphanumeric with underscores
-                                    $normalized = strtolower(Str::slug($state, '_'));
-                                    if ($normalized !== $state) {
-                                        $set('key', $normalized);
-                                    }
-                                })
-                                ->helperText(__('Use lowercase letters, numbers, and underscores only. e.g., power_consumption')),
+                                ->required(),
                             TagsInput::make('values')
                                 ->label(__('Values'))
                                 ->required()
@@ -168,7 +159,7 @@ class ProductForm
                                 ->helperText(__('Enter multiple values. Press Enter to add each value.')),
                         ])
                         ->collapsible()
-                        ->itemLabel(fn (array $state): ?string => $state['key'] ? ucfirst(str_replace('_', ' ', $state['key'])) : null)
+                        ->itemLabel(fn (array $state): ?string => $state['key'] ? ucfirst($state['key']) : null)
                         ->reorderable()
                         ->reorderableWithDragAndDrop(),
                 ]),
