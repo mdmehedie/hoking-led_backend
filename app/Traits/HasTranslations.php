@@ -54,6 +54,11 @@ trait HasTranslations
     {
         $locale = $locale ?: app()->getLocale();
 
+        // Ensure translations relationship is loaded
+        if (!$this->relationLoaded('translations')) {
+            $this->load('translations');
+        }
+
         $translation = $this->translations
             ->firstWhere(fn ($t) => $t->locale === $locale && $t->attribute === $attribute);
 

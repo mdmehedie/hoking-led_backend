@@ -35,13 +35,13 @@ class ProductResource extends JsonResource
             'published_at' => $this->published_at,
             'author_id' => $this->author_id,
             'is_featured' => $this->is_featured,
-            'main_image' => $this->main_image ? url(Storage::url($this->main_image)) : null,
+            'main_image' => $this->main_image ? Storage::disk('public')->url($this->main_image) : null,
             'gallery' => $this->gallery ? array_map(function ($image) {
-                return url(Storage::url($image));
+                return Storage::disk('public')->url($image);
             }, $this->gallery) : [],
             'video_embeds' => $this->video_embeds ?? [],
             'downloads' => $this->downloads ? array_map(function ($download) {
-                return url(Storage::url($download));
+                return Storage::disk('public')->url($download);
             }, $this->downloads) : [],
             'technical_specs' => $this->technical_specs ?? [],
             'tags' => $this->tags ?? [],
@@ -51,7 +51,7 @@ class ProductResource extends JsonResource
                         'id' => $product->id,
                         'title' => $product->title,
                         'slug' => $product->slug,
-                        'main_image' => $product->main_image ? url(Storage::url($product->main_image)) : null,
+                        'main_image' => $product->main_image ? Storage::disk('public')->url($product->main_image) : null,
                         'short_description' => $product->short_description,
                         'url' => $product->getUrl(),
                     ];

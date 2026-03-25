@@ -2,35 +2,24 @@
 
 namespace App\Filament\Admin\Resources;
 
+use App\Filament\Admin\Resources\ProductResource\Form\ProductForm;
 use App\Filament\Admin\Resources\ProductResource\Pages;
 use App\Models\Product;
 use Filament\Actions\Action;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\RichEditor;
-use Illuminate\Support\Facades\DB;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Illuminate\Support\Str;
-use Filament\Support\Icons\Heroicon;
 use Filament\Actions\BulkAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Collection;
-use Filament\Notifications\Notification;
 
 class ProductResource extends Resource
 {
@@ -80,87 +69,7 @@ class ProductResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $activeLocales = \App\Models\Locale::activeCodes();
-        $defaultLocale = \App\Models\Locale::defaultCode();
-
-        return $schema->schema([
-            Tabs::make('Product Tabs')->tabs([
-                Tab::make(__('General Information'))->schema([
-                    TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required()
-                        ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
-                        ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
-                        ->afterStateUpdated(function ($state, callable $set) {
-                            // Convert spaces to hyphens and ensure only valid characters
-                            $slug = strtolower(str_replace(' ', '-', $state));
-                            $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
-                            $slug = preg_replace('/-+/', '-', $slug); // Replace multiple hyphens with single
-                            $slug = trim($slug, '-'); // Remove leading/trailing hyphens
-                            $set('slug', $slug);
-                        })
-                        ->live(debounce: 300),
-                    Select::make('category_id')->relationship('category', 'name')->label(__('Category'))->nullable(),
-                    Select::make('status')->label(__('Status'))->options(['draft' => __('Draft'), 'published' => __('Published'), 'archived' => __('Archived')])->required(),
-                    Hidden::make('published_at')->default(now()),
-                    Toggle::make('is_featured')->label(__('Featured Product')),
-                ]),
-                Tab::make(__('Translations'))->schema([
-                    Tabs::make('Language Tabs')->tabs(
-                        collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
-                            $isDefault = $locale === $defaultLocale;
-
-                            return Tab::make(strtoupper($locale))
-                                ->schema([
-                                    TextInput::make("title.{$locale}")
-                                        ->label(__('Title'))
-                                        ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
-                                            if (!$isDefault) {
-                                                return;
-                                            }
-
-                                            if (blank($get('slug'))) {
-                                                $set('slug', static::generateUniqueSlug($state, null));
-                                            }
-                                        })
-                                        ->live()
-                                        ->required(),
-                                    Textarea::make("short_description.{$locale}")
-                                        ->label(__('Short Description')),
-                                    \App\Filament\Forms\Components\CustomRichEditor::make("detailed_description.{$locale}")
-                                        ->label(__('Detailed Description'))
-                                        ->required(),
-                                ]);
-                        })->all()
-                    ),
-                ]),
-                Tab::make(__('Media'))->schema([
-                    FileUpload::make('main_image')->label(__('Main Image'))->image()->directory('products/main')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                    FileUpload::make('gallery')->label(__('Gallery'))->multiple()->image()->directory('products/gallery')->imageEditor()->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                    Repeater::make('video_embeds')->label(__('Video Embeds'))->schema([
-                        Select::make('type')->label(__('Type'))->options(['embed' => __('Embed URL'), 'file' => __('Self-hosted File')])->required(),
-                        TextInput::make('title')->label(__('Title'))->visible(fn ($get) => $get('type') === 'embed'),
-                        TextInput::make('url')->label(__('URL'))->url()->rules(['regex:/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|vimeo\.com)/'])->visible(fn ($get) => $get('type') === 'embed'),
-                        FileUpload::make('video_file')->label(__('Video File'))->visible(fn ($get) => $get('type') === 'file'),
-                    ]),
-                    FileUpload::make('downloads')->label(__('Downloads'))->multiple()->directory('products/downloads'),
-                ]),
-                Tab::make(__('Technical Specifications'))->schema([
-                    Repeater::make('technical_specs')->label(__('Technical Specifications'))->schema([
-                        TextInput::make('key')->label(__('Key'))->required(),
-                        TextInput::make('value')->label(__('Value'))->required(),
-                    ]),
-                ]),
-                Tab::make(__('Tags & Relations'))->schema([
-                    \Filament\Forms\Components\TagsInput::make('tags')->label(__('Tags')),
-                    Select::make('related_products')->label(__('Related Products'))->multiple()->relationship('relatedProducts', 'title'),
-                ]),
-                Tab::make(__('SEO'))->schema([
-                    TextInput::make('meta_title')->label(__('Meta Title')),
-                    Textarea::make('meta_description')->label(__('Meta Description')),
-                    Textarea::make('meta_keywords')->label(__('Meta Keywords')),
-                    TextInput::make('canonical_url')->label(__('Canonical URL')),
-                ]),
-            ])->columnSpanFull(),
-        ]);
+        return ProductForm::form($schema);
     }
 
     public static function table(Table $table): Table
@@ -281,19 +190,6 @@ class ProductResource extends Resource
             'create' => Pages\CreateProduct::route('/create'),
             'edit' => Pages\EditProduct::route('/{record}/edit'),
         ];
-    }
-
-    protected static function generateUniqueSlug($title, $id = null)
-    {
-        $table = 'products';
-        $baseSlug = \Illuminate\Support\Str::slug($title);
-        $slug = $baseSlug;
-        $counter = 1;
-        while (DB::table($table)->where('slug', $slug)->where('id', '!=', $id)->exists()) {
-            $slug = $baseSlug . '-' . $counter;
-            $counter++;
-        }
-        return $slug;
     }
 
     /**

@@ -10,6 +10,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use App\Traits\HasSeo;
 use App\Traits\HasTranslations;
+use Illuminate\Support\Facades\Storage;
 
 class Product extends Model implements HasMedia
 {
@@ -50,6 +51,35 @@ class Product extends Model implements HasMedia
         'downloads' => 'array',
         'published_at' => 'datetime',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // No transformation needed - store as [{key, values}] format directly
+        // The form already provides data in this format
+
+        static::deleting(function ($product) {
+            // Delete main image
+            if ($product->main_image) {
+                Storage::disk('public')->delete($product->main_image);
+            }
+
+            // Delete gallery images
+            if ($product->gallery) {
+                foreach ($product->gallery as $image) {
+                    Storage::disk('public')->delete($image);
+                }
+            }
+
+            // Delete downloads
+            if ($product->downloads) {
+                foreach ($product->downloads as $download) {
+                    Storage::disk('public')->delete($download);
+                }
+            }
+        });
+    }
 
     public function category(): BelongsTo
     {
@@ -95,31 +125,31 @@ class Product extends Model implements HasMedia
     public function getAlternates(): array
     {
         $alternates = [];
-        
+
         // Get regions where this product is available
         $productRegions = $this->regions()->where('is_active', true)->pluck('code')->toArray();
-        
+
         // If no regions specified, use default region only
         if (empty($productRegions)) {
             $productRegions = [\App\Models\Region::defaultCode()];
         }
-        
+
         // For proper hreflang, generate alternates for each region with its default locale
         foreach ($productRegions as $region) {
             $url = $this->getUrl();
-            
+
             // Map regions to their typical locales
             $regionToLocale = [
                 'us' => 'en',
-                'uk' => 'en-GB', 
+                'uk' => 'en-GB',
                 'eu' => 'en',
                 'ca' => 'en-CA',
                 'au' => 'en-AU',
                 'bd' => 'bd'  // Use 'bd' locale code since that's what's in the database
             ];
-            
+
             $locale = $regionToLocale[$region] ?? 'en';
-            
+
             // For default region (us), don't add prefix
             if ($region === \App\Models\Region::defaultCode()) {
                 $alternates[] = [
@@ -134,7 +164,7 @@ class Product extends Model implements HasMedia
                 ];
             }
         }
-        
+
         return $alternates;
     }
 }

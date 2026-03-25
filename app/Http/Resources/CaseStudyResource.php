@@ -24,7 +24,7 @@ class CaseStudyResource extends JsonResource
             'content' => $this->content,
             'translations' => $this->translations,
             'url' => $this->getUrl(),
-            'image_path' => $this->image_path ? url(Storage::url($this->image_path)) : null,
+            'image_path' => $this->image_path ? Storage::disk('public')->url($this->image_path) : null,
             'published_at' => $this->published_at,
             'author_id' => $this->author_id,
             'status' => $this->status,

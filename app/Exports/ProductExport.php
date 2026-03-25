@@ -33,7 +33,9 @@ class ProductExport implements FromCollection, WithHeadings, WithMapping
     public function map($product): array
     {
         $tags = is_array($product->tags) ? array_filter($product->tags, 'is_scalar') : [];
-        $specs = is_array($product->technical_specs) ? $product->technical_specs : [];
+        
+        // Technical specs are already stored as [{key, values}] format
+        $specs = $product->technical_specs ?? [];
 
         return [
             $product->title,
