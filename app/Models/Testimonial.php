@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HasSeo;
+use Illuminate\Support\Facades\Storage;
 
 class Testimonial extends Model
 {
@@ -39,11 +40,24 @@ class Testimonial extends Model
                 $model->sort_order = static::max('sort_order') + 1;
             }
         });
+
+        static::updating(function ($model) {
+            // Delete old image if it's being replaced
+            if ($model->isDirty('image_path') && $model->getOriginal('image_path')) {
+                Storage::disk('public')->delete($model->getOriginal('image_path'));
+            }
+        });
+
+        static::deleting(function ($model) {
+            if ($model->image_path) {
+                Storage::disk('public')->delete($model->image_path);
+            }
+        });
     }
 
     public function getImageAttribute()
     {
-        return $this->image_path ? asset('storage/testimonials/' . $this->image_path) : null;
+        return $this->image_path ? Storage::disk('public')->url($this->image_path) : null;
     }
 
     public function scopeVisible($query)

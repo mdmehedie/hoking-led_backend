@@ -45,10 +45,33 @@ class CaseStudy extends Model implements HasMedia
     {
         parent::boot();
 
+        static::updating(function ($caseStudy) {
+            // Delete old image if it's being replaced (for all locales)
+            foreach ($caseStudy->getTranslatableAttributes() as $attribute) {
+                if ($caseStudy->isDirty($attribute)) {
+                    $oldValue = $caseStudy->getOriginal($attribute);
+                    if ($oldValue && is_array($oldValue)) {
+                        foreach ($oldValue as $locale => $filePath) {
+                            if ($filePath) {
+                                Storage::disk('public')->delete($filePath);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
         static::deleting(function ($caseStudy) {
-            // Delete image file
-            if ($caseStudy->image_path) {
-                Storage::disk('public')->delete($caseStudy->image_path);
+            // Delete image file (for all locales)
+            foreach ($caseStudy->getTranslatableAttributes() as $attribute) {
+                $value = $caseStudy->$attribute;
+                if ($value && is_array($value)) {
+                    foreach ($value as $locale => $filePath) {
+                        if ($filePath) {
+                            Storage::disk('public')->delete($filePath);
+                        }
+                    }
+                }
             }
         });
     }

@@ -80,7 +80,9 @@ class TestimonialResource extends Resource
                         FileUpload::make('image_path')
                             ->label(__('Image'))
                             ->image()
+                            ->disk('public')
                             ->directory('testimonials')
+                            ->visibility('public')
                             ->imageEditor()
                             ->imageEditorAspectRatios([
                                 '1:1',
