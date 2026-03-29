@@ -17,21 +17,11 @@ return new class extends Migration
             $table->json('features')->nullable()->after('technical_specs');
         });
 
-        // Backup existing detailed_description data
-        $products = DB::table('products')->get();
-        $backup = [];
-        foreach ($products as $product) {
-            if ($product->detailed_description) {
-                $backup[$product->id] = $product->detailed_description;
-            }
-        }
+        // Clear old HTML content (can't be auto-converted to JSON repeater format)
+        DB::table('products')->whereNotNull('detailed_description')->update(['detailed_description' => null]);
 
-        // Convert column type to JSON (set to NULL first to avoid invalid JSON errors)
+        // Convert column type to JSON
         DB::statement('ALTER TABLE products MODIFY detailed_description JSON NULL');
-
-        // Note: Existing HTML content cannot be automatically converted to JSON repeater format
-        // The detailed_description field will need to be repopulated via the admin panel
-        // This is expected as we're changing from rich text to a structured repeater format
     }
 
     /**
