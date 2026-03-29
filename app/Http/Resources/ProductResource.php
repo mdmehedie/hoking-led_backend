@@ -11,6 +11,7 @@ class ProductResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
@@ -20,8 +21,9 @@ class ProductResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'short_description' => $this->short_description,
-            'detailed_description' => $this->detailed_description,
-            'translations' => $this->translations,
+            'detailed_description' => $this->transformDetailedDescription($this->detailed_description),
+            'features' => $this->transformFeatures($this->features),
+            'translations' => $this->transformTranslations(),
             'url' => $this->getUrl(),
             'category_id' => $this->category_id,
             'category' => $this->when($this->category, function () {
@@ -76,5 +78,125 @@ class ProductResource extends JsonResource
             'updated_at' => $this->updated_at,
             'alternates' => $this->getAlternates(),
         ];
+    }
+
+    /**
+     * Transform translations and decode JSON values.
+     */
+    private function transformTranslations(): array
+    {
+        if (!$this->translations) {
+            return [];
+        }
+
+        return $this->translations->map(function ($translation) {
+            $value = $translation->value;
+            
+            // Decode JSON for structured fields
+            if (in_array($translation->attribute, ['detailed_description', 'features'])) {
+                $decoded = json_decode($value, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $value = $decoded;
+                    
+                    // Convert image paths to URLs for detailed_description
+                    if ($translation->attribute === 'detailed_description' && is_array($value)) {
+                        foreach ($value as $locale => $items) {
+                            if (is_array($items)) {
+                                foreach ($items as $key => $item) {
+                                    if (isset($item['image'])) {
+                                        $value[$locale][$key]['image'] = Storage::disk('public')->url($item['image']);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return [
+                'id' => $translation->id,
+                'locale' => $translation->locale,
+                'attribute' => $translation->attribute,
+                'value' => $value,
+                'created_at' => $translation->created_at,
+                'updated_at' => $translation->updated_at,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Transform features field.
+     */
+    private function transformFeatures($value): array
+    {
+        if (empty($value)) {
+            return [];
+        }
+
+        if (is_string($value)) {
+            $value = json_decode($value, true);
+        }
+
+        if (!is_array($value)) {
+            return [];
+        }
+
+        // Return locale-based format as-is
+        if (isset($value['en']) || isset($value['bd'])) {
+            return $value;
+        }
+
+        return $value;
+    }
+
+    /**
+     * Transform detailed_description and convert image paths to URLs.
+     */
+    private function transformDetailedDescription($value): array
+    {
+        if (empty($value)) {
+            return [];
+        }
+
+        if (is_string($value)) {
+            $value = json_decode($value, true);
+        }
+
+        if (!is_array($value)) {
+            return [];
+        }
+
+        // Check if locale-based or flat array
+        $isLocaleFormat = false;
+        foreach ($value as $key => $val) {
+            if (is_array($val) && isset($val[0]['image'])) {
+                $isLocaleFormat = true;
+                break;
+            }
+        }
+        
+        if ($isLocaleFormat) {
+            // Locale-based format
+            $transformed = [];
+            foreach ($value as $locale => $items) {
+                if (is_array($items)) {
+                    $transformed[$locale] = array_map(function ($item) {
+                        if (isset($item['image'])) {
+                            $item['image'] = Storage::disk('public')->url($item['image']);
+                        }
+                        return $item;
+                    }, $items);
+                }
+            }
+            return $transformed;
+        }
+        
+        // Flat array format
+        return array_map(function ($item) {
+            if (isset($item['image'])) {
+                $item['image'] = Storage::disk('public')->url($item['image']);
+            }
+            return $item;
+        }, $value);
     }
 }

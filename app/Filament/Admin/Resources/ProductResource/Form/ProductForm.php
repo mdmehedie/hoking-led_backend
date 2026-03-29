@@ -80,13 +80,49 @@ class ProductForm
                                             }
                                         })
                                         ->live()
-                                        ->required(),
+                                        ->required($isDefault),
                                     Textarea::make("short_description.{$locale}")
                                         ->label(__('Short Description')),
-                                    \App\Filament\Forms\Components\CustomRichEditor::make("detailed_description.{$locale}")
+                                    Repeater::make("detailed_description.{$locale}")
                                         ->label(__('Detailed Description'))
-                                        ->required(),
-                                ]);
+                                        ->schema([
+                                            TextInput::make('title')
+                                                ->label(__('Title'))
+                                                ->required($isDefault)
+                                                ->maxLength(255)
+                                                ->columnSpanFull(),
+                                            Textarea::make('description')
+                                                ->label(__('Description'))
+                                                ->maxLength(1000)
+                                                ->columnSpanFull(),
+                                            FileUpload::make('image')
+                                                ->label(__('Image'))
+                                                ->image()
+                                                ->disk('public')
+                                                ->directory('products/descriptions')
+                                                ->visibility('public')
+                                                ->required($isDefault)
+                                                ->columnSpanFull(),
+                                        ])
+                                        ->columns(1)
+                                        ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                                        ->createItemButtonLabel(__('Add item'))
+                                        ->columnSpanFull(),
+                                    Repeater::make("features.{$locale}")
+                                        ->label(__('Key Features'))
+                                        ->schema([
+                                            TextInput::make('feature')
+                                                ->label(__('Feature'))
+                                                ->required($isDefault)
+                                                ->maxLength(255)
+                                                ->placeholder(__('Add a feature')),
+                                        ])
+                                        ->createItemButtonLabel(__('Add item'))
+                                        ->columnSpanFull()
+                                        ->default([])
+                                        ->formatStateUsing(fn ($state) => static::formatFeaturesState($state))
+                                        ->dehydrateStateUsing(fn ($state) => static::dehydrateFeaturesState($state)),
+                                ])->columns(1);
                         })->all()
                     ),
                 ]),
@@ -184,5 +220,48 @@ class ProductForm
             $counter++;
         }
         return $slug;
+    }
+
+    /**
+     * Format features state for display in repeater.
+     */
+    private static function formatFeaturesState($state): array
+    {
+        // Handle empty or invalid state
+        if (blank($state) || !is_array($state) || count($state) === 0) {
+            return [['feature' => '']];
+        }
+
+        // Fix double-nested structure (Filament wrapping issue)
+        foreach ($state as $key => $item) {
+            if (is_array($item) && isset($item['feature']['feature'])) {
+                $state[$key] = ['feature' => ''];
+            }
+        }
+
+        // Convert simple array to repeater format
+        $firstItem = reset($state);
+        if (!is_array($firstItem) || !isset($firstItem['feature'])) {
+            return collect($state)->map(fn($f) => ['feature' => $f])->all();
+        }
+
+        return $state;
+    }
+
+    /**
+     * Dehydrate features state for storage.
+     */
+    private static function dehydrateFeaturesState($state): array
+    {
+        if (!is_array($state)) {
+            return $state;
+        }
+
+        // Convert repeater format to simple array, filtering empty values
+        return collect($state)
+            ->filter(fn($item) => !empty($item['feature']))
+            ->pluck('feature')
+            ->values()
+            ->all();
     }
 }
