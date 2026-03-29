@@ -10,44 +10,80 @@ class CreateProduct extends CreateRecord
 {
     protected static string $resource = ProductResource::class;
 
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $locales = Locale::activeCodes();
+
+        // Initialize translatable fields for each locale
+        foreach ($locales as $locale) {
+            $data['title'][$locale] = '';
+            $data['short_description'][$locale] = '';
+            $data['detailed_description'][$locale] = [];
+        }
+
+        return $data;
+    }
+
     protected function mutateFormDataBeforeSave(array $data): array
     {
         $locales = Locale::activeCodes();
         $defaultLocale = Locale::defaultCode();
 
-        // Handle title translations
-        if (isset($data['title']) && is_array($data['title'])) {
-            foreach ($locales as $locale) {
-                if (isset($data['title'][$locale])) {
-                    $this->record->setTranslation('title', $locale, $data['title'][$locale]);
+        // Group dotted notation fields
+        $grouped = static::groupTranslatableFields($data);
+
+        // Save translatable fields
+        foreach (['title', 'short_description', 'detailed_description'] as $field) {
+            if (isset($grouped[$field])) {
+                foreach ($locales as $locale) {
+                    if (isset($grouped[$field][$locale])) {
+                        $this->record->setTranslation($field, $locale, $grouped[$field][$locale]);
+                    }
                 }
+                $data[$field] = $grouped[$field][$defaultLocale] ?? '';
             }
-            // Set default locale value for the main field
-            $data['title'] = $data['title'][$defaultLocale] ?? '';
         }
 
-        // Handle short_description translations
-        if (isset($data['short_description']) && is_array($data['short_description'])) {
+        // Handle features
+        if (isset($grouped['features'])) {
             foreach ($locales as $locale) {
-                if (isset($data['short_description'][$locale])) {
-                    $this->record->setTranslation('short_description', $locale, $data['short_description'][$locale]);
+                if (isset($grouped['features'][$locale])) {
+                    $features = static::flattenFeatures($grouped['features'][$locale]);
+                    $this->record->setTranslation('features', $locale, $features);
                 }
             }
-            // Set default locale value for the main field
-            $data['short_description'] = $data['short_description'][$defaultLocale] ?? '';
-        }
-
-        // Handle detailed_description translations
-        if (isset($data['detailed_description']) && is_array($data['detailed_description'])) {
-            foreach ($locales as $locale) {
-                if (isset($data['detailed_description'][$locale])) {
-                    $this->record->setTranslation('detailed_description', $locale, $data['detailed_description'][$locale]);
-                }
-            }
-            // Set default locale value for the main field
-            $data['detailed_description'] = $data['detailed_description'][$defaultLocale] ?? '';
+            $data['features'] = $grouped['features'][$defaultLocale] ?? [];
         }
 
         return $data;
+    }
+
+    /**
+     * Group dotted notation fields into nested arrays.
+     */
+    private static function groupTranslatableFields(array $data): array
+    {
+        $grouped = [];
+        
+        foreach ($data as $key => $value) {
+            if (strpos($key, '.') !== false) {
+                [$field, $locale] = explode('.', $key, 2);
+                $grouped[$field][$locale] = $value;
+            }
+        }
+        
+        return $grouped;
+    }
+
+    /**
+     * Convert repeater format to simple array.
+     */
+    private static function flattenFeatures(array $features): array
+    {
+        return collect($features)
+            ->filter(fn($item) => !empty($item['feature']))
+            ->pluck('feature')
+            ->values()
+            ->all();
     }
 }

@@ -63,7 +63,15 @@ trait HasTranslations
             ->firstWhere(fn ($t) => $t->locale === $locale && $t->attribute === $attribute);
 
         if ($translation) {
-            return $translation->value;
+            $value = $translation->value;
+            // Try to decode JSON for arrays/objects
+            if (is_string($value)) {
+                $decoded = json_decode($value, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    return $decoded;
+                }
+            }
+            return $value;
         }
 
         if (!$fallback) {
@@ -77,7 +85,15 @@ trait HasTranslations
                     ->firstWhere(fn ($t) => $t->locale === $default && $t->attribute === $attribute);
 
                 if ($fallbackTranslation) {
-                    return $fallbackTranslation->value;
+                    $value = $fallbackTranslation->value;
+                    // Try to decode JSON for arrays/objects
+                    if (is_string($value)) {
+                        $decoded = json_decode($value, true);
+                        if (json_last_error() === JSON_ERROR_NONE) {
+                            return $decoded;
+                        }
+                    }
+                    return $value;
                 }
             }
         }
@@ -87,6 +103,11 @@ trait HasTranslations
 
     public function setTranslation(string $attribute, string $locale, mixed $value): static
     {
+        // JSON encode arrays and objects for storage
+        if (is_array($value) || is_object($value)) {
+            $value = json_encode($value);
+        }
+        
         $this->pendingTranslations[$locale][$attribute] = $value;
 
         $default = Locale::defaultCode();
@@ -116,19 +137,30 @@ trait HasTranslations
 
     public function setAttribute($key, $value): static
     {
-        if (is_string($key) && $this->isTranslatableAttribute($key)) {
-            if (is_array($value)) {
-                foreach ($value as $locale => $translatedValue) {
-                    if (!is_string($locale)) {
-                        continue;
+        if (is_string($key)) {
+            // Handle dotted notation like 'features.en'
+            if (strpos($key, '.') !== false) {
+                [$attribute, $locale] = explode('.', $key, 2);
+                if ($this->isTranslatableAttribute($attribute)) {
+                    return $this->setTranslation($attribute, $locale, $value);
+                }
+            }
+            
+            // Handle array of translations (e.g., from Filament form)
+            if ($this->isTranslatableAttribute($key)) {
+                if (is_array($value)) {
+                    foreach ($value as $locale => $translatedValue) {
+                        if (!is_string($locale)) {
+                            continue;
+                        }
+                        $this->setTranslation($key, $locale, $translatedValue);
                     }
-                    $this->setTranslation($key, $locale, $translatedValue);
+
+                    return $this;
                 }
 
-                return $this;
+                return $this->setTranslation($key, app()->getLocale(), $value);
             }
-
-            return $this->setTranslation($key, app()->getLocale(), $value);
         }
 
         return parent::setAttribute($key, $value);

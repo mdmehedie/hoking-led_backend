@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
@@ -23,6 +24,7 @@ class Product extends Model implements HasMedia
         'meta_title',
         'meta_description',
         'meta_keywords',
+        'features',
     ];
 
     protected $fillable = [
@@ -41,23 +43,90 @@ class Product extends Model implements HasMedia
         'slug',
         'is_featured',
         'order_column',
+        'features',
     ];
 
     protected $casts = [
         'technical_specs' => 'array',
-        'tags' => 'array',
         'video_embeds' => 'array',
         'gallery' => 'array',
         'downloads' => 'array',
         'published_at' => 'datetime',
     ];
 
+    /**
+     * Transform tags between database format [{"tag":"value"},...] 
+     * and Filament format ["value",...]
+     */
+    protected function tags(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                if (empty($value)) {
+                    return [];
+                }
+                
+                $tags = is_string($value) ? json_decode($value, true) : $value;
+                
+                if (is_array($tags) && isset($tags[0]['tag'])) {
+                    // Transform from [{"tag":"value"},...] to ["value",...]
+                    return array_column($tags, 'tag');
+                }
+                
+                return $tags ?? [];
+            },
+            set: function ($value) {
+                // Ensure tags is an array
+                $tags = is_array($value) ? $value : [];
+                
+                // Transform from ["value",...] to [{"tag":"value"},...] and JSON encode
+                return json_encode(array_map(function ($tag) {
+                    return ['tag' => $tag];
+                }, $tags));
+            }
+        );
+    }
+
     protected static function boot()
     {
         parent::boot();
 
-        // No transformation needed - store as [{key, values}] format directly
-        // The form already provides data in this format
+        static::updating(function ($product) {
+            // Delete old main image if being replaced
+            if ($product->isDirty('main_image') && $product->getOriginal('main_image')) {
+                Storage::disk('public')->delete($product->getOriginal('main_image'));
+            }
+
+            // Delete removed gallery images
+            if ($product->isDirty('gallery')) {
+                $oldGallery = $product->getOriginal('gallery') ?? [];
+                $newGallery = $product->gallery ?? [];
+                $toDelete = array_diff($oldGallery, $newGallery);
+                foreach ($toDelete as $image) {
+                    Storage::disk('public')->delete($image);
+                }
+            }
+
+            // Delete removed downloads
+            if ($product->isDirty('downloads')) {
+                $oldDownloads = $product->getOriginal('downloads') ?? [];
+                $newDownloads = $product->downloads ?? [];
+                $toDelete = array_diff($oldDownloads, $newDownloads);
+                foreach ($toDelete as $download) {
+                    Storage::disk('public')->delete($download);
+                }
+            }
+
+            // Delete removed description images
+            if ($product->isDirty('detailed_description')) {
+                $oldImages = static::collectDescriptionImages($product->getOriginal('detailed_description'));
+                $newImages = static::collectDescriptionImages($product->detailed_description);
+                $toDelete = array_diff($oldImages, $newImages);
+                foreach ($toDelete as $image) {
+                    Storage::disk('public')->delete($image);
+                }
+            }
+        });
 
         static::deleting(function ($product) {
             // Delete main image
@@ -78,7 +147,49 @@ class Product extends Model implements HasMedia
                     Storage::disk('public')->delete($download);
                 }
             }
+
+            // Delete video files
+            if ($product->video_embeds) {
+                foreach ($product->video_embeds as $embed) {
+                    if (isset($embed['type']) && $embed['type'] === 'file' && isset($embed['video_file'])) {
+                        Storage::disk('public')->delete($embed['video_file']);
+                    }
+                }
+            }
+
+            // Delete description images
+            foreach (static::collectDescriptionImages($product->detailed_description) as $image) {
+                Storage::disk('public')->delete($image);
+            }
         });
+    }
+
+    /**
+     * Collect all image paths from description data.
+     */
+    private static function collectDescriptionImages($descriptions): array
+    {
+        $images = [];
+        
+        if (is_string($descriptions)) {
+            $descriptions = json_decode($descriptions, true);
+        }
+        
+        if (!is_array($descriptions)) {
+            return $images;
+        }
+
+        foreach ($descriptions as $locale => $items) {
+            if (is_array($items)) {
+                foreach ($items as $item) {
+                    if (isset($item['image'])) {
+                        $images[] = $item['image'];
+                    }
+                }
+            }
+        }
+
+        return $images;
     }
 
     public function category(): BelongsTo
@@ -119,7 +230,7 @@ class Product extends Model implements HasMedia
 
     public function getUrl(): string
     {
-        return url('/api/v1/products/' . $this->slug);
+        return config('app.url') . '/api/v1/products/' . $this->slug;
     }
 
     public function getAlternates(): array
