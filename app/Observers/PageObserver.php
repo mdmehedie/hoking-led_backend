@@ -16,11 +16,6 @@ class PageObserver
     {
         // Check if the page was just published (status changed to 'published')
         if ($page->wasChanged('status') && $page->status === 'published') {
-            Log::info('Page published, dispatching social media job', [
-                'page_id' => $page->id,
-                'title' => $page->title,
-            ]);
-
             // Dispatch job to publish to all active social media accounts
             PublishToSocialMedia::dispatch($page, 'page');
         }
@@ -34,11 +29,6 @@ class PageObserver
     {
         // Check if the page was created as published
         if ($page->status === 'published') {
-            Log::info('Page created as published, dispatching social media job', [
-                'page_id' => $page->id,
-                'title' => $page->title,
-            ]);
-
             // Dispatch job to publish to all active social media accounts
             PublishToSocialMedia::dispatch($page, 'page');
         }
