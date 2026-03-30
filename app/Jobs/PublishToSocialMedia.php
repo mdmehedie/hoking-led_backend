@@ -9,7 +9,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Exception;
 
 class PublishToSocialMedia implements ShouldQueue
@@ -45,10 +44,6 @@ class PublishToSocialMedia implements ShouldQueue
         $accounts = $this->getSocialAccounts();
 
         if ($accounts->isEmpty()) {
-            Log::info("No active social media accounts found for publishing {$this->contentType}", [
-                'content_id' => $this->content->id,
-                'content_type' => $this->contentType,
-            ]);
             return;
         }
 
@@ -57,18 +52,7 @@ class PublishToSocialMedia implements ShouldQueue
         foreach ($accounts as $account) {
             try {
                 $this->publishToPlatform($account, $postData);
-                Log::info("Successfully published {$this->contentType} to {$account->platform}", [
-                    'content_id' => $this->content->id,
-                    'account_id' => $account->id,
-                    'platform' => $account->platform,
-                ]);
             } catch (Exception $e) {
-                Log::error("Failed to publish {$this->contentType} to {$account->platform}", [
-                    'content_id' => $this->content->id,
-                    'account_id' => $account->id,
-                    'platform' => $account->platform,
-                    'error' => $e->getMessage(),
-                ]);
                 throw $e; // Re-throw to trigger retry
             }
         }
@@ -313,11 +297,6 @@ class PublishToSocialMedia implements ShouldQueue
      */
     public function failed(Exception $exception): void
     {
-        Log::error('Social media publishing job failed', [
-            'content_id' => $this->content->id ?? null,
-            'content_type' => $this->contentType,
-            'platforms' => $this->platforms,
-            'error' => $exception->getMessage(),
-        ]);
+        //
     }
 }
