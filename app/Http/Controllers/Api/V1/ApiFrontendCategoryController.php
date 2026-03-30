@@ -15,8 +15,24 @@ class ApiFrontendCategoryController extends ApiBaseController
     {
         $perPage = $request->get('per_page', 10);
 
-        $categories = Category::with('parent')->orderBy('name')->paginate($perPage);
+        $categories = Category::with('parent')->where('is_visible', true)->orderBy('name')->paginate($perPage);
 
         return $this->okResponse(['categories' => CategoryResource::collection($categories)], __('Categories retrieved successfully'));
+    }
+
+    public function show(Request $request): JsonResponse
+    {
+        $slug = $request->route('slug');
+        
+        $category = Category::with(['parent', 'children', 'translations'])
+            ->where('slug', $slug)
+            ->where('is_visible', true)
+            ->first();
+
+        if (!$category) {
+            return $this->notFoundResponse([], __('Category not found'));
+        }
+
+        return $this->okResponse(['category' => new CategoryResource($category)], __('Category retrieved successfully'));
     }
 }

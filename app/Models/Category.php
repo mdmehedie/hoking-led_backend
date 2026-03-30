@@ -6,11 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 use Kalnoy\Nestedset\NodeTrait;
 use Illuminate\Support\Str;
 use App\Traits\HasSeo;
+use App\Traits\HasTranslations;
 use Illuminate\Support\Facades\Storage;
 
 class Category extends Model
 {
-    use NodeTrait, HasSeo;
+    use NodeTrait, HasSeo, HasTranslations;
+
+    protected array $translatable = [
+        'name',
+        'description',
+    ];
 
     protected $fillable = [
         'name',

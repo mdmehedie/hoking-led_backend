@@ -29,7 +29,6 @@ class CategoryResource extends JsonResource
             'children' => CategoryResource::collection($this->whenLoaded('children')),
             'translations' => $this->translations,
             'url' => $this->getUrl(),
-            'status' => $this->status,
             'meta_title' => $this->meta_title,
             'meta_description' => $this->meta_description,
             'meta_keywords' => $this->meta_keywords,

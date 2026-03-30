@@ -34,6 +34,7 @@ Route::prefix('v1')->group(function () {
     Route::get('products', [ApiFrontendProductController::class, 'index']);
     Route::get('products/{slug}', [ApiFrontendProductController::class, 'show']);
     Route::get('categories', [ApiFrontendCategoryController::class, 'index']);
+    Route::get('categories/{slug}', [ApiFrontendCategoryController::class, 'show']);
     Route::get('featured-products', [ApiFrontendFeaturedProductController::class, 'index']);
     Route::get('news', [ApiFrontendNewsController::class, 'index']);
     Route::get('news/{slug}', [ApiFrontendNewsController::class, 'show']);
@@ -57,6 +58,8 @@ Route::prefix('v1/{region}')->where(['region' => $regionPattern])->group(functio
     Route::get('case-studies/{slug}', [ApiFrontendCaseStudyController::class, 'show']);
     Route::get('products', [ApiFrontendProductController::class, 'index']);
     Route::get('products/{slug}', [ApiFrontendProductController::class, 'show']);
+    Route::get('categories', [ApiFrontendCategoryController::class, 'index']);
+    Route::get('categories/{slug}', [ApiFrontendCategoryController::class, 'show']);
     Route::get('news', [ApiFrontendNewsController::class, 'index']);
     Route::get('news/{slug}', [ApiFrontendNewsController::class, 'show']);
     Route::get('pages/{slug}', [ApiFrontendPageController::class, 'show']);
