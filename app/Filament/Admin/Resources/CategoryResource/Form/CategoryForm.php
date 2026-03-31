@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\CategoryResource\Form;
 
+use App\Models\Locale;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -16,40 +17,26 @@ class CategoryForm
 {
     public static function form(Schema $schema): Schema
     {
+        $activeLocales = Locale::activeCodes();
+        $defaultLocale = Locale::defaultCode();
+
         return $schema->schema([
             Tabs::make('Category Tabs')->tabs([
                 Tab::make(__('General Information'))->schema([
-                    TextInput::make('name')
-                        ->label(__('Name'))
-                        ->afterStateUpdated(function ($state, callable $set, $context) {
-                            $record = $context['record'] ?? null;
-                            if ($record === null) {
-                                $set('slug', static::generateUniqueSlug($state, $record?->id));
-                            }
-                        })
-                        ->live()
-                        ->required(),
-                    TextInput::make('slug')->label(__('Slug'))->unique(ignoreRecord: true)->required()
+                    TextInput::make('slug')
+                        ->label(__('Slug'))
+                        ->unique(ignoreRecord: true)
+                        ->required()
                         ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
                         ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
                         ->afterStateUpdated(function ($state, callable $set) {
-                            // Convert spaces to hyphens and ensure only valid characters
                             $slug = strtolower(str_replace(' ', '-', $state));
                             $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
-                            $slug = preg_replace('/-+/', '-', $slug); // Replace multiple hyphens with single
-                            $slug = trim($slug, '-'); // Remove leading/trailing hyphens
+                            $slug = preg_replace('/-+/', '-', $slug);
+                            $slug = trim($slug, '-');
                             $set('slug', $slug);
                         })
                         ->live(debounce: 300),
-                    Textarea::make('description')->label(__('Description')),
-                    FileUpload::make('thumbnail')
-                        ->label(__('Thumbnail'))
-                        ->image()
-                        ->imageEditor()
-                        ->disk('public')
-                        ->directory('categories/thumbnails')
-                        ->visibility('public')
-                        ->nullable(),
                     Select::make('parent_id')
                         ->label(__('Parent Category'))
                         ->options(function () {
@@ -63,6 +50,38 @@ class CategoryForm
                         ->preload()
                         ->nullable(),
                     Toggle::make('is_visible')->label(__('Visible'))->default(true),
+                ]),
+                Tab::make(__('Translations'))->schema([
+                    Tabs::make('Language tabs')->tabs(
+                        collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
+                            $isDefault = $locale === $defaultLocale;
+
+                            return Tab::make(strtoupper($locale))
+                                ->schema([
+                                    TextInput::make("name.{$locale}")
+                                        ->label(__('Name'))
+                                        ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault, $defaultLocale) {
+                                            if ($isDefault && blank($get('slug'))) {
+                                                $set('slug', static::generateUniqueSlug($state, null));
+                                            }
+                                        })
+                                        ->live()
+                                        ->required($isDefault),
+                                    Textarea::make("description.{$locale}")
+                                        ->label(__('Description')),
+                                ]);
+                        })->all()
+                    ),
+                ]),
+                Tab::make(__('Media'))->schema([
+                    FileUpload::make('thumbnail')
+                        ->label(__('Thumbnail'))
+                        ->image()
+                        ->imageEditor()
+                        ->disk('public')
+                        ->directory('categories/thumbnails')
+                        ->visibility('public')
+                        ->nullable(),
                 ]),
                 Tab::make(__('SEO'))->schema([
                     TextInput::make('meta_title')->label(__('Meta Title')),
@@ -86,5 +105,4 @@ class CategoryForm
         }
         return $slug;
     }
-
 }
