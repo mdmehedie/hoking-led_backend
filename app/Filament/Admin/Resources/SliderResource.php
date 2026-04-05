@@ -1,12 +1,10 @@
 <?php
 
-namespace App\Filament\Admin\Resources\Sliders;
+namespace App\Filament\Admin\Resources;
 
-use App\Filament\Admin\Resources\Sliders\Pages\CreateSlider;
-use App\Filament\Admin\Resources\Sliders\Pages\EditSlider;
-use App\Filament\Admin\Resources\Sliders\Pages\ListSliders;
-use App\Filament\Admin\Resources\Sliders\Schemas\SliderForm;
-use App\Filament\Admin\Resources\Sliders\Tables\SlidersTable;
+use App\Filament\Admin\Resources\SliderResource\Form\SliderForm;
+use App\Filament\Admin\Resources\SliderResource\Table\SliderTable;
+use App\Filament\Admin\Resources\SliderResource\Pages;
 use App\Models\Slider;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -58,12 +56,12 @@ class SliderResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return SliderForm::configure($schema);
+        return SliderForm::form($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return SlidersTable::configure($table);
+        return SliderTable::table($table);
     }
 
     public static function getRelations(): array
@@ -76,9 +74,9 @@ class SliderResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListSliders::route('/'),
-            'create' => CreateSlider::route('/create'),
-            'edit' => EditSlider::route('/{record}/edit'),
+            'index' => Pages\ListSliders::route('/'),
+            'create' => Pages\CreateSlider::route('/create'),
+            'edit' => Pages\EditSlider::route('/{record}/edit'),
         ];
     }
 }

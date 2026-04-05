@@ -1,30 +1,28 @@
 <?php
 
-namespace App\Filament\Admin\Resources\Sliders\Schemas;
+namespace App\Filament\Admin\Resources\SliderResource\Form;
 
+use App\Filament\Forms\Components\CustomRichEditor;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 
 class SliderForm
 {
-    public static function configure(Schema $schema): Schema
+    public static function form(Schema $schema): Schema
     {
         return $schema
-            ->components([
+            ->schema([
                 Tabs::make('Slider Content Tabs')->tabs([
                     Tab::make(__('Slider Details'))->schema([
-                        \App\Filament\Forms\Components\CustomRichEditor::make('title')
+                        CustomRichEditor::make('title')
                             ->label(__('Title'))
                             ->required(),
-                        \App\Filament\Forms\Components\CustomRichEditor::make('description')
+                        CustomRichEditor::make('description')
                             ->label(__('Description')),
                         Select::make('media_type')
                             ->label(__('Media Type'))

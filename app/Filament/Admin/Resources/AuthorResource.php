@@ -2,20 +2,11 @@
 
 namespace App\Filament\Admin\Resources;
 
+use App\Filament\Admin\Resources\AuthorResource\Form\AuthorForm;
+use App\Filament\Admin\Resources\AuthorResource\Table\AuthorTable;
 use App\Filament\Admin\Resources\AuthorResource\Pages;
 use App\Models\Author;
-use Filament\Forms;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AuthorResource extends Resource
 {
@@ -55,66 +46,14 @@ class AuthorResource extends Resource
         return auth()->user()->can('view author');
     }
 
-    public static function form(Schema $schema): Schema
+    public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
-        return $schema->schema([
-            Tabs::make('Author Tabs')->tabs([
-                Tab::make(__('Author Information'))->schema([
-                    Forms\Components\Select::make('user_id')
-                        ->relationship('user', 'name')
-                        ->required()
-                        ->unique(ignoreRecord: true),
-                    Forms\Components\Textarea::make('bio')
-                        ->rows(4),
-                ]),
-                Tab::make(__('Profile Image'))->schema([
-                    Forms\Components\FileUpload::make('avatar')
-                        ->image()
-                        ->directory('authors')
-                        ->imageEditor()
-                        ->imageEditorAspectRatios(['1:1']),
-                ]),
-                Tab::make(__('Social Links'))->schema([
-                    Forms\Components\Repeater::make('social_links')
-                        ->schema([
-                            Forms\Components\Select::make('platform')
-                                ->options([
-                                    'facebook' => 'Facebook',
-                                    'twitter' => 'Twitter / X',
-                                    'linkedin' => 'LinkedIn',
-                                    'instagram' => 'Instagram',
-                                    'youtube' => 'YouTube',
-                                    'tiktok' => 'TikTok',
-                                    'github' => 'GitHub',
-                                    'website' => 'Website',
-                                ])
-                                ->required(),
-                            Forms\Components\TextInput::make('url')
-                                ->rules(['regex:/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i'])
-                                ->required(),
-                        ])
-                        ->default([]),
-                ]),
-            ])->columnSpanFull(),
-        ]);
+        return AuthorForm::configure($schema);
     }
 
-    public static function table(Table $table): Table
+    public static function table(\Filament\Tables\Table $table): \Filament\Tables\Table
     {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('user.name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('bio')
-                    ->limit(50),
-                Tables\Columns\ImageColumn::make('avatar'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable(),
-            ])
-            ->filters([
-                //
-            ]);
+        return AuthorTable::configure($table);
     }
 
     public static function getRelations(): array

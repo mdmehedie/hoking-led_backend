@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Admin\Resources\Sliders\Tables;
+namespace App\Filament\Admin\Resources\SliderResource\Table;
 
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -16,9 +16,9 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 
-class SlidersTable
+class SliderTable
 {
-    public static function configure(Table $table): Table
+    public static function table(Table $table): Table
     {
         return $table
             ->columns([

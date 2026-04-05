@@ -2,17 +2,13 @@
 
 namespace App\Filament\Admin\Resources;
 
+use App\Filament\Admin\Resources\RoleResource\Form\RoleForm;
+use App\Filament\Admin\Resources\RoleResource\Table\RoleTable;
 use App\Filament\Admin\Resources\RoleResource\Pages;
 use Spatie\Permission\Models\Role;
-use Filament\Forms;
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class RoleResource extends Resource
 {
@@ -59,78 +55,12 @@ class RoleResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        if (!auth()->user()->hasAnyRole(['Super Admin', 'Admin'])) {
-            return $schema;
-        }
-
-        return $schema->schema([
-            Tabs::make('Role Management Tabs')->tabs([
-                Tab::make(__('Role Information'))->schema([
-                    Forms\Components\TextInput::make('name')
-                        ->label(__('Role Name'))
-                        ->required()
-                        ->unique(ignoreRecord: true),
-                    Forms\Components\Textarea::make('description')
-                        ->label(__('Description'))
-                        ->maxLength(500),
-                ]),
-                Tab::make(__('Permissions'))->schema([
-                    Forms\Components\CheckboxList::make('permissions')
-                        ->relationship('permissions', 'name')
-                        ->columns(3)
-                        ->gridDirection('row')
-                        ->searchable()
-                        ->bulkToggleable()
-                        ->helperText(__('Permissions assigned to this role')),
-                ]),
-            ])->columnSpanFull(),
-        ]);
+        return RoleForm::form($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->label(__('Role Name'))
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('description')
-                    ->label(__('Description'))
-                    ->limit(50),
-                Tables\Columns\TextColumn::make('permissions_count')
-                    ->counts('permissions')
-                    ->label(__('Permissions')),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('Created At'))
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label(__('Updated At'))
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
-            ])
-            ->actions([
-                \Filament\Actions\EditAction::make()->label(__('Edit')),
-                \Filament\Actions\DeleteAction::make()
-                    ->label(__('Delete'))
-                    ->requiresConfirmation()
-                    ->modalHeading(__('Delete Role'))
-                    ->modalDescription(__('Are you sure you want to delete this role? Users assigned to this role will lose their permissions.'))
-                    ->modalSubmitActionLabel(__('Yes, delete it')),
-            ])
-            ->bulkActions([
-                \Filament\Actions\BulkActionGroup::make([
-                    \Filament\Actions\DeleteBulkAction::make()
-                        ->label(__('Delete Selected'))
-                        ->requiresConfirmation(),
-                ]),
-            ]);
+        return RoleTable::table($table);
     }
 
     public static function getRelations(): array

@@ -12,7 +12,12 @@ class Translation extends Model
         'translatable_type',
         'locale',
         'attribute',
+        'type',
         'value',
+    ];
+
+    protected $casts = [
+        'value' => 'string',
     ];
 
     public function translatable(): MorphTo
