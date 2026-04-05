@@ -2,34 +2,47 @@
 
 namespace App\Models;
 
+use App\Traits\HasMedia;
+use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Model;
 
 class Slider extends Model
 {
+    use HasMedia, HasTranslations;
+
     protected $fillable = [
         'title',
         'description',
-        'image_path',
-        'link',
-        'alt_text',
-        'order',
+        'primary_button_text',
+        'primary_button_link',
+        'background_image',
+        'foreground_image',
+        'label',
         'status',
-        'custom_styles',
-        'media_type',
-        'video_url',
-        'video_file',
+        'sort_order',
+    ];
+
+    protected $translatable = [
+        'title',
+        'description',
+        'label',
+        'primary_button_text',
+    ];
+
+    protected array $mediaAttributes = [
+        'background_image',
+        'foreground_image',
     ];
 
     protected $casts = [
         'status' => 'boolean',
-        'order' => 'integer',
-        'custom_styles' => 'array',
+        'sort_order' => 'integer',
     ];
 
     protected static function booted()
     {
         static::addGlobalScope('order', function ($builder) {
-            $builder->orderBy('order');
+            $builder->orderBy('sort_order');
         });
     }
 }

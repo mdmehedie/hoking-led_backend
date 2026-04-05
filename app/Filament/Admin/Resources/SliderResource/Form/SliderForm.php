@@ -3,10 +3,11 @@
 namespace App\Filament\Admin\Resources\SliderResource\Form;
 
 use App\Filament\Forms\Components\CustomRichEditor;
+use App\Models\Locale;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Illuminate\Http\UploadedFile;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
@@ -15,65 +16,72 @@ class SliderForm
 {
     public static function form(Schema $schema): Schema
     {
+        $activeLocales = Locale::activeCodes();
+        $defaultLocale = Locale::defaultCode();
+
         return $schema
             ->schema([
                 Tabs::make('Slider Content Tabs')->tabs([
                     Tab::make(__('Slider Details'))->schema([
-                        CustomRichEditor::make('title')
-                            ->label(__('Title'))
-                            ->required(),
-                        CustomRichEditor::make('description')
-                            ->label(__('Description')),
-                        Select::make('media_type')
-                            ->label(__('Media Type'))
-                            ->options([
-                                'image' => __('Image'),
-                                'gif' => __('GIF (Playable)'),
-                                'video_url' => __('Video URL'),
-                                'video_file' => __('Uploaded Video'),
-                            ])
-                            ->default('image')
-                            ->required()
-                            ->live(),
-                        FileUpload::make('image_path')
-                            ->label(__('Image'))
-                            ->directory('sliders')
+                        TextInput::make('sort_order')
+                            ->label(__('Sort Order'))
+                            ->numeric()
+                            ->default(0)
+                            ->helperText(__('Determines the display order. Lower numbers appear first.')),
+                        Toggle::make('status')
+                            ->label(__('Show / Hide'))
+                            ->default(true)
+                            ->helperText(__('Toggles the visibility of the slider on the frontend.')),
+                        FileUpload::make('background_image')
+                            ->label(__('Background Image'))
+                            ->disk('public')
+                            ->directory('sliders/backgrounds')
                             ->visibility('public')
                             ->image()
                             ->imageEditor()
-                            ->imageEditorAspectRatios(['16:9', '4:3', '1:1', '3:2', '2:1'])
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
-                            ->visible(fn ($get) => in_array($get('media_type'), ['image', 'gif'])),
-                        TextInput::make('video_url')
-                            ->label(__('Video URL'))
-                            ->rules(['regex:/^((http|https):\/\/)?[\w.-]+\.[a-zA-Z]{2,}(\/\S*)?$/'])
-                            ->helperText(__('Enter full URL including http:// or https://, or just the domain like youtube.com'))
-                            ->visible(fn ($get) => $get('media_type') === 'video_url'),
-                        FileUpload::make('video_file')
-                            ->label(__('Video File'))
-                            ->directory('sliders/videos')
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName()),
+                        FileUpload::make('foreground_image')
+                            ->label(__('Foreground Image'))
+                            ->disk('public')
+                            ->directory('sliders/foregrounds')
                             ->visibility('public')
-                            ->acceptedFileTypes(['video/mp4', 'video/avi', 'video/mov', 'video/webm'])
-                            ->visible(fn ($get) => $get('media_type') === 'video_file'),
-                        TextInput::make('link')
-                            ->label(__('Link'))
-                            ->extraAttributes(fn ($get) => ['class' => $get('custom_styles.link_class') ?? '']),
-                        TextInput::make('alt_text')
-                            ->label(__('Alt Text'))
-                            ->extraAttributes(fn ($get) => ['class' => $get('custom_styles.alt_text_class') ?? '']),
-                        TextInput::make('order')
-                            ->label(__('Order'))
-                            ->numeric()
-                            ->default(0),
-                        Toggle::make('status')
-                            ->label(__('Status'))
-                            ->default(true),
+                            ->image()
+                            ->imageEditor()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                            ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                            ->helperText(__('Image displayed on the card.')),
+                        TextInput::make('primary_button_link')
+                            ->label(__('Primary Button Link'))
+                            ->url()
+                            ->helperText(__('URL the button will navigate to.')),
                     ]),
-                    Tab::make(__('Custom Styling'))->schema([
-                        TextInput::make('custom_styles.link_class')
-                            ->label(__('Link CSS Class')),
-                        TextInput::make('custom_styles.alt_text_class')
-                            ->label(__('Alt Text CSS Class')),
+                    Tab::make(__('Translations'))->schema([
+                        Tabs::make('Language Tabs')->tabs(
+                            collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
+                                $isDefault = $locale === $defaultLocale;
+
+                                return Tab::make(strtoupper($locale))
+                                    ->schema([
+                                        TextInput::make("title.{$locale}")
+                                            ->label(__('Title'))
+                                            ->required($isDefault)
+                                            ->helperText(__('Main heading displayed on the slider.')),
+                                        CustomRichEditor::make("description.{$locale}")
+                                            ->label(__('Description'))
+                                            ->required($isDefault)
+                                            ->helperText(__('Text displayed in the bottom-left corner of the slider.')),
+                                        TextInput::make("label.{$locale}")
+                                            ->label(__('Label'))
+                                            ->required($isDefault)
+                                            ->helperText(__('Text displayed on the slider card.')),
+                                        TextInput::make("primary_button_text.{$locale}")
+                                            ->label(__('Primary Button Text'))
+                                            ->required($isDefault)
+                                            ->helperText(__('Text for the button in the bottom-left corner of the slider.')),
+                                    ])->columns(1);
+                            })->all()
+                        ),
                     ]),
                 ])->columnSpanFull(),
             ]);

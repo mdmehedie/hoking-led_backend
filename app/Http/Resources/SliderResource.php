@@ -15,35 +15,43 @@ class SliderResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $data = [
+        $locale = app()->getLocale();
+
+        return [
             'id' => $this->id,
-            'title' => $this->title,
-            'description' => $this->description,
-            'translations' => $this->translations,
-            'media_type' => $this->media_type,
-            'link' => $this->link,
-            'alt_text' => $this->alt_text,
-            'order' => $this->order,
+            'title' => $this->getTranslation('title', $locale),
+            'description' => $this->getTranslation('description', $locale),
+            'label' => $this->getTranslation('label', $locale),
+            'primary_button_text' => $this->getTranslation('primary_button_text', $locale),
+            'primary_button_link' => $this->primary_button_link,
+            'background_image' => $this->background_image ? url(Storage::url($this->background_image)) : null,
+            'foreground_image' => $this->foreground_image ? url(Storage::url($this->foreground_image)) : null,
+            'sort_order' => $this->sort_order,
             'status' => $this->status,
-            'custom_styles' => $this->custom_styles,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
+    }
 
-        // Add the relevant media field based on type
-        switch ($this->media_type) {
-            case 'image':
-            case 'gif':
-                $data['image_path'] = $this->image_path ? url(Storage::url($this->image_path)) : null;
-                break;
-            case 'video_url':
-                $data['video_url'] = $this->video_url;
-                break;
-            case 'video_file':
-                $data['video_file'] = $this->video_file ? url(Storage::url($this->video_file)) : null;
-                break;
+    /**
+     * Get translation for a given attribute and locale.
+     * Falls back to the default locale if translation is missing.
+     */
+    protected function getTranslation(string $attribute, string $locale): ?string
+    {
+        // If model has the translation relationship loaded
+        if (method_exists($this, 'translations')) {
+            $translation = $this->translations
+                ->where('attribute', $attribute)
+                ->where('locale', $locale)
+                ->first();
+
+            if ($translation) {
+                return $translation->value;
+            }
         }
 
-        return $data;
+        // Fallback: return the attribute's value directly (default locale)
+        return $this->{$attribute};
     }
 }

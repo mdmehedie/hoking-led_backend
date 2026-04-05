@@ -22,17 +22,12 @@ class SliderTable
     {
         return $table
             ->columns([
-                TextColumn::make('title')->label(__('Title'))->sortable()->formatStateUsing(fn ($state) => strip_tags($state)),
-                TextColumn::make('media_type')->label(__('Media Type'))->formatStateUsing(fn ($state) => match($state) {
-                    'image' => __('Image'),
-                    'gif' => __('GIF (Playable)'),
-                    'video_url' => __('Video URL'),
-                    'video_file' => __('Uploaded Video'),
-                    default => $state,
-                }),
-                ImageColumn::make('image_path')->label(__('Media')),
+                TextColumn::make('title')->label(__('Title'))->sortable()->searchable(),
+                TextColumn::make('label')->label(__('Label'))->sortable()->searchable(),
+                ImageColumn::make('background_image')->label(__('Background'))->circular(),
+                ImageColumn::make('foreground_image')->label(__('Foreground'))->circular(),
                 BooleanColumn::make('status')->label(__('Status')),
-                TextColumn::make('order')->label(__('Order'))->sortable(),
+                TextColumn::make('sort_order')->label(__('Sort Order'))->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')

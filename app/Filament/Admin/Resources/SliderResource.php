@@ -20,7 +20,7 @@ class SliderResource extends Resource
 
     protected static ?string $navigationLabel = 'Sliders';
 
-    protected static ?int $navigationSort = 7;
+    protected static ?int $navigationSort = 0;
 
     public static function getNavigationLabel(): string
     {
