@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\CategoryResource\Form;
 
 use App\Models\Locale;
 use Filament\Forms\Components\FileUpload;
+use Illuminate\Http\UploadedFile;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -74,6 +75,14 @@ class CategoryForm
                     ),
                 ]),
                 Tab::make(__('Media'))->schema([
+                    FileUpload::make('icon')
+                        ->label(__('Icon'))
+                        ->image()
+                        ->disk('public')
+                        ->directory('categories/icons')
+                        ->visibility('public')
+                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                        ->nullable(),
                     FileUpload::make('thumbnail')
                         ->label(__('Thumbnail'))
                         ->image()
