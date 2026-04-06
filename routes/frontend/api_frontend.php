@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\ApiFrontendPageController;
 use App\Http\Controllers\Api\V1\ApiFrontendAppSettingController;
 use App\Http\Controllers\Api\V1\ApiFrontendCertificationAwardController;
 use App\Http\Controllers\Api\V1\ApiFrontendTestimonialController;
+use App\Http\Controllers\Api\V1\ApiFrontendCoreAdvantageController;
 use App\Http\Controllers\Api\V1\ApiFrontendLocaleController;
 use App\Http\Controllers\Api\V1\ApiFrontendFormController;
 
@@ -49,6 +50,7 @@ Route::prefix('v1')->group(function () {
     Route::get('certifications/{slug}', [ApiFrontendCertificationAwardController::class, 'show'])->name('certifications.show');
     
     Route::get('testimonials', [ApiFrontendTestimonialController::class, 'index'])->name('testimonials.index');
+    Route::get('core-advantages', [ApiFrontendCoreAdvantageController::class, 'index'])->name('core-advantages.index');
     
     Route::get('pages', [ApiFrontendPageController::class, 'index'])->name('pages.index');
     Route::get('pages/{slug}', [ApiFrontendPageController::class, 'show'])->name('pages.show');
