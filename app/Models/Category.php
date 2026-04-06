@@ -23,10 +23,16 @@ class Category extends Model
         'slug',
         'description',
         'thumbnail',
+        'icon',
         'is_visible',
         'meta_title',
         'meta_description',
         'meta_keywords',
+    ];
+
+    protected array $mediaAttributes = [
+        'thumbnail',
+        'icon',
     ];
 
     protected static function boot()
@@ -42,6 +48,9 @@ class Category extends Model
         static::deleted(function ($category) {
             if ($category->thumbnail) {
                 Storage::disk('public')->delete($category->thumbnail);
+            }
+            if ($category->icon) {
+                Storage::disk('public')->delete($category->icon);
             }
         });
 

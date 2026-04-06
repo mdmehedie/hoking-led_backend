@@ -21,6 +21,7 @@ class CategoryResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'thumbnail' => $this->thumbnail ? Storage::disk('public')->url($this->thumbnail) : null,
+            'icon' => $this->icon ? Storage::disk('public')->url($this->icon) : null,
             'is_visible' => $this->is_visible,
             'parent' => $this->when($this->parent_id, fn () => [
                 'id' => $this->parent_id,

@@ -27,6 +27,8 @@ class ComprehensivePermissionsSeeder extends Seeder
             'certificationaward',
             'category',
             'content',
+            'coreadvantage',
+            'project',
             'featuredproduct',
             'form',
             'lead',
