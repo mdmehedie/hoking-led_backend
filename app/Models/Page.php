@@ -70,7 +70,7 @@ class Page extends Model implements HasMedia
 
     public function getUrl(): string
     {
-        return url('/api/v1/pages/' . $this->slug);
+        return route('pages.show', ['slug' => $this->slug]);
     }
 
     public function getAlternates(): array

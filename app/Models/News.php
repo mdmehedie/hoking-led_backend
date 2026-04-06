@@ -69,7 +69,7 @@ class News extends Model implements HasMedia
 
     public function getUrl(): string
     {
-        return url('/api/v1/news/' . $this->slug);
+        return route('news.show', ['slug' => $this->slug]);
     }
 
     public function getAlternates(): array

@@ -92,7 +92,7 @@ class CaseStudy extends Model implements HasMedia
 
     public function getUrl(): string
     {
-        return url('/api/v1/case-studies/' . $this->slug);
+        return route('case-studies.show', ['slug' => $this->slug]);
     }
 
     public function getAlternates(): array

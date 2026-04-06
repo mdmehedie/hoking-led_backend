@@ -5,6 +5,8 @@ namespace App\Traits;
 use App\Models\Locale;
 use App\Models\Translation;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 
 trait HasTranslations
 {
@@ -38,13 +40,20 @@ trait HasTranslations
 
         // Clean up registry when model is deleted
         static::deleted(function ($model): void {
+            // 1. Delete media files inside translatable fields
+            static::cleanupTranslatableMediaOnDelete($model);
+            
+            // 2. Delete translation records from DB
+            $model->translations()->delete();
+            
+            // 3. Clear static registry
             unset(static::$pendingTranslations[spl_object_id($model)]);
         });
     }
 
     /**
      * STEP 1: Extract translatable fields from model data.
-     * 
+     *
      * Runs BEFORE model saves to database.
      * Sets default locale value for main column.
      * Stores full translation data in static registry for later.
@@ -58,8 +67,15 @@ trait HasTranslations
         $translationsToSave = [];
 
         foreach ($model->translatable as $attribute) {
-            // Access raw attributes directly, bypass getAttribute()
             $value = $model->attributes[$attribute] ?? null;
+
+            // Handle JSON strings (common with complex repeaters like video_embeds)
+            if (is_string($value) && str_starts_with(trim($value), '{')) {
+                $decoded = json_decode($value, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $value = $decoded;
+                }
+            }
 
             // If value is array (multiple locales), extract it
             if (is_array($value)) {
@@ -75,6 +91,11 @@ trait HasTranslations
                 } else {
                     $model->attributes[$attribute] = $defaultValue;
                 }
+
+                // Clean up media for translatable fields
+                if (static::hasTranslatableMedia($model, $attribute)) {
+                    static::cleanupTranslatableMedia($model, $attribute, $value);
+                }
             }
         }
 
@@ -82,6 +103,168 @@ trait HasTranslations
         if (!empty($translationsToSave)) {
             static::$pendingTranslations[spl_object_id($model)] = $translationsToSave;
         }
+    }
+
+    /**
+     * Check if a translatable attribute has media paths defined.
+     */
+    protected static function hasTranslatableMedia($model, string $attribute): bool
+    {
+        if (!property_exists($model, 'translatableMediaKeys')) {
+            return false;
+        }
+
+        foreach ($model->translatableMediaKeys as $key) {
+            if (str_starts_with($key, $attribute . '.')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the full original value for a translatable attribute.
+     * Merges the main column (default locale) with the translations table.
+     */
+    protected static function getFullOriginalTranslatable($model, string $attribute): array
+    {
+        $original = $model->getOriginal($attribute);
+        $full = [];
+
+        // 1. Parse main column value (usually default locale)
+        if (is_string($original)) {
+            $original = json_decode($original, true);
+        }
+
+        if (is_array($original)) {
+            // If it already has locale keys (e.g., ['en' => ...])
+            if (isset($original['en']) || isset($original['bd'])) {
+                $full = $original;
+            } else {
+                // If it's a plain array, assume it's the default locale
+                $full[Locale::defaultCode()] = $original;
+            }
+        }
+
+        // 2. Merge with existing translations from DB
+        // Check if the relationship is loaded to avoid extra queries
+        if ($model->relationLoaded('translations')) {
+            $translations = $model->translations;
+        } else {
+            $translations = $model->translations()->where('attribute', $attribute)->get();
+        }
+
+        foreach ($translations as $t) {
+            if ($t->attribute === $attribute) {
+                $val = is_string($t->value) ? json_decode($t->value, true) : $t->value;
+                $full[$t->locale] = $val;
+            }
+        }
+
+        return $full;
+    }
+
+    /**
+     * Handle media cleanup when the model is deleted.
+     */
+    protected static function cleanupTranslatableMediaOnDelete($model): void
+    {
+        if (!property_exists($model, 'translatable')) {
+            return;
+        }
+
+        $disk = $model->getMediaDisk() ?? 'public';
+        $dottedKeys = $model->translatableMediaKeys ?? [];
+
+        foreach ($model->translatable as $attribute) {
+            // Check if this attribute has media paths defined
+            $attributePaths = array_filter($dottedKeys, fn ($key) => str_starts_with($key, $attribute . '.'));
+            if (empty($attributePaths)) {
+                continue;
+            }
+
+            // Get the full value (main column + translations table)
+            $value = static::getFullOriginalTranslatable($model, $attribute);
+            $paths = static::extractMediaPathsFromNested($value, $attributePaths, $attribute);
+
+            foreach ($paths as $file) {
+                Storage::disk($disk)->delete($file);
+            }
+        }
+    }
+
+    /**
+     * Compare old vs new translation data and delete removed media files.
+     * Uses dotted notation paths from $translatableMediaKeys (e.g., 'detailed_description.*.image').
+     */
+    protected static function cleanupTranslatableMedia($model, string $attribute, array $newValue): void
+    {
+        // Get the full original data (Main column + Translations table)
+        $oldValue = static::getFullOriginalTranslatable($model, $attribute);
+
+        if (empty($oldValue)) {
+            return;
+        }
+
+        // Get dotted notation media keys for this attribute (e.g., 'attribute.*.field')
+        $dottedKeys = $model->translatableMediaKeys ?? [];
+        $attributePaths = array_filter($dottedKeys, fn ($key) => str_starts_with($key, $attribute . '.'));
+
+        if (empty($attributePaths)) {
+            return;
+        }
+
+        $oldPaths = static::extractMediaPathsFromNested($oldValue, $attributePaths, $attribute);
+        $newPaths = static::extractMediaPathsFromNested($newValue, $attributePaths, $attribute);
+
+        $removed = array_diff($oldPaths, $newPaths);
+        $disk = $model->getMediaDisk() ?? 'public';
+
+        foreach ($removed as $file) {
+            Storage::disk($disk)->delete($file);
+        }
+    }
+
+    /**
+     * Extract file paths from nested translatable data using dotted notation paths.
+     * Example path: 'detailed_description.*.image'
+     * Data structure: {'en': [{'image': 'path.jpg'}], 'bd': [{'image': 'path2.jpg'}]}
+     */
+    protected static function extractMediaPathsFromNested(array $data, array $dottedPaths, string $attribute): array
+    {
+        $paths = [];
+
+        // Extract the sub-path (everything after the attribute name)
+        // e.g., 'detailed_description.*.image' → '*.image'
+        $prefix = $attribute . '.';
+        $subPaths = array_map(fn ($p) => substr($p, strlen($prefix)), $dottedPaths);
+
+        // Iterate through each locale
+        foreach ($data as $locale => $items) {
+            if (!is_array($items)) {
+                continue;
+            }
+
+            // Apply each dotted path to the locale data
+            foreach ($subPaths as $subPath) {
+                foreach ($items as $item) {
+                    if (!is_array($item)) {
+                        continue;
+                    }
+
+                    // Remove wildcard (*) and get the target key
+                    $targetKey = str_replace('*.', '', $subPath);
+                    $value = Arr::get($item, $targetKey);
+
+                    if (is_string($value) && !empty($value)) {
+                        $paths[] = $value;
+                    }
+                }
+            }
+        }
+
+        return $paths;
     }
 
     /**
