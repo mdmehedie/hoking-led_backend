@@ -28,6 +28,7 @@ class ComprehensivePermissionsSeeder extends Seeder
             'category',
             'content',
             'coreadvantage',
+            'project',
             'featuredproduct',
             'form',
             'lead',

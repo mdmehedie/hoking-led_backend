@@ -57,6 +57,7 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 \Filament\Navigation\NavigationGroup::make(fn() => __('Content Management')),
                 \Filament\Navigation\NavigationGroup::make(fn() => __('Product Management')),
+                \Filament\Navigation\NavigationGroup::make(fn() => __('Project Management')),
                 \Filament\Navigation\NavigationGroup::make(fn() => __('Marketing')),
                 \Filament\Navigation\NavigationGroup::make(fn() => __('Settings')),
                 \Filament\Navigation\NavigationGroup::make(fn() => __('User Management')),
