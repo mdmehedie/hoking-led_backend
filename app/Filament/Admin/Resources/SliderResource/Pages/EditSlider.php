@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Admin\Resources\Sliders\Pages;
+namespace App\Filament\Admin\Resources\SliderResource\Pages;
 
-use App\Filament\Admin\Resources\Sliders\SliderResource;
+use App\Filament\Admin\Resources\SliderResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 

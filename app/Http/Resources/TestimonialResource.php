@@ -8,11 +8,6 @@ use Illuminate\Support\Facades\Storage;
 
 class TestimonialResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
@@ -22,14 +17,8 @@ class TestimonialResource extends JsonResource
             'client_company' => $this->client_company,
             'testimonial' => $this->testimonial,
             'rating' => $this->rating,
-            'image_path' => $this->image_path ? Storage::disk('public')->url($this->image_path) : null,
-            'is_visible' => $this->is_visible,
+            'image' => $this->image_path ? Storage::disk('public')->url($this->image_path) : null,
             'sort_order' => $this->sort_order,
-            'meta_title' => $this->meta_title,
-            'meta_description' => $this->meta_description,
-            'meta_keywords' => $this->meta_keywords,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ];
     }
 }

@@ -2,31 +2,16 @@
 
 namespace App\Filament\Admin\Resources;
 
+use App\Filament\Admin\Resources\PageResource\Form\PageForm;
+use App\Filament\Admin\Resources\PageResource\Table\PageTable;
 use App\Filament\Admin\Resources\PageResource\Pages;
 use App\Models\Page;
-use App\Models\Locale;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
-use Filament\Actions\BulkAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\ImageColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Collection;
-use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
+use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
-use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
+use Illuminate\Support\Str;
 
 class PageResource extends Resource
 {
@@ -70,197 +55,12 @@ class PageResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $activeLocales = Locale::activeCodes();
-        $defaultLocale = Locale::defaultCode();
-
-        return $schema
-            ->schema([
-                Tabs::make('Page Tabs')->tabs([
-                    Tab::make(__('General Information'))->schema([
-                        TextInput::make('slug')
-                            ->label(__('Slug'))
-                            ->unique(ignoreRecord: true)
-                            ->required()
-                            ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
-                            ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
-                            ->afterStateUpdated(function ($state, callable $set) {
-                                // Convert spaces to hyphens and ensure only valid characters
-                                $slug = strtolower(str_replace(' ', '-', $state));
-                                $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
-                                $slug = preg_replace('/-+/', '-', $slug); // Replace multiple hyphens with single
-                                $slug = trim($slug, '-'); // Remove leading/trailing hyphens
-                                $set('slug', $slug);
-                            })
-                            ->live(debounce: 300),
-                        Select::make('status')
-                            ->label(__('Status'))
-                            ->options([
-                                'draft' => __('Draft'),
-                                'review' => __('Review'),
-                                'published' => __('Published'),
-                            ])
-                            ->required(),
-                        Hidden::make('published_at')
-                            ->default(now()),
-                        Hidden::make('author_id')
-                            ->default(auth()->id()),
-                    ]),
-                    Tab::make(__('Translations'))->schema([
-                        Tabs::make('Language Tabs')->tabs(
-                            collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
-                                $isDefault = $locale === $defaultLocale;
-
-                                return Tab::make(strtoupper($locale))
-                                    ->schema([
-                                        TextInput::make("title.{$locale}")
-                                            ->label(__('Title'))
-                                            ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
-                                                if (!$isDefault) {
-                                                    return;
-                                                }
-
-                                                if (blank($get('slug'))) {
-                                                    $set('slug', static::generateUniqueSlug($state, null));
-                                                }
-                                            })
-                                            ->live()
-                                            ->required($isDefault),
-                                        Textarea::make("excerpt.{$locale}")
-                                            ->label(__('Excerpt')),
-                                        \App\Filament\Forms\Components\CustomRichEditor::make("content.{$locale}")
-                                            ->label(__('Content'))
-                                            ->required($isDefault),
-                                        FileUpload::make("image_path.{$locale}")
-                                            ->label(__('Image'))
-                                            ->image()
-                                            ->directory('pages')
-                                            ->imageEditor()
-                                            ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                                    ]);
-                            })->all()
-                        ),
-                    ]),
-                    Tab::make(__('SEO'))->schema([
-                        TextInput::make('meta_title')->label(__('Meta Title')),
-                        Textarea::make('meta_description')->label(__('Meta Description')),
-                        Textarea::make('meta_keywords')->label(__('Meta Keywords')),
-                        TextInput::make('canonical_url')->label(__('Canonical URL')),
-                    ]),
-                ])->columnSpanFull(),
-            ]);
+        return PageForm::form($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns([
-                TextColumn::make('title'),
-                TextColumn::make('status'),
-                TextColumn::make('author.name'),
-                TextColumn::make('published_at'),
-            ])
-            ->filters([
-                SelectFilter::make('status')
-                    ->options([
-                        'draft' => 'Draft',
-                        'review' => 'Review',
-                        'published' => 'Published',
-                    ]),
-            ])
-            ->searchable()
-            ->actions([
-                \Filament\Actions\Action::make('send_to_review')
-                    ->label('Send to Review')
-                    ->icon('heroicon-o-arrow-right')
-                    ->visible(fn ($record) => $record->status === 'draft')
-                    ->action(fn ($record) => $record->update(['status' => 'review'])),
-                \Filament\Actions\Action::make('publish')
-                    ->label('Publish')
-                    ->icon('heroicon-o-check')
-                    ->visible(fn ($record) => $record->status === 'review')
-                    ->action(fn ($record) => $record->update(['status' => 'published', 'published_at' => now()])),
-                \Filament\Actions\Action::make('unpublish')
-                    ->label('Unpublish')
-                    ->icon('heroicon-o-x-mark')
-                    ->visible(fn ($record) => $record->status === 'published')
-                    ->action(fn ($record) => $record->update(['status' => 'draft'])),
-                \Filament\Actions\Action::make('share')
-                    ->label('Share')
-                    ->icon('heroicon-o-share')
-                    ->color('success')
-                    ->visible(fn ($record) => $record->status === 'published')
-                    ->form([
-                        Section::make('URL Preview')
-                            ->description('This is the URL that will be included in your social media posts')
-                            ->schema([
-                                \Filament\Forms\Components\TextInput::make('url_preview')
-                                    ->label('Content URL')
-                                    ->default(fn ($record) => static::generateShareUrl($record, 'page'))
-                                    ->disabled()
-                                    ->helperText('This URL will be shared on the selected social media platforms'),
-                            ]),
-                        \Filament\Forms\Components\CheckboxList::make('platforms')
-                            ->label('Share to Platforms')
-                            ->options([
-                                'facebook' => 'Facebook',
-                                'twitter' => 'Twitter (X)',
-                                'linkedin' => 'LinkedIn',
-                            ])
-                            ->default(['facebook', 'twitter', 'linkedin'])
-                            ->required()
-                            ->helperText('Select which social media platforms to share this page on'),
-                    ])
-                    ->action(function ($record, array $data) {
-                        \App\Jobs\PublishToSocialMedia::dispatch($record, 'page', $data['platforms']);
-
-                        \Filament\Notifications\Notification::make()
-                            ->title('Page shared successfully!')
-                            ->body('The page has been queued for sharing to selected social media platforms.')
-                            ->success()
-                            ->send();
-                    })
-                    ->modalHeading('Share Page')
-                    ->modalSubmitActionLabel('Share Now'),
-                \Filament\Actions\EditAction::make(),
-                \Filament\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                BulkAction::make('delete_selected')
-                    ->label('Delete Selected')
-                    ->color('danger')
-                    ->icon('heroicon-o-trash')
-                    ->requiresConfirmation()
-                    ->action(function (Collection $records) {
-                        $count = $records->count();
-                        $records->each->delete();
-                        Notification::make()
-                            ->success()
-                            ->title('Deleted')
-                            ->body($count . ' items deleted successfully.')
-                            ->send();
-                    }),
-                BulkAction::make('change_status')
-                    ->label('Change Status')
-                    ->form([
-                        Select::make('status')
-                            ->options([
-                                'draft' => 'Draft',
-                                'review' => 'Review',
-                                'published' => 'Published',
-                            ])
-                            ->required(),
-                    ])
-                    ->action(function (Collection $records, array $data) {
-                        $records->each->update(['status' => $data['status']]);
-                        Notification::make()
-                            ->success()
-                            ->title('Status Updated')
-                            ->body('Selected items have been updated to ' . $data['status'] . '.')
-                            ->send();
-                    })
-                    ->requiresConfirmation()
-                    ->icon('heroicon-o-cog'),
-            ]);
+        return PageTable::table($table);
     }
 
     public static function getRelations(): array
@@ -279,10 +79,10 @@ class PageResource extends Resource
         ];
     }
 
-    protected static function generateUniqueSlug($title, $id = null)
+    public static function generateUniqueSlug($title, $id = null)
     {
         $table = 'pages';
-        $baseSlug = \Illuminate\Support\Str::slug($title);
+        $baseSlug = Str::slug($title);
         $slug = $baseSlug;
         $counter = 1;
         while (DB::table($table)->where('slug', $slug)->where('id', '!=', $id)->exists()) {
@@ -295,7 +95,7 @@ class PageResource extends Resource
     /**
      * Generate share URL for content preview
      */
-    protected static function generateShareUrl($record, string $contentType): string
+    public static function generateShareUrl($record, string $contentType): string
     {
         // Get frontend URL from app settings or fallback to app URL
         $frontendUrl = \App\Models\AppSetting::first()?->frontend_url ?? config('app.url');

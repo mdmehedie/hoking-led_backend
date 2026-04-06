@@ -2,14 +2,12 @@
 
 namespace App\Filament\Admin\Resources;
 
+use App\Filament\Admin\Resources\FeaturedProductResource\Table\FeaturedProductTable;
 use App\Filament\Admin\Resources\FeaturedProductResource\Pages;
 use App\Models\Product;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\Action;
 
 class FeaturedProductResource extends Resource
 {
@@ -35,27 +33,7 @@ class FeaturedProductResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->query(Product::where('is_featured', true))
-            ->columns([
-                TextColumn::make('title')->label(__('Title'))->searchable(),
-                TextColumn::make('status')->label(__('Status')),
-                TextColumn::make('category.name')->label(__('Category')),
-            ])
-            ->filters([
-                \Filament\Tables\Filters\SelectFilter::make('status')->label(__('Status'))->options(['draft' => __('Draft'), 'published' => __('Published'), 'archived' => __('Archived')]),
-                \Filament\Tables\Filters\SelectFilter::make('category_id')->label(__('Category'))->relationship('category', 'name'),
-            ])
-            ->actions([
-                Action::make('remove_featured')
-                    ->label(__('Remove from Featured'))
-                    ->icon('heroicon-o-x-mark')
-                    ->action(function ($record) {
-                        $record->update(['is_featured' => false]);
-                        \Filament\Notifications\Notification::make()->success()->title(__('Product removed from featured'))->body(__('The product has been removed from featured products.'))->send();
-                    })
-                    ->requiresConfirmation(),
-            ]);
+        return FeaturedProductTable::table($table);
     }
 
     public static function getRelations(): array

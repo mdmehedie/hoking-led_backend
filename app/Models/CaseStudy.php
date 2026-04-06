@@ -19,15 +19,15 @@ class CaseStudy extends Model implements HasMedia
     protected array $translatable = [
         'title',
         'excerpt',
-        'content',
         'image_path',
+        'project_description',
+        'project_details',
     ];
 
     protected $fillable = [
         'title',
         'slug',
         'excerpt',
-        'content',
         'image_path',
         'author_id',
         'status',
@@ -35,38 +35,25 @@ class CaseStudy extends Model implements HasMedia
         'meta_title',
         'meta_description',
         'meta_keywords',
+        'slider_images',
+        'canonical_url',
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
+        'slider_images' => 'array',
     ];
 
     protected static function boot()
     {
         parent::boot();
 
-        static::updating(function ($caseStudy) {
-            // Delete old image if it's being replaced (for all locales)
-            foreach ($caseStudy->getTranslatableAttributes() as $attribute) {
-                if ($caseStudy->isDirty($attribute)) {
-                    $oldValue = $caseStudy->getOriginal($attribute);
-                    if ($oldValue && is_array($oldValue)) {
-                        foreach ($oldValue as $locale => $filePath) {
-                            if ($filePath) {
-                                Storage::disk('public')->delete($filePath);
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
         static::deleting(function ($caseStudy) {
-            // Delete image file (for all locales)
-            foreach ($caseStudy->getTranslatableAttributes() as $attribute) {
-                $value = $caseStudy->$attribute;
-                if ($value && is_array($value)) {
-                    foreach ($value as $locale => $filePath) {
+            // Delete image files from translatable fields (for all locales)
+            foreach ($caseStudy->translatable as $attribute) {
+                if ($attribute === 'image_path') {
+                    foreach (['en', 'bd'] as $locale) {
+                        $filePath = $caseStudy->getTranslation($attribute, $locale, false);
                         if ($filePath) {
                             Storage::disk('public')->delete($filePath);
                         }
@@ -105,7 +92,7 @@ class CaseStudy extends Model implements HasMedia
 
     public function getUrl(): string
     {
-        return url('/api/v1/case-studies/' . $this->slug);
+        return route('case-studies.show', ['slug' => $this->slug]);
     }
 
     public function getAlternates(): array

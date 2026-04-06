@@ -2,14 +2,22 @@
 
 namespace App\Models;
 
+use App\Traits\HasMedia;
+use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasSeo;
 use Illuminate\Support\Facades\Storage;
 
 class Testimonial extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations, HasMedia;
+
+    protected $translatable = [
+        'client_name',
+        'client_position',
+        'client_company',
+        'testimonial',
+    ];
 
     protected $fillable = [
         'client_name',
@@ -25,6 +33,10 @@ class Testimonial extends Model
         'meta_keywords',
     ];
 
+    protected array $mediaAttributes = [
+        'image_path',
+    ];
+
     protected $casts = [
         'rating' => 'integer',
         'is_visible' => 'boolean',
@@ -38,19 +50,6 @@ class Testimonial extends Model
         static::creating(function ($model) {
             if (empty($model->sort_order)) {
                 $model->sort_order = static::max('sort_order') + 1;
-            }
-        });
-
-        static::updating(function ($model) {
-            // Delete old image if it's being replaced
-            if ($model->isDirty('image_path') && $model->getOriginal('image_path')) {
-                Storage::disk('public')->delete($model->getOriginal('image_path'));
-            }
-        });
-
-        static::deleting(function ($model) {
-            if ($model->image_path) {
-                Storage::disk('public')->delete($model->image_path);
             }
         });
     }

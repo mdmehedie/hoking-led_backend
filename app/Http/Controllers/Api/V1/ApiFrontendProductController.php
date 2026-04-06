@@ -15,6 +15,7 @@ class ApiFrontendProductController extends ApiBaseController
         $perPage = $request->get('per_page', 10);
         $region = $request->route('region');
         $category = $request->get('category');
+        $isTop = $request->boolean('top');
 
         // Set locale based on region
         if ($region) {
@@ -24,11 +25,12 @@ class ApiFrontendProductController extends ApiBaseController
         $products = Product::with(['category', 'regions', 'relatedProducts'])
             ->where('status', 'published')
             ->when($category, function ($query, $category) {
-                // Filter products by category
                 $query->where('category_id', $category);
             })
+            ->when($isTop, function ($query) {
+                $query->where('is_top', true);
+            })
             ->when($region, function ($query, $region) {
-                // Filter products that are available in this region
                 $query->whereHas('regions', function ($q) use ($region) {
                     $q->where('code', $region)->where('is_active', true);
                 });

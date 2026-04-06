@@ -3,8 +3,9 @@
 namespace App\Filament\Admin\Resources\AnalyticsEventResource\Pages;
 
 use App\Filament\Admin\Resources\AnalyticsEventResource;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Actions;
 
 class ViewAnalyticsEvent extends ViewRecord
 {
@@ -13,8 +14,8 @@ class ViewAnalyticsEvent extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
-            Actions\DeleteAction::make(),
+            EditAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiBaseController;
-use App\Http\Resources\TestimonialCollection;
+use App\Http\Resources\TestimonialResource;
 use App\Models\Testimonial;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,6 +18,9 @@ class ApiFrontendTestimonialController extends ApiBaseController
             ->ordered()
             ->paginate($perPage);
 
-        return $this->okResponse(['testimonials' => new TestimonialCollection($testimonials)], __('Testimonials retrieved successfully'));
+        return $this->okResponse(
+            ['testimonials' => TestimonialResource::collection($testimonials)],
+            __('Testimonials retrieved successfully')
+        );
     }
 }

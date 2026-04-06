@@ -69,6 +69,6 @@ class Category extends Model
 
     public function getUrl(): string
     {
-        return url('/categories/' . $this->slug);
+        return route('categories.show', ['slug' => $this->slug]);
     }
 }

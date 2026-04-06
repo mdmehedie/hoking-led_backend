@@ -2,11 +2,11 @@
 
 namespace App\Filament\Admin\Resources\CaseStudyResource\Form;
 
-use App\Models\CaseStudy;
 use App\Models\Locale;
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -75,9 +75,6 @@ class CaseStudyForm
                                         ->required($isDefault),
                                     Textarea::make("excerpt.{$locale}")
                                         ->label(__('Excerpt')),
-                                    \App\Filament\Forms\Components\CustomRichEditor::make("content.{$locale}")
-                                        ->label(__('Content'))
-                                        ->required($isDefault),
                                     FileUpload::make("image_path.{$locale}")
                                         ->label(__('Image'))
                                         ->image()
@@ -86,9 +83,66 @@ class CaseStudyForm
                                         ->visibility('public')
                                         ->imageEditor()
                                         ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                                ]);
+                                    Section::make(__('Project Details'))
+                                        ->schema([
+                                            TextInput::make("project_details.{$locale}.product")
+                                                ->label(__('Product'))
+                                                ->maxLength(255),
+                                            TextInput::make("project_details.{$locale}.pixel_pitch")
+                                                ->label(__('Pixel Pitch'))
+                                                ->maxLength(255),
+                                            TextInput::make("project_details.{$locale}.client")
+                                                ->label(__('Client'))
+                                                ->maxLength(255),
+                                            TextInput::make("project_details.{$locale}.country")
+                                                ->label(__('Country'))
+                                                ->maxLength(255),
+                                            DatePicker::make("project_details.{$locale}.date")
+                                                ->label(__('Date'))
+                                                ->displayFormat('Y-m-d'),
+                                        ])->columns(2),
+                                    Repeater::make("project_description.{$locale}")
+                                        ->label(__('Project Description'))
+                                        ->schema([
+                                            TextInput::make('title')
+                                                ->label(__('Title'))
+                                                ->required($isDefault)
+                                                ->maxLength(255)
+                                                ->columnSpanFull(),
+                                            Textarea::make('description')
+                                                ->label(__('Description'))
+                                                ->maxLength(1000)
+                                                ->columnSpanFull(),
+                                            FileUpload::make('image')
+                                                ->label(__('Image'))
+                                                ->image()
+                                                ->disk('public')
+                                                ->directory('case-studies/descriptions')
+                                                ->visibility('public')
+                                                ->imageEditor()
+                                                ->columnSpanFull(),
+                                        ])
+                                        ->columns(1)
+                                        ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                                        ->createItemButtonLabel(__('Add item'))
+                                        ->columnSpanFull()
+                                        ->default([])
+                                        ->formatStateUsing(fn ($state) => static::formatProjectDescriptionState($state))
+                                        ->dehydrateStateUsing(fn ($state) => static::dehydrateProjectDescriptionState($state)),
+                                ])->columns(1);
                         })->all()
                     ),
+                ]),
+                Tab::make(__('Slider Images'))->schema([
+                    FileUpload::make('slider_images')
+                        ->label(__('Slider Images'))
+                        ->multiple()
+                        ->image()
+                        ->disk('public')
+                        ->directory('case-studies/slider')
+                        ->visibility('public')
+                        ->imageEditor()
+                        ->reorderable(),
                 ]),
                 Tab::make('SEO')->schema([
                     TextInput::make('meta_title'),
@@ -111,5 +165,47 @@ class CaseStudyForm
             $counter++;
         }
         return $slug;
+    }
+
+    /**
+     * Format project description state for display in repeater.
+     */
+    private static function formatProjectDescriptionState($state): array
+    {
+        // Handle empty or invalid state
+        if (blank($state) || !is_array($state) || count($state) === 0) {
+            return [['title' => '']];
+        }
+
+        // Fix double-nested structure (Filament wrapping issue)
+        foreach ($state as $key => $item) {
+            if (is_array($item) && isset($item['title']['title'])) {
+                $state[$key] = ['title' => ''];
+            }
+        }
+
+        // Convert simple array to repeater format
+        $firstItem = reset($state);
+        if (!is_array($firstItem) || !isset($firstItem['title'])) {
+            return collect($state)->map(fn($item) => is_array($item) ? $item : ['title' => $item])->all();
+        }
+
+        return $state;
+    }
+
+    /**
+     * Dehydrate project description state for storage.
+     */
+    private static function dehydrateProjectDescriptionState($state): array
+    {
+        if (!is_array($state)) {
+            return $state;
+        }
+
+        // Filter empty items
+        return collect($state)
+            ->filter(fn($item) => !empty($item['title']) || !empty($item['description']))
+            ->values()
+            ->all();
     }
 }

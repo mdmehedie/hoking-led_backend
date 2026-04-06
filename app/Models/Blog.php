@@ -69,7 +69,7 @@ class Blog extends Model implements HasMedia
 
     public function getUrl(): string
     {
-        return url('/api/v1/blogs/' . $this->slug);
+        return route('blogs.show', ['slug' => $this->slug]);
     }
 
     public function getAlternates(): array
