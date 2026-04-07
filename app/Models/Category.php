@@ -57,9 +57,4 @@ class Category extends Model
     {
         return $this->hasMany(Category::class, 'parent_id');
     }
-
-    public function getUrl(): string
-    {
-        return route('categories.show', ['slug' => $this->slug]);
-    }
 }

@@ -73,11 +73,6 @@ class CaseStudy extends Model
         return $this->belongsToMany(Region::class, 'case_study_regions');
     }
 
-    public function getUrl(): string
-    {
-        return route('case-studies.show', ['slug' => $this->slug]);
-    }
-
     public function scopePublished($query)
     {
         return $query->where('status', 'published');

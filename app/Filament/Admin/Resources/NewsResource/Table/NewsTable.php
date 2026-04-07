@@ -2,98 +2,62 @@
 
 namespace App\Filament\Admin\Resources\NewsResource\Table;
 
-use App\Filament\Admin\Resources\NewsResource;
+use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
-use Filament\Tables\Table;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Database\Eloquent\Collection;
+use Filament\Tables\Table;
 use Filament\Notifications\Notification;
-use Filament\Forms\Components\Select;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\CheckboxList;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
+use Illuminate\Database\Eloquent\Collection;
 
 class NewsTable
 {
-    public static function configure(Table $table): Table
+    public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('title'),
-                TextColumn::make('status'),
-                TextColumn::make('author.name'),
-                TextColumn::make('published_at'),
+                ImageColumn::make('image_path')
+                    ->label(__('Image'))
+                    ->square()
+                    ->size(40),
+                TextColumn::make('title')
+                    ->label(__('Title'))
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('status')
+                    ->label(__('Status'))
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                    ->sortable(),
+                TextColumn::make('author.name')
+                    ->label(__('Author'))
+                    ->searchable()
+                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')
                     ->options([
-                        'draft' => 'Draft',
-                        'review' => 'Review',
-                        'published' => 'Published',
+                        'draft' => __('Draft'),
+                        'review' => __('Review'),
+                        'published' => __('Published'),
                     ]),
             ])
-            ->searchable()
             ->actions([
-                \Filament\Actions\Action::make('send_to_review')
-                    ->label('Send to Review')
-                    ->icon('heroicon-o-arrow-right')
-                    ->visible(fn ($record) => $record->status === 'draft')
-                    ->action(fn ($record) => $record->update(['status' => 'review'])),
-                \Filament\Actions\Action::make('publish')
-                    ->label('Publish')
-                    ->icon('heroicon-o-check')
-                    ->visible(fn ($record) => $record->status === 'review')
-                    ->action(fn ($record) => $record->update(['status' => 'published', 'published_at' => now()])),
-                \Filament\Actions\Action::make('unpublish')
-                    ->label('Unpublish')
-                    ->icon('heroicon-o-x-mark')
-                    ->visible(fn ($record) => $record->status === 'published')
-                    ->action(fn ($record) => $record->update(['status' => 'draft'])),
-                \Filament\Actions\Action::make('share')
-                    ->label('Share')
-                    ->icon('heroicon-o-share')
-                    ->color('success')
-                    ->visible(fn ($record) => $record->status === 'published')
-                    ->form([
-                        Section::make('URL Preview')
-                            ->description('This is the URL that will be included in your social media posts')
-                            ->schema([
-                                \Filament\Forms\Components\TextInput::make('url_preview')
-                                    ->label('Content URL')
-                                    ->default(fn ($record) => NewsResource::generateShareUrl($record, 'news'))
-                                    ->disabled()
-                                    ->helperText('This URL will be shared on the selected social media platforms'),
-                            ]),
-                        \Filament\Forms\Components\CheckboxList::make('platforms')
-                            ->label('Share to Platforms')
-                            ->options([
-                                'facebook' => 'Facebook',
-                                'twitter' => 'Twitter (X)',
-                                'linkedin' => 'LinkedIn',
-                            ])
-                            ->default(['facebook', 'twitter', 'linkedin'])
-                            ->required()
-                            ->helperText('Select which social media platforms to share this news article on'),
-                    ])
-                    ->action(function ($record, array $data) {
-                        \App\Jobs\PublishToSocialMedia::dispatch($record, 'news', $data['platforms']);
-
-                        \Filament\Notifications\Notification::make()
-                            ->title('News shared successfully!')
-                            ->body('The news article has been queued for sharing to selected social media platforms.')
-                            ->success()
-                            ->send();
-                    })
-                    ->modalHeading('Share News Article')
-                    ->modalSubmitActionLabel('Share Now'),
-                EditAction::make(),
-                DeleteAction::make(),
+                Action::make('edit')
+                    ->label(__('Edit'))
+                    ->url(fn ($record) => \App\Filament\Admin\Resources\NewsResource::getUrl('edit', ['record' => $record]))
+                    ->icon('heroicon-o-pencil'),
+                Action::make('delete')
+                    ->label(__('Delete'))
+                    ->action(fn ($record) => $record->delete())
+                    ->requiresConfirmation()
+                    ->color('danger')
+                    ->icon('heroicon-o-trash'),
             ])
             ->bulkActions([
-                BulkAction::make('delete_selected')
-                    ->label('Delete Selected')
+                BulkAction::make('delete')
+                    ->label(__('Delete Selected'))
                     ->color('danger')
                     ->icon('heroicon-o-trash')
                     ->requiresConfirmation()
@@ -102,31 +66,10 @@ class NewsTable
                         $records->each->delete();
                         Notification::make()
                             ->success()
-                            ->title('Deleted')
-                            ->body($count . ' items deleted successfully.')
+                            ->title(__('Deleted'))
+                            ->body($count . ' ' . __('items deleted successfully.'))
                             ->send();
                     }),
-                BulkAction::make('change_status')
-                    ->label('Change Status')
-                    ->form([
-                        Select::make('status')
-                            ->options([
-                                'draft' => 'Draft',
-                                'review' => 'Review',
-                                'published' => 'Published',
-                            ])
-                            ->required(),
-                    ])
-                    ->action(function (Collection $records, array $data) {
-                        $records->each->update(['status' => $data['status']]);
-                        Notification::make()
-                            ->success()
-                            ->title('Status Updated')
-                            ->body('Selected items have been updated to ' . $data['status'] . '.')
-                            ->send();
-                    })
-                    ->requiresConfirmation()
-                    ->icon('heroicon-o-cog'),
             ]);
     }
 }
