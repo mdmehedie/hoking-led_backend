@@ -33,6 +33,7 @@ class Project extends Model
         'gallery',
         'is_featured',
         'is_popular',
+        'is_successful',
         'status',
         'sort_order',
         'meta_title',
@@ -48,9 +49,9 @@ class Project extends Model
 
     protected $casts = [
         'gallery' => 'array',
-        'project_date' => 'date',
         'is_featured' => 'boolean',
         'is_popular' => 'boolean',
+        'is_successful' => 'boolean',
     ];
 
     protected static function boot()
@@ -77,6 +78,11 @@ class Project extends Model
     public function scopePopular($query)
     {
         return $query->where('is_popular', true);
+    }
+
+    public function scopeSuccessful($query)
+    {
+        return $query->where('is_successful', true);
     }
 
     public function scopeOrdered($query)

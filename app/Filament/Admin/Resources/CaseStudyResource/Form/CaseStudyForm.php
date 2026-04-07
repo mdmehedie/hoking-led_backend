@@ -5,9 +5,9 @@ namespace App\Filament\Admin\Resources\CaseStudyResource\Form;
 use App\Models\Locale;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -15,197 +15,203 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 
 class CaseStudyForm
 {
     public static function form(Schema $schema): Schema
     {
-        $activeLocales = Locale::activeCodes();
-        $defaultLocale = Locale::defaultCode();
-
         return $schema->schema([
             Tabs::make('Case Study Tabs')->tabs([
-                Tab::make(__('General Information'))->schema([
-                    TextInput::make('slug')
-                        ->unique(ignoreRecord: true)
-                        ->required()
-                        ->rules(['regex:/^[a-z0-9-]+$/', 'no_spaces'])
-                        ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
-                        ->afterStateUpdated(function ($state, callable $set) {
-                            $slug = strtolower(str_replace(' ', '-', $state));
-                            $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
-                            $slug = preg_replace('/-+/', '-', $slug);
-                            $slug = trim($slug, '-');
-                            $set('slug', $slug);
-                        })
-                        ->live(debounce: 300),
-                    Select::make('status')
-                        ->options([
-                            'draft' => 'Draft',
-                            'review' => 'Review',
-                            'published' => 'Published',
-                        ])
-                        ->required(),
-                    Hidden::make('published_at')
-                        ->default(now()),
-                    Hidden::make('author_id')
-                        ->default(auth()->id()),
-                ]),
-                Tab::make(__('Translations'))->schema([
-                    Tabs::make('Language Tabs')->tabs(
-                        collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
-                            $isDefault = $locale === $defaultLocale;
-
-                            return Tab::make(strtoupper($locale))
-                                ->schema([
-                                    TextInput::make("title.{$locale}")
-                                        ->label(__('Title'))
-                                        ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
-                                            if (!$isDefault) {
-                                                return;
-                                            }
-
-                                            if (blank($get('slug'))) {
-                                                $set('slug', static::generateUniqueSlug($state, null));
-                                            }
-                                        })
-                                        ->live()
-                                        ->required($isDefault),
-                                    Textarea::make("excerpt.{$locale}")
-                                        ->label(__('Excerpt')),
-                                    FileUpload::make("image_path.{$locale}")
-                                        ->label(__('Image'))
-                                        ->image()
-                                        ->disk('public')
-                                        ->directory('case-studies')
-                                        ->visibility('public')
-                                        ->imageEditor()
-                                        ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                                    Section::make(__('Project Details'))
-                                        ->schema([
-                                            TextInput::make("project_details.{$locale}.product")
-                                                ->label(__('Product'))
-                                                ->maxLength(255),
-                                            TextInput::make("project_details.{$locale}.pixel_pitch")
-                                                ->label(__('Pixel Pitch'))
-                                                ->maxLength(255),
-                                            TextInput::make("project_details.{$locale}.client")
-                                                ->label(__('Client'))
-                                                ->maxLength(255),
-                                            TextInput::make("project_details.{$locale}.country")
-                                                ->label(__('Country'))
-                                                ->maxLength(255),
-                                            DatePicker::make("project_details.{$locale}.date")
-                                                ->label(__('Date'))
-                                                ->displayFormat('Y-m-d'),
-                                        ])->columns(2),
-                                    Repeater::make("project_description.{$locale}")
-                                        ->label(__('Project Description'))
-                                        ->schema([
-                                            TextInput::make('title')
-                                                ->label(__('Title'))
-                                                ->required($isDefault)
-                                                ->maxLength(255)
-                                                ->columnSpanFull(),
-                                            Textarea::make('description')
-                                                ->label(__('Description'))
-                                                ->maxLength(1000)
-                                                ->columnSpanFull(),
-                                            FileUpload::make('image')
-                                                ->label(__('Image'))
-                                                ->image()
-                                                ->disk('public')
-                                                ->directory('case-studies/descriptions')
-                                                ->visibility('public')
-                                                ->imageEditor()
-                                                ->columnSpanFull(),
-                                        ])
-                                        ->columns(1)
-                                        ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
-                                        ->createItemButtonLabel(__('Add item'))
-                                        ->columnSpanFull()
-                                        ->default([])
-                                        ->formatStateUsing(fn ($state) => static::formatProjectDescriptionState($state))
-                                        ->dehydrateStateUsing(fn ($state) => static::dehydrateProjectDescriptionState($state)),
-                                ])->columns(1);
-                        })->all()
-                    ),
-                ]),
-                Tab::make(__('Slider Images'))->schema([
-                    FileUpload::make('slider_images')
-                        ->label(__('Slider Images'))
-                        ->multiple()
-                        ->image()
-                        ->disk('public')
-                        ->directory('case-studies/slider')
-                        ->visibility('public')
-                        ->imageEditor()
-                        ->reorderable(),
-                ]),
-                Tab::make('SEO')->schema([
-                    TextInput::make('meta_title'),
-                    Textarea::make('meta_description'),
-                    Textarea::make('meta_keywords'),
-                    TextInput::make('canonical_url'),
-                ]),
+                Tab::make(__('General Information'))->schema(self::generalSchema()),
+                Tab::make(__('Translations'))->schema(self::translationTabsSchema()),
+                Tab::make(__('Media'))->schema(self::mediaSchema()),
+                Tab::make(__('SEO'))->schema(self::seoSchema()),
             ])->columnSpanFull(),
         ]);
     }
 
-    protected static function generateUniqueSlug($title, $id = null)
+    private static function generalSchema(): array
     {
-        $table = 'case_studies';
-        $baseSlug = Str::slug($title);
-        $slug = $baseSlug;
-        $counter = 1;
-        while (DB::table($table)->where('slug', $slug)->where('id', '!=', $id)->exists()) {
-            $slug = $baseSlug . '-' . $counter;
-            $counter++;
+        return [
+            TextInput::make('slug')
+                ->label(__('Slug'))
+                ->unique(ignoreRecord: true)
+                ->required()
+                ->regex('/^[a-z0-9-]+$/')
+                ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
+                ->live(debounce: 300)
+                ->afterStateUpdated(function ($state, callable $set) {
+                    $slug = strtolower(str_replace(' ', '-', $state));
+                    $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
+                    $slug = preg_replace('/-+/', '-', $slug);
+                    $slug = trim($slug, '-');
+                    $set('slug', $slug);
+                }),
+            Select::make('status')
+                ->label(__('Status'))
+                ->options([
+                    'draft' => __('Draft'),
+                    'review' => __('Review'),
+                    'published' => __('Published'),
+                ])
+                ->default('draft')
+                ->required(),
+            Hidden::make('author_id')
+                ->default(fn () => auth()->id()),
+            Hidden::make('published_at')
+                ->default(fn () => now()),
+        ];
+    }
+
+    private static function translationTabsSchema(): array
+    {
+        $activeLocales = Locale::activeCodes();
+        $defaultLocale = Locale::defaultCode();
+
+        return [
+            Tabs::make('Language Tabs')->tabs(
+                collect($activeLocales)->map(fn (string $locale) => self::localeTabSchema($locale, $locale === $defaultLocale))->all()
+            ),
+        ];
+    }
+
+    private static function localeTabSchema(string $locale, bool $isDefault): Tab
+    {
+        return Tab::make(strtoupper($locale))
+            ->schema([
+                TextInput::make("title.{$locale}")
+                    ->label(__('Title'))
+                    ->required($isDefault)
+                    ->maxLength(255)
+                    ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
+                        if ($isDefault && blank($get('slug'))) {
+                            $set('slug', static::generateUniqueSlug($state, null));
+                        }
+                    })
+                    ->live()
+                    ->required($isDefault),
+                Textarea::make("excerpt.{$locale}")
+                    ->label(__('Excerpt'))
+                    ->maxLength(500)
+                    ->columnSpanFull(),
+                Section::make(__('Project Details'))->schema([
+                    TextInput::make("project_details.{$locale}.product")
+                        ->label(__('Product'))
+                        ->maxLength(255),
+                    TextInput::make("project_details.{$locale}.pixel_pitch")
+                        ->label(__('Pixel Pitch'))
+                        ->maxLength(255),
+                    TextInput::make("project_details.{$locale}.client")
+                        ->label(__('Client'))
+                        ->maxLength(255),
+                    TextInput::make("project_details.{$locale}.country")
+                        ->label(__('Country'))
+                        ->maxLength(255),
+                    DatePicker::make("project_details.{$locale}.date")
+                        ->label(__('Date'))
+                        ->displayFormat('Y-m-d'),
+                ])->columns(2),
+                self::projectDescriptionRepeater($locale, $isDefault),
+            ])->columns(1);
+    }
+
+    private static function projectDescriptionRepeater(string $locale, bool $isDefault): Repeater
+    {
+        return Repeater::make("project_description.{$locale}")
+            ->label(__('Project Description'))
+            ->schema([
+                TextInput::make('title')
+                    ->label(__('Title'))
+                    ->required($isDefault)
+                    ->maxLength(255)
+                    ->columnSpanFull(),
+                RichEditor::make('description')
+                    ->label(__('Description'))
+                    ->columnSpanFull(),
+                FileUpload::make('image')
+                    ->label(__('Image'))
+                    ->image()
+                    ->disk('public')
+                    ->directory('case-studies/descriptions')
+                    ->visibility('public')
+                    ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . "_{$locale}_" . $file->getClientOriginalName())
+                    ->columnSpanFull(),
+            ])
+            ->columns(1)
+            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+            ->createItemButtonLabel(__('Add item'))
+            ->columnSpanFull();
+    }
+
+    private static function mediaSchema(): array
+    {
+        $keepOriginal = fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName();
+
+        return [
+            FileUpload::make('image_path')
+                ->label(__('Featured Image'))
+                ->image()
+                ->disk('public')
+                ->directory('case-studies/images')
+                ->visibility('public')
+                ->getUploadedFileNameForStorageUsing($keepOriginal)
+                ->imageEditor()
+                ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+            FileUpload::make('slider_images')
+                ->label(__('Slider Images'))
+                ->multiple()
+                ->image()
+                ->disk('public')
+                ->directory('case-studies/slider')
+                ->visibility('public')
+                ->getUploadedFileNameForStorageUsing($keepOriginal)
+                ->imageEditor()
+                ->reorderable(),
+        ];
+    }
+
+    private static function seoSchema(): array
+    {
+        return [
+            TextInput::make('meta_title')
+                ->label(__('Meta Title'))
+                ->maxLength(255),
+            Textarea::make('meta_description')
+                ->label(__('Meta Description'))
+                ->maxLength(500),
+            Textarea::make('meta_keywords')
+                ->label(__('Meta Keywords')),
+            TextInput::make('canonical_url')
+                ->label(__('Canonical URL'))
+                ->maxLength(255),
+        ];
+    }
+
+    private static function generateUniqueSlug(?string $title, ?int $ignoreId = null): string
+    {
+        if (blank($title)) {
+            return '';
         }
+
+        $base = Str::slug($title);
+        $slug = $base;
+        $counter = 1;
+
+        while (static::slugExists($slug, $ignoreId)) {
+            $slug = $base . '-' . $counter++;
+        }
+
         return $slug;
     }
 
-    /**
-     * Format project description state for display in repeater.
-     */
-    private static function formatProjectDescriptionState($state): array
+    private static function slugExists(string $slug, ?int $ignoreId = null): bool
     {
-        // Handle empty or invalid state
-        if (blank($state) || !is_array($state) || count($state) === 0) {
-            return [['title' => '']];
+        $query = \App\Models\CaseStudy::where('slug', $slug);
+        if ($ignoreId) {
+            $query->where('id', '!=', $ignoreId);
         }
-
-        // Fix double-nested structure (Filament wrapping issue)
-        foreach ($state as $key => $item) {
-            if (is_array($item) && isset($item['title']['title'])) {
-                $state[$key] = ['title' => ''];
-            }
-        }
-
-        // Convert simple array to repeater format
-        $firstItem = reset($state);
-        if (!is_array($firstItem) || !isset($firstItem['title'])) {
-            return collect($state)->map(fn($item) => is_array($item) ? $item : ['title' => $item])->all();
-        }
-
-        return $state;
-    }
-
-    /**
-     * Dehydrate project description state for storage.
-     */
-    private static function dehydrateProjectDescriptionState($state): array
-    {
-        if (!is_array($state)) {
-            return $state;
-        }
-
-        // Filter empty items
-        return collect($state)
-            ->filter(fn($item) => !empty($item['title']) || !empty($item['description']))
-            ->values()
-            ->all();
+        return $query->exists();
     }
 }

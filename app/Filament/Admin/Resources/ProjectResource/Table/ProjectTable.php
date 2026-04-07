@@ -35,6 +35,10 @@ class ProjectTable
                     ->label(__('Popular'))
                     ->boolean()
                     ->sortable(),
+                IconColumn::make('is_successful')
+                    ->label(__('Successful'))
+                    ->boolean()
+                    ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -47,6 +51,8 @@ class ProjectTable
                     ->label(__('Featured')),
                 TernaryFilter::make('is_popular')
                     ->label(__('Popular')),
+                TernaryFilter::make('is_successful')
+                    ->label(__('Successful')),
             ])
             ->actions([
                 Action::make('edit')

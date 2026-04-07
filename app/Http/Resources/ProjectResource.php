@@ -24,6 +24,7 @@ class ProjectResource extends JsonResource
             ) : [],
             'is_featured' => (bool) $this->is_featured,
             'is_popular' => (bool) $this->is_popular,
+            'is_successful' => (bool) $this->is_successful,
             'sort_order' => $this->sort_order,
             'meta_title' => $this->meta_title,
             'meta_description' => $this->meta_description,

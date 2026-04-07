@@ -7,19 +7,25 @@ use App\Filament\Admin\Resources\PageResource\Table\PageTable;
 use App\Filament\Admin\Resources\PageResource\Pages;
 use App\Models\Page;
 use Filament\Resources\Resource;
-use Filament\Support\Icons\Heroicon;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class PageResource extends Resource
 {
     protected static ?string $model = Page::class;
 
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document';
+
     protected static ?string $navigationLabel = 'Pages';
 
+    protected static ?string $slug = 'pages';
+
     protected static ?int $navigationSort = 5;
+
+    public static function getModelLabel(): string
+    {
+        return 'Page';
+    }
 
     public static function getNavigationLabel(): string
     {
@@ -31,7 +37,10 @@ class PageResource extends Resource
         return __('Content Management');
     }
 
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document';
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->can('view page');
+    }
 
     public static function canCreate(): bool
     {
@@ -65,9 +74,7 @@ class PageResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
@@ -77,49 +84,5 @@ class PageResource extends Resource
             'create' => Pages\CreatePage::route('/create'),
             'edit' => Pages\EditPage::route('/{record}/edit'),
         ];
-    }
-
-    public static function generateUniqueSlug($title, $id = null)
-    {
-        $table = 'pages';
-        $baseSlug = Str::slug($title);
-        $slug = $baseSlug;
-        $counter = 1;
-        while (DB::table($table)->where('slug', $slug)->where('id', '!=', $id)->exists()) {
-            $slug = $baseSlug . '-' . $counter;
-            $counter++;
-        }
-        return $slug;
-    }
-
-    /**
-     * Generate share URL for content preview
-     */
-    public static function generateShareUrl($record, string $contentType): string
-    {
-        // Get frontend URL from app settings or fallback to app URL
-        $frontendUrl = \App\Models\AppSetting::first()?->frontend_url ?? config('app.url');
-
-        // Ensure frontend URL doesn't end with /
-        $frontendUrl = rtrim($frontendUrl, '/');
-
-        // Get content type prefix from app settings with fallback
-        $prefix = \App\Models\AppSetting::first()?->{$contentType . '_prefix'} ?? match($contentType) {
-            'blog' => '/blog/',
-            'news' => '/news/',
-            'page' => '/pages/',
-            'case_study' => '/case-studies/',
-            'product' => '/products/',
-            default => '/',
-        };
-
-        // Ensure prefix starts and ends with /
-        $prefix = '/' . trim($prefix, '/') . '/';
-
-        // Get slug
-        $slug = $record->slug ?? '';
-
-        // Construct full URL
-        return $frontendUrl . $prefix . $slug;
     }
 }

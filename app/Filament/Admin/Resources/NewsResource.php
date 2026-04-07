@@ -31,6 +31,11 @@ class NewsResource extends Resource
         return __('Content Management');
     }
 
+    public static function getRouteBaseName(?\Filament\Panel $panel = null): string
+    {
+        return 'filament.admin.resources.news-items';
+    }
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-newspaper';
 
     // Override navigation URL to use the correct slug
