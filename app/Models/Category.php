@@ -3,15 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Kalnoy\Nestedset\NodeTrait;
 use Illuminate\Support\Str;
+use App\Traits\HasMedia;
 use App\Traits\HasSeo;
 use App\Traits\HasTranslations;
-use Illuminate\Support\Facades\Storage;
 
 class Category extends Model
 {
-    use NodeTrait, HasSeo, HasTranslations;
+    use NodeTrait, HasMedia, HasSeo, HasTranslations;
 
     protected array $translatable = [
         'name',
@@ -44,34 +46,14 @@ class Category extends Model
                 $category->slug = Str::slug($category->name);
             }
         });
-
-        static::deleted(function ($category) {
-            if ($category->thumbnail) {
-                Storage::disk('public')->delete($category->thumbnail);
-            }
-            if ($category->icon) {
-                Storage::disk('public')->delete($category->icon);
-            }
-        });
-
-        static::deleting(function ($category) {
-            // Delete thumbnails from all children when deleting with children
-            if (method_exists($category, 'children')) {
-                $category->children->each(function ($child) {
-                    if ($child->thumbnail) {
-                        Storage::disk('public')->delete($child->thumbnail);
-                    }
-                });
-            }
-        });
     }
 
-    public function parent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function parent(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'parent_id');
     }
 
-    public function children(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function children(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id');
     }
