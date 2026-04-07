@@ -14,11 +14,13 @@ class CaseStudyResource extends Resource
 {
     protected static ?string $model = CaseStudy::class;
 
+    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
+
     protected static ?string $navigationLabel = 'Case Studies';
 
-    protected static ?int $navigationSort = 3;
-
     protected static ?string $slug = 'cases';
+
+    protected static ?int $navigationSort = 3;
 
     public static function getModelLabel(): string
     {
@@ -35,12 +37,9 @@ class CaseStudyResource extends Resource
         return __('Content Management');
     }
 
-    protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
-
-    // Override navigation URL to use the correct slug
-    public static function getNavigationUrl(): string
+    public static function canViewAny(): bool
     {
-        return static::getUrl('index');
+        return auth()->user()->can('view casestudy');
     }
 
     public static function canCreate(): bool
@@ -75,14 +74,7 @@ class CaseStudyResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
-    }
-
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
-    {
-        return parent::getEloquentQuery()->with('translations');
+        return [];
     }
 
     public static function getPages(): array
