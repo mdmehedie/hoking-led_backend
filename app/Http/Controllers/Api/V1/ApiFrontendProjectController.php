@@ -15,10 +15,12 @@ class ApiFrontendProjectController extends ApiBaseController
         $perPage = $request->get('per_page', 10);
         $featured = $request->boolean('featured');
         $popular = $request->boolean('popular');
+        $successful = $request->boolean('successful');
 
         $projects = Project::published()
             ->when($featured, fn ($q) => $q->featured())
             ->when($popular, fn ($q) => $q->popular())
+            ->when($successful, fn ($q) => $q->successful())
             ->ordered()
             ->paginate($perPage);
 

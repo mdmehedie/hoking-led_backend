@@ -60,6 +60,7 @@ class ProjectForm
                 ->default(0),
             Toggle::make('is_featured')->label(__('Featured')),
             Toggle::make('is_popular')->label(__('Popular')),
+            Toggle::make('is_successful')->label(__('Successful')),
         ];
     }
 
