@@ -61,7 +61,7 @@ Route::prefix('v1')->group(function () {
     Route::get('brands', [ApiFrontendBrandController::class, 'index'])->name('brands.index');
     Route::get('brands/{slug}', [ApiFrontendBrandController::class, 'show'])->name('brands.show');
 
-    Route::post('newsletter/subscribe', [ApiFrontendNewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+    Route::post('newsletter/subscribe', [ApiFrontendNewsletterController::class, 'subscribe'])->middleware('throttle:3,1')->name('newsletter.subscribe');
     Route::get('newsletter/unsubscribe/{token}', [ApiFrontendNewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
     Route::get('newsletter/confirm/{token}', [ApiFrontendNewsletterController::class, 'confirm'])->name('newsletter.confirm');
 

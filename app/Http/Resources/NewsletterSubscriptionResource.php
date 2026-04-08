@@ -16,7 +16,6 @@ class NewsletterSubscriptionResource extends JsonResource
             'last_name' => $this->last_name,
             'status' => $this->status,
             'source' => $this->source,
-            'consent_given' => (bool) $this->consent_given,
             'subscribed_at' => $this->subscribed_at?->toIso8601String(),
             'unsubscribed_at' => $this->unsubscribed_at?->toIso8601String(),
             'last_activity_at' => $this->last_activity_at?->toIso8601String(),
