@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CertificationAward extends Model
 {
-    use HasFactory;
+    use HasFactory, HasMedia;
 
     protected $fillable = [
         'title',
@@ -29,25 +30,7 @@ class CertificationAward extends Model
         'sort_order' => 'integer',
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            if (empty($model->slug)) {
-                $model->slug = \Str::slug($model->title);
-            }
-        });
-
-        static::updating(function ($model) {
-            if ($model->isDirty('title') && empty($model->slug)) {
-                $model->slug = \Str::slug($model->title);
-            }
-        });
-    }
-
-    public function getImageAttribute()
-    {
-        return $this->image_path ? asset('storage/certifications/' . $this->image_path) : null;
-    }
+    protected array $mediaAttributes = [
+        'image_path',
+    ];
 }

@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\V1\ApiFrontendProjectController;
 use App\Http\Controllers\Api\V1\ApiFrontendBrandController;
 use App\Http\Controllers\Api\V1\ApiFrontendContactController;
 use App\Http\Controllers\Api\V1\ApiFrontendNewsletterController;
+use App\Http\Controllers\Api\V1\ApiFrontendTeamMemberController;
 use App\Http\Controllers\Api\V1\MediaLibraryController;
 use App\Http\Controllers\Api\V1\ApiFrontendLocaleController;
 use App\Http\Controllers\Api\V1\ApiFrontendFormController;
@@ -67,6 +68,9 @@ Route::prefix('v1')->group(function () {
     Route::get('newsletter/confirm/{token}', [ApiFrontendNewsletterController::class, 'confirm'])->name('newsletter.confirm');
 
     Route::post('contact/submit', [ApiFrontendContactController::class, 'submit'])->middleware('throttle:10,1')->name('contact.submit');
+
+    Route::get('team-members', [ApiFrontendTeamMemberController::class, 'index'])->name('team-members.index');
+    Route::get('team-members/{slug}', [ApiFrontendTeamMemberController::class, 'show'])->name('team-members.show');
 
     Route::get('media-library', [MediaLibraryController::class, 'index'])->name('media-library.index');
     Route::post('media-library/upload', [MediaLibraryController::class, 'upload'])->name('media-library.upload');
