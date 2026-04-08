@@ -6,7 +6,7 @@ use App\Models\Locale;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\RichEditor;
+use App\Filament\Forms\Components\TinyEditor;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -128,7 +128,7 @@ class CaseStudyForm
                     ->required($isDefault)
                     ->maxLength(255)
                     ->columnSpanFull(),
-                RichEditor::make('description')
+                TinyEditor::make('description')
                     ->label(__('Description'))
                     ->columnSpanFull(),
                 FileUpload::make('image')

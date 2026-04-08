@@ -5,7 +5,7 @@ namespace App\Filament\Admin\Resources\NewsResource\Form;
 use App\Models\Locale;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\RichEditor;
+use App\Filament\Forms\Components\TinyEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -97,7 +97,7 @@ class NewsForm
                     ->label(__('Excerpt'))
                     ->maxLength(500)
                     ->columnSpanFull(),
-                RichEditor::make("content.{$locale}")
+                TinyEditor::make("content.{$locale}")
                     ->label(__('Content'))
                     ->required($isDefault)
                     ->columnSpanFull(),
