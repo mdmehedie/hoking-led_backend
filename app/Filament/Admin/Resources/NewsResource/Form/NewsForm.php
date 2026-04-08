@@ -9,6 +9,7 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
@@ -55,6 +56,9 @@ class NewsForm
                 ])
                 ->default('draft')
                 ->required(),
+            Toggle::make('is_popular')
+                ->label(__('Is Popular'))
+                ->default(false),
             Hidden::make('author_id')
                 ->default(fn () => auth()->id()),
             Hidden::make('published_at')

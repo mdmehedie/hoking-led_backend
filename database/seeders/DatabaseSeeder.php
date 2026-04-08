@@ -41,14 +41,26 @@ class DatabaseSeeder extends Seeder
         // 4. Assign Super Admin role to admin user
         $this->call(AssignSuperAdminRoleSeeder::class);
         
-        // 5. Content seeders
+        // 5. Structure seeders
+        $this->call([
+            CategorySeeder::class,
+        ]);
+
+        // 6. Content seeders
         $this->call([
             ProductSeeder::class,
             BlogSeeder::class,
             NewsSeeder::class,
+            PageSeeder::class,
+            CaseStudySeeder::class,
+            ProjectSeeder::class,
+            SliderSeeder::class,
+            CoreAdvantageSeeder::class,
+            TestimonialSeeder::class,
+            BrandSeeder::class,
         ]);
         
-        // 6. Test user (optional)
+        // 7. Test user (optional)
         User::firstOrCreate(
             ['email' => 'test@example.com'],
             [

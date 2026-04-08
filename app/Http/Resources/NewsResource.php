@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Helpers\ContentUrlHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
@@ -15,8 +16,9 @@ class NewsResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'excerpt' => $this->excerpt,
-            'content' => $this->content,
+            'content' => ContentUrlHelper::convertImageUrlsToAbsolute($this->content),
             'image' => $this->image_path ? Storage::disk('public')->url($this->image_path) : null,
+            'is_popular' => (bool) $this->is_popular,
             'published_at' => $this->published_at?->format('Y-m-d H:i:s'),
             'author' => $this->when($this->author, fn () => [
                 'id' => $this->author->id,

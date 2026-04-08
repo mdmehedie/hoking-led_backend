@@ -109,16 +109,21 @@ class NewsSeeder extends Seeder
         ];
 
         foreach ($newsArticles as $newsData) {
-            $news = News::create([
-                'title' => $newsData['title']['en'], // Default to English for database
-                'slug' => $newsData['slug'],
-                'excerpt' => $newsData['excerpt']['en'], // Default to English
-                'content' => $newsData['content']['en'], // Default to English
-                'status' => $newsData['status'],
-                'author_id' => $newsData['author_id'],
-                'published_at' => $newsData['published_at'],
-            ]);
-            
+            $news = News::firstOrCreate(
+                ['slug' => $newsData['slug']],
+                [
+                    'title' => $newsData['title']['en'],
+                    'excerpt' => $newsData['excerpt']['en'],
+                    'content' => $newsData['content']['en'],
+                    'status' => $newsData['status'],
+                    'author_id' => $newsData['author_id'],
+                    'published_at' => $newsData['published_at'],
+                    'meta_title' => $newsData['meta_title']['en'] ?? '',
+                    'meta_description' => $newsData['meta_description']['en'] ?? '',
+                    'meta_keywords' => $newsData['meta_keywords']['en'] ?? '',
+                ]
+            );
+
             // Set translatable attributes
             foreach (['title', 'excerpt', 'content'] as $field) {
                 if (isset($newsData[$field]) && is_array($newsData[$field])) {
@@ -127,13 +132,7 @@ class NewsSeeder extends Seeder
                     }
                 }
             }
-            
-            // Set meta fields as plain strings (use English version)
-            $news->update([
-                'meta_title' => $newsData['meta_title']['en'] ?? '',
-                'meta_description' => $newsData['meta_description']['en'] ?? '',
-                'meta_keywords' => $newsData['meta_keywords']['en'] ?? '',
-            ]);
+            $news->save();
         }
 
         $this->command->info('News articles seeded successfully!');

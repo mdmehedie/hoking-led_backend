@@ -14,6 +14,9 @@ use App\Http\Controllers\Api\V1\ApiFrontendCertificationAwardController;
 use App\Http\Controllers\Api\V1\ApiFrontendTestimonialController;
 use App\Http\Controllers\Api\V1\ApiFrontendCoreAdvantageController;
 use App\Http\Controllers\Api\V1\ApiFrontendProjectController;
+use App\Http\Controllers\Api\V1\ApiFrontendBrandController;
+use App\Http\Controllers\Api\V1\ApiFrontendNewsletterController;
+use App\Http\Controllers\Api\V1\MediaLibraryController;
 use App\Http\Controllers\Api\V1\ApiFrontendLocaleController;
 use App\Http\Controllers\Api\V1\ApiFrontendFormController;
 
@@ -54,6 +57,17 @@ Route::prefix('v1')->group(function () {
     Route::get('core-advantages', [ApiFrontendCoreAdvantageController::class, 'index'])->name('core-advantages.index');
     Route::get('projects', [ApiFrontendProjectController::class, 'index'])->name('projects.index');
     Route::get('projects/{slug}', [ApiFrontendProjectController::class, 'show'])->name('projects.show');
+
+    Route::get('brands', [ApiFrontendBrandController::class, 'index'])->name('brands.index');
+    Route::get('brands/{slug}', [ApiFrontendBrandController::class, 'show'])->name('brands.show');
+
+    Route::post('newsletter/subscribe', [ApiFrontendNewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+    Route::get('newsletter/unsubscribe/{token}', [ApiFrontendNewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+    Route::get('newsletter/confirm/{token}', [ApiFrontendNewsletterController::class, 'confirm'])->name('newsletter.confirm');
+
+    Route::get('media-library', [MediaLibraryController::class, 'index'])->name('media-library.index');
+    Route::post('media-library/upload', [MediaLibraryController::class, 'upload'])->name('media-library.upload');
+    Route::delete('media-library/{media}', [MediaLibraryController::class, 'destroy'])->name('media-library.destroy');
     
     Route::get('pages', [ApiFrontendPageController::class, 'index'])->name('pages.index');
     Route::get('pages/{slug}', [ApiFrontendPageController::class, 'show'])->name('pages.show');

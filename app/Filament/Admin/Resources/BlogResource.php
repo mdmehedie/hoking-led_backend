@@ -37,11 +37,6 @@ class BlogResource extends Resource
         return __('Content Management');
     }
 
-    public static function canViewAny(): bool
-    {
-        return auth()->user()->can('view blog');
-    }
-
     public static function canCreate(): bool
     {
         return auth()->user()->can('create blog');

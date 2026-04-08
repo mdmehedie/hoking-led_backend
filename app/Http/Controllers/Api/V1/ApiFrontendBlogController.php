@@ -13,10 +13,22 @@ class ApiFrontendBlogController extends ApiBaseController
     public function index(Request $request): JsonResponse
     {
         $perPage = $request->get('per_page', 10);
+        $recent = $request->boolean('recent');
+        $popular = $request->boolean('popular');
+        $limit = $request->get('limit');
 
-        $blogs = Blog::published()
-            ->orderBy('published_at', 'desc')
-            ->paginate($perPage);
+        $query = Blog::published();
+
+        // Apply filters
+        $query->when($recent, fn ($q) => $q->recent($limit ?? 5));
+        $query->when($popular && !$recent, fn ($q) => $q->popular());
+
+        // If neither recent nor popular, use default ordering
+        if (!$recent && !$popular) {
+            $query->orderBy('published_at', 'desc');
+        }
+
+        $blogs = $query->paginate($perPage);
 
         return $this->okResponse(
             ['blogs' => BlogResource::collection($blogs)],

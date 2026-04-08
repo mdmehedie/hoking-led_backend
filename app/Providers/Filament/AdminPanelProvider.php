@@ -93,6 +93,9 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->renderHook('head.end', function () {
+                return new HtmlString('<script src="/assets/tinymce/tinymce.min.js"></script><meta name="csrf-token" content="' . csrf_token() . '">');
+            })
+            ->renderHook('head.end', function () {
                 try {
                     $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());
                     return ($settings && $settings->toastr_enabled ? '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>' : '') .
@@ -410,6 +413,9 @@ class AdminPanelProvider extends PanelProvider
                         }
                     </script>
                 ');
+            })
+            ->renderHook('panels::body.end', function () {
+                return view('components.media-file-manager')->render();
             });
     }
 }
