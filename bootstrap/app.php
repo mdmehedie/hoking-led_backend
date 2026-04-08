@@ -3,6 +3,9 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\TrustProxies;
 use App\Http\Middleware\CacheAssets;
@@ -42,5 +45,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (ThrottleRequestsException $e, Request $request): JsonResponse {
+            return response()->json([
+                'status' => false,
+                'message' => __('Too many attempts. Please try again later.'),
+                'data' => ['retry_after' => $e->getHeaders()['Retry-After'] ?? 60],
+            ], 429);
+        });
     })->create();

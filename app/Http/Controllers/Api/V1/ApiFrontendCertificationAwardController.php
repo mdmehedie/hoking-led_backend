@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiBaseController;
+use App\Http\Resources\CertificationAwardResource;
 use App\Models\CertificationAward;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,7 +23,10 @@ class ApiFrontendCertificationAwardController extends ApiBaseController
 
         $certifications = $query->paginate($perPage);
 
-        return $this->okResponse(['certifications' => $certifications], __('Certifications retrieved successfully'));
+        return $this->okResponse(
+            ['certifications' => CertificationAwardResource::collection($certifications)],
+            __('Certifications retrieved successfully')
+        );
     }
 
     public function show($slug): JsonResponse
@@ -33,6 +37,9 @@ class ApiFrontendCertificationAwardController extends ApiBaseController
             return $this->notFoundResponse([], __('Certification not found'));
         }
 
-        return $this->okResponse(['certification' => $certification], __('Certification retrieved successfully'));
+        return $this->okResponse(
+            ['certification' => new CertificationAwardResource($certification)],
+            __('Certification retrieved successfully')
+        );
     }
 }

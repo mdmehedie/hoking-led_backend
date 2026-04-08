@@ -9,8 +9,6 @@ use App\Models\CertificationAward;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class CertificationAwardResource extends Resource
 {
@@ -64,9 +62,7 @@ class CertificationAwardResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
@@ -76,18 +72,5 @@ class CertificationAwardResource extends Resource
             'create' => Pages\CreateCertificationAward::route('/create'),
             'edit' => Pages\EditCertificationAward::route('/{record}/edit'),
         ];
-    }
-
-    protected static function generateUniqueSlug($title, $id = null)
-    {
-        $table = 'certification_awards';
-        $baseSlug = Str::slug($title);
-        $slug = $baseSlug;
-        $counter = 1;
-        while (DB::table($table)->where('slug', $slug)->where('id', '!=', $id)->exists()) {
-            $slug = $baseSlug . '-' . $counter;
-            $counter++;
-        }
-        return $slug;
     }
 }

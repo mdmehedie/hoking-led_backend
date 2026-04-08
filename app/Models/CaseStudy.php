@@ -19,6 +19,7 @@ class CaseStudy extends Model
         'excerpt',
         'project_description',
         'project_details',
+        'bullet_fields',
     ];
 
     protected $fillable = [
@@ -36,6 +37,7 @@ class CaseStudy extends Model
         'canonical_url',
         'project_description',
         'project_details',
+        'bullet_fields',
     ];
 
     protected array $mediaAttributes = [
@@ -50,6 +52,7 @@ class CaseStudy extends Model
     protected $casts = [
         'published_at' => 'datetime',
         'slider_images' => 'array',
+        'bullet_fields' => 'array',
     ];
 
     protected static function boot()
