@@ -4,9 +4,11 @@ namespace App\Filament\Admin\Resources\BlogResource\Table;
 
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
@@ -25,6 +27,10 @@ class BlogTable
                     ->label(__('Title'))
                     ->searchable()
                     ->sortable(),
+                IconColumn::make('is_popular')
+                    ->label(__('Popular'))
+                    ->boolean()
+                    ->sortable(),
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()
@@ -42,6 +48,8 @@ class BlogTable
                         'review' => __('Review'),
                         'published' => __('Published'),
                     ]),
+                TernaryFilter::make('is_popular')
+                    ->label(__('Popular')),
             ])
             ->actions([
                 Action::make('edit')

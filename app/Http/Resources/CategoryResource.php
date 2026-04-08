@@ -8,11 +8,6 @@ use Illuminate\Support\Facades\Storage;
 
 class CategoryResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
@@ -28,8 +23,6 @@ class CategoryResource extends JsonResource
                 'name' => $this->parent->name,
             ]),
             'children' => CategoryResource::collection($this->whenLoaded('children')),
-            'translations' => $this->transformTranslations(),
-            'url' => $this->getUrl(),
             'meta_title' => $this->meta_title,
             'meta_description' => $this->meta_description,
             'meta_keywords' => $this->meta_keywords,
@@ -37,28 +30,5 @@ class CategoryResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
-    }
-
-    /**
-     * Transform translations and decode JSON values.
-     */
-    private function transformTranslations(): array
-    {
-        if (!$this->translations) {
-            return [];
-        }
-
-        return $this->translations->map(function ($translation) {
-            $value = $translation->value;
-            
-            return [
-                'id' => $translation->id,
-                'locale' => $translation->locale,
-                'attribute' => $translation->attribute,
-                'value' => $value,
-                'created_at' => $translation->created_at,
-                'updated_at' => $translation->updated_at,
-            ];
-        })->toArray();
     }
 }

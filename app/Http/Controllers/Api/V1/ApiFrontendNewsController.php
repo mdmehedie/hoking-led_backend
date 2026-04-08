@@ -13,10 +13,22 @@ class ApiFrontendNewsController extends ApiBaseController
     public function index(Request $request): JsonResponse
     {
         $perPage = $request->get('per_page', 10);
+        $recent = $request->boolean('recent');
+        $popular = $request->boolean('popular');
+        $limit = $request->get('limit');
 
-        $news = News::published()
-            ->orderBy('published_at', 'desc')
-            ->paginate($perPage);
+        $query = News::published();
+
+        // Apply filters
+        $query->when($recent, fn ($q) => $q->recent($limit ?? 5));
+        $query->when($popular && !$recent, fn ($q) => $q->popular());
+
+        // If neither recent nor popular, use default ordering
+        if (!$recent && !$popular) {
+            $query->orderBy('published_at', 'desc');
+        }
+
+        $news = $query->paginate($perPage);
 
         return $this->okResponse(
             ['news' => NewsResource::collection($news)],

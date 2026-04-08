@@ -29,6 +29,7 @@ class News extends Model
         'image_path',
         'author_id',
         'status',
+        'is_popular',
         'published_at',
         'meta_title',
         'meta_description',
@@ -39,8 +40,13 @@ class News extends Model
         'image_path',
     ];
 
+    protected array $translatableMediaKeys = [
+        'content.*.image',
+    ];
+
     protected $casts = [
         'published_at' => 'datetime',
+        'is_popular' => 'boolean',
     ];
 
     protected static function boot()
@@ -67,5 +73,15 @@ class News extends Model
     public function scopePublished($query)
     {
         return $query->where('status', 'published');
+    }
+
+    public function scopePopular($query)
+    {
+        return $query->where('is_popular', true);
+    }
+
+    public function scopeRecent($query, int $count = 5)
+    {
+        return $query->orderBy('published_at', 'desc')->limit($count);
     }
 }

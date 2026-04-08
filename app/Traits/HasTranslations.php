@@ -82,11 +82,13 @@ trait HasTranslations
                 $translationsToSave[$attribute] = $value;
 
                 // Set default locale value for main column (clean payload)
-                $defaultLocale = Locale::defaultCode();
-                $defaultValue = $value[$defaultLocale] ?? null;
+                $defaultLocale = Locale::defaultCode() ?? 'en';
+                $defaultValue = $value[$defaultLocale] ?? reset($value);
 
-                // JSON-encode if default value is array/object (structured data like repeaters)
-                if (is_array($defaultValue) || is_object($defaultValue)) {
+                // JSON-encode if default value is array/object, OR if column is JSON type
+                $columnType = $model->getConnection()->getSchemaBuilder()->getColumnType($model->getTable(), $attribute);
+                
+                if (is_array($defaultValue) || is_object($defaultValue) || $columnType === 'json') {
                     $model->attributes[$attribute] = json_encode($defaultValue);
                 } else {
                     $model->attributes[$attribute] = $defaultValue;

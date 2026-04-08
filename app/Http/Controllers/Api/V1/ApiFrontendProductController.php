@@ -13,77 +13,34 @@ class ApiFrontendProductController extends ApiBaseController
     public function index(Request $request): JsonResponse
     {
         $perPage = $request->get('per_page', 10);
-        $region = $request->route('region');
         $category = $request->get('category');
         $isTop = $request->boolean('top');
 
-        // Set locale based on region
-        if ($region) {
-            $this->setLocaleForRegion($region);
-        }
-
-        $products = Product::with(['category', 'regions', 'relatedProducts'])
-            ->where('status', 'published')
-            ->when($category, function ($query, $category) {
-                $query->where('category_id', $category);
-            })
-            ->when($isTop, function ($query) {
-                $query->where('is_top', true);
-            })
-            ->when($region, function ($query, $region) {
-                $query->whereHas('regions', function ($q) use ($region) {
-                    $q->where('code', $region)->where('is_active', true);
-                });
-            })
+        $products = Product::published()
+            ->when($category, fn ($q, $cat) => $q->where('category_id', $cat))
+            ->when($isTop, fn ($q) => $q->where('is_top', true))
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
-        return $this->okResponse(['products' => ProductResource::collection($products)], __('Products retrieved successfully'));
+        return $this->okResponse(
+            ['products' => ProductResource::collection($products)],
+            __('Products retrieved successfully')
+        );
     }
 
-    public function show(Request $request): JsonResponse
+    public function show(Request $request, string $slug): JsonResponse
     {
-        $region = $request->route('region');
-        $slug = $request->route('slug');
-        
-        // Set locale based on region
-        if ($region) {
-            $this->setLocaleForRegion($region);
-        }
-        
-        $product = Product::with(['category', 'regions', 'relatedProducts'])
+        $product = Product::published()
             ->where('slug', $slug)
-            ->where('status', 'published')
-            ->when($region, function ($query, $region) {
-                // Ensure product is available in this region
-                $query->whereHas('regions', function ($q) use ($region) {
-                    $q->where('code', $region)->where('is_active', true);
-                });
-            })
             ->first();
 
         if (!$product) {
             return $this->notFoundResponse([], __('Product not found'));
         }
 
-        return $this->okResponse(['product' => new ProductResource($product)], __('Product retrieved successfully'));
-    }
-
-    /**
-     * Set locale based on region
-     */
-    private function setLocaleForRegion(string $region): void
-    {
-        $regionToLocale = [
-            'us' => 'en',
-            'uk' => 'en-GB', 
-            'eu' => 'en',
-            'ca' => 'en-CA',
-            'au' => 'en-AU',
-            'bd' => 'bd'  // Use 'bd' locale code since that's what's in the database
-        ];
-
-        $locale = $regionToLocale[$region] ?? 'en';
-        app()->setLocale($locale);
+        return $this->okResponse(
+            ['product' => new ProductResource($product)],
+            __('Product retrieved successfully')
+        );
     }
 }

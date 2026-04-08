@@ -12,6 +12,7 @@ use App\Http\Controllers\Frontend\FrontendProductController;
 use App\Http\Controllers\Frontend\FrontendPageController;
 use App\Http\Controllers\Frontend\FrontendCaseStudyController;
 use App\Http\Controllers\Frontend\FrontendNewsController;
+use App\Http\Controllers\Api\V1\MediaLibraryController;
 
 $supportedLocales = config('app.supported_locales', []);
 $localePattern = $supportedLocales !== [] ? implode('|', array_map('preg_quote', $supportedLocales)) : '[a-zA-Z\-]+';
@@ -93,6 +94,13 @@ Route::get('/sw.js', [PWAController::class, 'serviceWorker']);
 
 Route::middleware('auth')->group(function () {
     Route::post('/editor-image-upload', [EditorImageUploadController::class, 'store'])->name('editor.image.upload');
+
+    // Media Library routes for TinyMCE
+    Route::prefix('media-library')->group(function () {
+        Route::get('/', [MediaLibraryController::class, 'index'])->name('media.library.index');
+        Route::post('/upload', [MediaLibraryController::class, 'upload'])->name('media.library.upload');
+        Route::delete('/{media}', [MediaLibraryController::class, 'destroy'])->name('media.library.destroy');
+    });
 
     // Admin locale update
     Route::post('/locale', [AdminLocaleController::class, 'update'])->name('admin.locale.update');

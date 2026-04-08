@@ -109,16 +109,21 @@ class BlogSeeder extends Seeder
         ];
 
         foreach ($blogs as $blogData) {
-            $blog = Blog::create([
-                'title' => $blogData['title']['en'], // Default to English for database
-                'slug' => $blogData['slug'],
-                'excerpt' => $blogData['excerpt']['en'], // Default to English
-                'content' => $blogData['content']['en'], // Default to English
-                'status' => $blogData['status'],
-                'author_id' => $blogData['author_id'],
-                'published_at' => $blogData['published_at'],
-            ]);
-            
+            $blog = Blog::firstOrCreate(
+                ['slug' => $blogData['slug']],
+                [
+                    'title' => $blogData['title']['en'],
+                    'excerpt' => $blogData['excerpt']['en'],
+                    'content' => $blogData['content']['en'],
+                    'status' => $blogData['status'],
+                    'author_id' => $blogData['author_id'],
+                    'published_at' => $blogData['published_at'],
+                    'meta_title' => $blogData['meta_title']['en'] ?? '',
+                    'meta_description' => $blogData['meta_description']['en'] ?? '',
+                    'meta_keywords' => $blogData['meta_keywords']['en'] ?? '',
+                ]
+            );
+
             // Set translatable attributes
             foreach (['title', 'excerpt', 'content'] as $field) {
                 if (isset($blogData[$field]) && is_array($blogData[$field])) {
@@ -127,13 +132,7 @@ class BlogSeeder extends Seeder
                     }
                 }
             }
-            
-            // Set meta fields as plain strings (use English version)
-            $blog->update([
-                'meta_title' => $blogData['meta_title']['en'] ?? '',
-                'meta_description' => $blogData['meta_description']['en'] ?? '',
-                'meta_keywords' => $blogData['meta_keywords']['en'] ?? '',
-            ]);
+            $blog->save();
         }
 
         $this->command->info('Blogs seeded successfully!');
