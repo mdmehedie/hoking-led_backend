@@ -114,6 +114,7 @@ class CaseStudyForm
                         ->displayFormat('Y-m-d'),
                 ])->columns(2),
                 self::projectDescriptionRepeater($locale, $isDefault),
+                self::bulletFieldsRepeater($locale, $isDefault),
             ])->columns(1);
     }
 
@@ -143,6 +144,26 @@ class CaseStudyForm
             ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
             ->createItemButtonLabel(__('Add item'))
             ->columnSpanFull();
+    }
+
+    private static function bulletFieldsRepeater(string $locale, bool $isDefault): Repeater
+    {
+        return Repeater::make("bullet_fields.{$locale}")
+            ->label(__('Bullet Points'))
+            ->schema([
+                TextInput::make('value')
+                    ->label('')
+                    ->placeholder(__('Enter a bullet point'))
+                    ->required($isDefault)
+                    ->maxLength(255),
+            ])
+            ->columns(1)
+            ->itemLabel(fn (array $state): ?string => $state['value'] ?? null)
+            ->createItemButtonLabel(__('Add bullet point'))
+            ->columnSpanFull()
+            ->default([])
+            ->formatStateUsing(fn ($state) => static::formatBulletState($state))
+            ->dehydrateStateUsing(fn ($state) => static::dehydrateBulletsState($state));
     }
 
     private static function mediaSchema(): array
@@ -213,5 +234,32 @@ class CaseStudyForm
             $query->where('id', '!=', $ignoreId);
         }
         return $query->exists();
+    }
+
+    private static function formatBulletState($state): array
+    {
+        if (blank($state) || !is_array($state) || count($state) === 0) {
+            return [['value' => '']];
+        }
+
+        $firstItem = reset($state);
+        if (!is_array($firstItem) || !isset($firstItem['value'])) {
+            return collect($state)->map(fn ($item) => ['value' => $item])->all();
+        }
+
+        return $state;
+    }
+
+    private static function dehydrateBulletsState($state): array
+    {
+        if (!is_array($state)) {
+            return $state;
+        }
+
+        return collect($state)
+            ->pluck('value')
+            ->filter()
+            ->values()
+            ->all();
     }
 }
