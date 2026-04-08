@@ -7,7 +7,6 @@ use App\Models\Region;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -96,7 +95,7 @@ class AppSettingForm
                                         ->label(__('Company name'))
                                         ->default('')
                                         ->required($isDefault),
-                                    \App\Filament\Forms\Components\CustomRichEditor::make("about.{$locale}")
+                                    \App\Filament\Forms\Components\TinyEditor::make("about.{$locale}")
                                         ->label(__('About information'))
                                         ->default('')
                                         ->required($isDefault),

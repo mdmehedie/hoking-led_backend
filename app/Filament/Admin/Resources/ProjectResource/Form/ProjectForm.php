@@ -4,7 +4,7 @@ namespace App\Filament\Admin\Resources\ProjectResource\Form;
 
 use App\Models\Locale;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
+use App\Filament\Forms\Components\TinyEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -98,7 +98,7 @@ class ProjectForm
                     ->label(__('Excerpt'))
                     ->maxLength(500)
                     ->columnSpanFull(),
-                RichEditor::make("description.{$locale}")
+                TinyEditor::make("description.{$locale}")
                     ->label(__('Description'))
                     ->required($isDefault)
                     ->columnSpanFull(),

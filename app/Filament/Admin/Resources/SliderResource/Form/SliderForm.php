@@ -2,7 +2,7 @@
 
 namespace App\Filament\Admin\Resources\SliderResource\Form;
 
-use App\Filament\Forms\Components\CustomRichEditor;
+use App\Filament\Forms\Components\TinyEditor;
 use App\Models\Locale;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
@@ -67,7 +67,7 @@ class SliderForm
                                             ->label(__('Title'))
                                             ->required($isDefault)
                                             ->helperText(__('Main heading displayed on the slider.')),
-                                        CustomRichEditor::make("description.{$locale}")
+                                        TinyEditor::make("description.{$locale}")
                                             ->label(__('Description'))
                                             ->required($isDefault)
                                             ->helperText(__('Text displayed in the bottom-left corner of the slider.')),
