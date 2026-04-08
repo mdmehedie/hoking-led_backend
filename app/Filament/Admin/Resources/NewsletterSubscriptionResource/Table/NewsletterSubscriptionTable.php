@@ -7,7 +7,6 @@ use Filament\Actions\BulkAction;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
@@ -77,8 +76,6 @@ class NewsletterSubscriptionTable
                         'landing_page' => __('Landing Page'),
                         'import' => __('Import'),
                     ]),
-                TernaryFilter::make('consent_given')
-                    ->label(__('Consent Given')),
             ])
             ->actions([
                 Action::make('view')

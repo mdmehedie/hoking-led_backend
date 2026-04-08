@@ -85,6 +85,11 @@ class Product extends Model
         return $this->belongsToMany(Product::class, 'product_related', 'product_id', 'related_product_id');
     }
 
+    public function scopePublished($query)
+    {
+        return $query->where('status', 'published');
+    }
+
     public function regions(): BelongsToMany
     {
         return $this->belongsToMany(Region::class, 'product_regions');

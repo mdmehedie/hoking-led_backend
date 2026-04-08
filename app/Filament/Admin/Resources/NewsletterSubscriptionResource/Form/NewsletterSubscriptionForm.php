@@ -6,7 +6,6 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class NewsletterSubscriptionForm
@@ -40,9 +39,6 @@ class NewsletterSubscriptionForm
                 ->label(__('Source'))
                 ->nullable()
                 ->maxLength(255),
-            Toggle::make('consent_given')
-                ->label(__('Consent Given'))
-                ->default(false),
             Textarea::make('preferences')
                 ->label(__('Preferences (JSON)'))
                 ->nullable()
