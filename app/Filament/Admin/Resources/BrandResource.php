@@ -20,26 +20,17 @@ class BrandResource extends Resource
 
     protected static ?string $slug = 'brands';
 
-    protected static ?int $navigationSort = 7;
 
-    public static function getModelLabel(): string
-    {
-        return 'Brand';
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('Brands');
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return __('Content Management');
-    }
+    protected static ?int $navigationSort = 6;
 
     public static function canViewAny(): bool
     {
         return auth()->user()->can('view brand');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Content';
     }
 
     public static function canCreate(): bool

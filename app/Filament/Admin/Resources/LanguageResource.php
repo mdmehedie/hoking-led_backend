@@ -19,16 +19,12 @@ class LanguageResource extends Resource
 
     protected static ?string $navigationLabel = 'Languages';
 
-    protected static \UnitEnum|string|null $navigationGroup = 'Settings';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Languages');
-    }
+    protected static ?int $navigationSort = 1;
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Settings');
+        return 'Settings';
     }
 
     public static function form(Schema $schema): Schema

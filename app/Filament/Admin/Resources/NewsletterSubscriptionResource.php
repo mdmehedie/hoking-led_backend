@@ -20,21 +20,12 @@ class NewsletterSubscriptionResource extends Resource
 
     protected static ?string $slug = 'newsletter-subscriptions';
 
-    protected static ?int $navigationSort = 8;
 
-    public static function getModelLabel(): string
-    {
-        return 'Newsletter Subscription';
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('Newsletter Subscriptions');
-    }
+    protected static ?int $navigationSort = 0;
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Marketing');
+        return 'Marketing';
     }
 
     public static function form(Schema $schema): Schema

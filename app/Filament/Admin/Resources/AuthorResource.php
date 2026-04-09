@@ -14,36 +14,39 @@ class AuthorResource extends Resource
 
     protected static ?string $navigationLabel = 'Authors';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Authors');
-    }
 
-    public static function getNavigationGroup(): ?string
-    {
-        return __('Content Management');
-    }
+    protected static ?int $navigationSort = 4;
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-user-group';
 
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Content';
+    }
+
+    public static function canViewAny(): bool
+    {
+        return false;
+    }
+
     public static function canCreate(): bool
     {
-        return auth()->user()->can('create author');
+        return false;
     }
 
     public static function canEdit($record): bool
     {
-        return auth()->user()->can('edit author');
+        return false;
     }
 
     public static function canDelete($record): bool
     {
-        return auth()->user()->can('delete author');
+        return false;
     }
 
     public static function canView($record): bool
     {
-        return auth()->user()->can('view author');
+        return false;
     }
 
     public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema

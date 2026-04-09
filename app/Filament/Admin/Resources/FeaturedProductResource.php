@@ -17,15 +17,8 @@ class FeaturedProductResource extends Resource
 
     protected static ?string $navigationLabel = 'Featured Products';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Featured Products');
-    }
 
-    public static function getNavigationGroup(): ?string
-    {
-        return __('Product Management');
-    }
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $modelLabel = 'Featured Product';
 
@@ -48,6 +41,11 @@ class FeaturedProductResource extends Resource
         return [
             'index' => Pages\ListFeaturedProducts::route('/'),
         ];
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Products';
     }
 
     public static function canCreate(): bool

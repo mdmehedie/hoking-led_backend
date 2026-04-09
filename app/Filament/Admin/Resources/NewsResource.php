@@ -20,26 +20,17 @@ class NewsResource extends Resource
 
     protected static ?string $slug = 'news-items';
 
-    protected static ?int $navigationSort = 6;
 
-    public static function getModelLabel(): string
-    {
-        return 'News';
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('News');
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return __('Content Management');
-    }
+    protected static ?int $navigationSort = 1;
 
     public static function canViewAny(): bool
     {
         return auth()->user()->can('view news');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Posts';
     }
 
     public static function canCreate(): bool

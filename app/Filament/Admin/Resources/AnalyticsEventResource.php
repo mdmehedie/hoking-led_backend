@@ -16,14 +16,41 @@ class AnalyticsEventResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
 
-    public static function getNavigationGroup(): ?string
+    protected static ?int $navigationSort = 0;
+
+    public static function canViewAny(): bool
     {
-        return 'Analytics';
+        return false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canView($record): bool
+    {
+        return false;
+    }
+
+    public static function canEdit($record): bool
+    {
+        return false;
+    }
+
+    public static function canDelete($record): bool
+    {
+        return false;
     }
 
     public static function getNavigationLabel(): string
     {
         return 'Events';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Analytics';
     }
 
     public static function getModelLabel(): string

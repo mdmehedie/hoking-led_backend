@@ -12,11 +12,10 @@ use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use App\Models\AppSetting;
 use Filament\Widgets\FilamentInfoWidget;
-use App\Filament\Admin\Widgets\PageViewsWidget;
-use App\Filament\Admin\Widgets\TopVisitedPagesWidget;
-use App\Filament\Admin\Widgets\TrafficSourcesWidget;
-use App\Filament\Admin\Widgets\SEODashboardWidget;
-use App\Filament\Admin\Widgets\KeywordRankingWidget;
+use App\Filament\Admin\Widgets\ContentCountsWidget;
+use App\Filament\Admin\Widgets\NewsletterStatsWidget;
+use App\Filament\Admin\Widgets\RecentContactsWidget;
+use App\Filament\Admin\Widgets\RecentLeadsWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -41,6 +40,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->id('admin')
             ->path('')
+            ->maxContentWidth('full')
             ->brandName(function() {
                 try {
                     $settings = Cache::remember('app_settings', 3600, fn () => AppSetting::first());
@@ -68,12 +68,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
             ->widgets([
-                \Filament\Widgets\AccountWidget::class,
-                PageViewsWidget::class,
-                SEODashboardWidget::class,
-                TopVisitedPagesWidget::class,
-                TrafficSourcesWidget::class,
-                KeywordRankingWidget::class,
+                ContentCountsWidget::class,
+                NewsletterStatsWidget::class,
+                RecentContactsWidget::class,
+                RecentLeadsWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -86,8 +84,6 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                // Production debug middleware - REMOVE AFTER DEBUGGING
-                \App\Http\Middleware\ProductionDebugMiddleware::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

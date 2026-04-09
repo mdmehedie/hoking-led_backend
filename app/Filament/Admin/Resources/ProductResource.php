@@ -20,20 +20,18 @@ class ProductResource extends Resource
 
     protected static ?string $slug = 'product-items';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Products');
-    }
 
-    public static function getNavigationGroup(): ?string
-    {
-        return __('Product Management');
-    }
+    protected static ?int $navigationSort = 0;
 
     // Override navigation URL to use the correct slug
     public static function getNavigationUrl(): string
     {
         return static::getUrl('index');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Products';
     }
 
     public static function canCreate(): bool

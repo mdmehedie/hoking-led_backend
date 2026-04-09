@@ -20,21 +20,17 @@ class ProjectResource extends Resource
 
     protected static ?string $slug = 'projects';
 
-    protected static ?int $navigationSort = 4;
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Projects');
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return __('Project Management');
-    }
+    protected static ?int $navigationSort = 0;
 
     public static function canViewAny(): bool
     {
         return auth()->user()->hasRole('Super Admin');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Projects';
     }
 
     public static function canCreate(): bool

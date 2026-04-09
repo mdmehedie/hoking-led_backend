@@ -8,7 +8,7 @@ use Filament\Tables\Table;
 
 class KeywordRankingWidget extends BaseWidget
 {
-    protected static ?int $sort = 5;
+    protected static ?int $sort = 23;
 
     protected int | string | array $columnSpan = 'full';
 

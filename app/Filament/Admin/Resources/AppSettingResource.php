@@ -19,14 +19,12 @@ class AppSettingResource extends Resource
 
     protected static ?string $navigationLabel = 'App Settings';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('App Settings');
-    }
+
+    protected static ?int $navigationSort = 0;
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Settings');
+        return 'Settings';
     }
 
     public static function canCreate(): bool
