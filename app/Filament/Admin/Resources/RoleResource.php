@@ -16,21 +16,19 @@ class RoleResource extends Resource
 
     protected static ?string $navigationLabel = 'Roles';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Roles');
-    }
 
-    public static function getNavigationGroup(): ?string
-    {
-        return __('User Management');
-    }
+    protected static ?int $navigationSort = 1;
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-shield-check';
 
     public static function canAccessResource(): bool
     {
         return auth()->user()->hasAnyRole(['Super Admin', 'Admin']);
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Settings';
     }
 
     public static function canCreate(): bool

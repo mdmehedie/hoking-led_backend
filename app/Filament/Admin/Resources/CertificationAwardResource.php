@@ -18,16 +18,12 @@ class CertificationAwardResource extends Resource
 
     protected static ?string $navigationLabel = 'Certifications & Awards';
 
-    protected static ?int $navigationSort = 6;
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Certifications & Awards');
-    }
+    protected static ?int $navigationSort = 7;
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Content Management');
+        return 'Content';
     }
 
     public static function canCreate(): bool

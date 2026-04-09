@@ -20,21 +20,17 @@ class CoreAdvantageResource extends Resource
 
     protected static ?string $slug = 'core-advantages';
 
-    protected static ?int $navigationSort = 3;
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Core Advantages');
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return __('Content Management');
-    }
+    protected static ?int $navigationSort = 5;
 
     public static function canViewAny(): bool
     {
         return auth()->user()->can('view coreadvantage');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Content';
     }
 
     public static function canCreate(): bool

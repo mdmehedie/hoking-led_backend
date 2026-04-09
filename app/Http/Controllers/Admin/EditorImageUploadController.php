@@ -2,23 +2,31 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\MediaLibrary;
 use Illuminate\Http\Request;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class EditorImageUploadController
 {
     public function store(Request $request)
     {
         $request->validate([
-            'file' => 'required|image|max:10240', // 10MB max
+            'file' => 'required|image|max:10240',
         ]);
 
-        $media = Media::createFromRequest('file', 'public');
-        $media->collection_name = 'editor-images';
-        $media->save();
+        $file = $request->file('file');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $path = $file->storeAs('editor-images', $filename, 'public');
+
+        $media = MediaLibrary::create([
+            'user_id' => auth()->id(),
+            'original_name' => $file->getClientOriginalName(),
+            'file_path' => $path,
+            'mime_type' => $file->getMimeType(),
+            'file_size' => $file->getSize(),
+        ]);
 
         return response()->json([
-            'url' => $media->getUrl(),
+            'url' => $media->url,
         ]);
     }
 }

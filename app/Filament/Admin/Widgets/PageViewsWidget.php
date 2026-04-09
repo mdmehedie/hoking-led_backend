@@ -8,6 +8,18 @@ use App\Services\GA4Service;
 
 class PageViewsWidget extends BaseWidget
 {
+    protected static ?int $sort = 20;
+
+    protected int|string|array $columnSpan = [
+        'sm' => 'full',
+        'md' => 'full',
+        'lg' => 'full',
+    ];
+
+    protected function getColumns(): int
+    {
+        return 1;
+    }
     protected function getStats(): array
     {
         try {

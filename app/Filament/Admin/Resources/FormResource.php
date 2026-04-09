@@ -17,34 +17,37 @@ class FormResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Forms');
-    }
+
+    protected static ?int $navigationSort = 0;
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Content Management');
+        return 'Forms';
+    }
+
+    public static function canViewAny(): bool
+    {
+        return false;
     }
 
     public static function canCreate(): bool
     {
-        return auth()->user()->can('create form');
+        return false;
     }
 
     public static function canEdit($record): bool
     {
-        return auth()->user()->can('edit form');
+        return false;
     }
 
     public static function canDelete($record): bool
     {
-        return auth()->user()->can('delete form');
+        return false;
     }
 
     public static function canView($record): bool
     {
-        return auth()->user()->can('view form');
+        return false;
     }
 
     public static function form(Schema $schema): Schema

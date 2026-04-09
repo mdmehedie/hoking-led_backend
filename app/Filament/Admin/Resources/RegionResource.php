@@ -19,7 +19,38 @@ class RegionResource extends Resource
 
     protected static ?string $navigationLabel = 'Regions';
 
-    protected static ?int $navigationSort = 3;
+
+    protected static ?int $navigationSort = 2;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Settings';
+    }
+
+    public static function canViewAny(): bool
+    {
+        return false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canEdit($record): bool
+    {
+        return false;
+    }
+
+    public static function canDelete($record): bool
+    {
+        return false;
+    }
+
+    public static function canView($record): bool
+    {
+        return false;
+    }
 
     public static function form(Schema $schema): Schema
     {

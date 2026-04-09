@@ -9,9 +9,13 @@ use App\Services\GA4Service;
 
 class TrafficSourcesWidget extends BaseWidget
 {
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 21;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = [
+        'sm' => 'full',
+        'md' => 'full',
+        'lg' => 'full',
+    ];
 
     public function table(Table $table): Table
     {

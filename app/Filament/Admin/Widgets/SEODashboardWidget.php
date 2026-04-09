@@ -7,6 +7,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class SEODashboardWidget extends BaseWidget
 {
+    protected static ?int $sort = 22;
     protected function getStats(): array
     {
         // In a real implementation, integrate with SEMrush, Ahrefs, Moz, etc.

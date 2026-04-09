@@ -40,6 +40,11 @@ class SocialMediaSettings extends Page implements \Filament\Tables\Contracts\Has
 
     protected static ?int $navigationSort = 99;
 
+    public static function getNavigationGroup(): ?string
+    {
+        return __('Settings');
+    }
+
     public static function canAccess(): bool
     {
         return auth()->user()->can('manage socialmedia');

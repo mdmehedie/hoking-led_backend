@@ -20,21 +20,12 @@ class ContactSubmissionResource extends Resource
 
     protected static ?string $slug = 'contact-submissions';
 
-    protected static ?int $navigationSort = 9;
 
-    public static function getModelLabel(): string
-    {
-        return 'Contact Submission';
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('Contact Inbox');
-    }
+    protected static ?int $navigationSort = 1;
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Marketing');
+        return 'Marketing';
     }
 
     public static function form(Schema $schema): Schema
@@ -57,6 +48,7 @@ class ContactSubmissionResource extends Resource
         return [
             'index' => Pages\ListContactSubmissions::route('/'),
             'view' => Pages\ViewContactSubmission::route('/{record}'),
+            'edit' => Pages\EditContactSubmission::route('/{record}/edit'),
         ];
     }
 }

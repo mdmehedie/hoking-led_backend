@@ -20,21 +20,12 @@ class TeamMemberResource extends Resource
 
     protected static ?string $slug = 'team-members';
 
-    protected static ?int $navigationSort = 10;
 
-    public static function getModelLabel(): string
-    {
-        return 'Team Member';
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('Team Members');
-    }
+    protected static ?int $navigationSort = 0;
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Content Management');
+        return 'Users';
     }
 
     public static function canCreate(): bool

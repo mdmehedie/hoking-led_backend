@@ -18,15 +18,8 @@ class CategoryResource extends Resource
 
     protected static ?string $navigationLabel = 'Categories';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Categories');
-    }
 
-    public static function getNavigationGroup(): ?string
-    {
-        return __('Product Management');
-    }
+    protected static ?int $navigationSort = 1;
 
     public static function form(\Filament\Schemas\Schema $schema): \Filament\Schemas\Schema
     {
@@ -41,6 +34,11 @@ class CategoryResource extends Resource
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return parent::getEloquentQuery()->with('parent');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Products';
     }
 
     public static function canCreate(): bool

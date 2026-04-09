@@ -18,17 +18,8 @@ class TestimonialResource extends Resource
 
     protected static ?string $navigationLabel = 'Testimonials';
 
-    protected static ?int $navigationSort = 2;
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Testimonials');
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return __('Content Management');
-    }
+    protected static ?int $navigationSort = 3;
 
     public static function form(Schema $schema): Schema
     {
@@ -59,6 +50,11 @@ class TestimonialResource extends Resource
     public static function canViewAny(): bool
     {
         return auth()->user()->can('view testimonial');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Content';
     }
 
     public static function canCreate(): bool

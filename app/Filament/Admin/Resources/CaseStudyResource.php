@@ -20,21 +20,12 @@ class CaseStudyResource extends Resource
 
     protected static ?string $slug = 'cases';
 
-    protected static ?int $navigationSort = 3;
 
-    public static function getModelLabel(): string
-    {
-        return 'Case Study';
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('Case Studies');
-    }
+    protected static ?int $navigationSort = 2;
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Content Management');
+        return 'Content';
     }
 
     public static function canCreate(): bool

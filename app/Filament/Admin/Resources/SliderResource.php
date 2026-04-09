@@ -16,23 +16,19 @@ class SliderResource extends Resource
 {
     protected static ?string $model = Slider::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static \BackedEnum|string|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $navigationLabel = 'Sliders';
 
+
     protected static ?int $navigationSort = 0;
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Sliders');
-    }
+    protected static ?string $recordTitleAttribute = 'title';
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Content Management');
+        return 'Content';
     }
-
-    protected static ?string $recordTitleAttribute = 'title';
 
     public static function canCreate(): bool
     {

@@ -9,7 +9,7 @@ use App\Services\GA4Service;
 
 class TopVisitedPagesWidget extends BaseWidget
 {
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 24;
 
     protected int | string | array $columnSpan = 'full';
 

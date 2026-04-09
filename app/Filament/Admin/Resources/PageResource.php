@@ -20,26 +20,17 @@ class PageResource extends Resource
 
     protected static ?string $slug = 'pages';
 
-    protected static ?int $navigationSort = 5;
 
-    public static function getModelLabel(): string
-    {
-        return 'Page';
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return __('Pages');
-    }
-
-    public static function getNavigationGroup(): ?string
-    {
-        return __('Content Management');
-    }
+    protected static ?int $navigationSort = 1;
 
     public static function canViewAny(): bool
     {
         return auth()->user()->can('view page');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Content';
     }
 
     public static function canCreate(): bool

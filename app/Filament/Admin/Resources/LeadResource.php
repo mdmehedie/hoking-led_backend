@@ -14,34 +14,37 @@ class LeadResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-user-group';
 
-    public static function getNavigationLabel(): string
-    {
-        return __('Leads');
-    }
+
+    protected static ?int $navigationSort = 1;
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Marketing');
+        return 'Forms';
+    }
+
+    public static function canViewAny(): bool
+    {
+        return false;
     }
 
     public static function canCreate(): bool
     {
-        return auth()->user()->can('create lead');
+        return false;
     }
 
     public static function canEdit($record): bool
     {
-        return auth()->user()->can('edit lead');
+        return false;
     }
 
     public static function canDelete($record): bool
     {
-        return auth()->user()->can('delete lead');
+        return false;
     }
 
     public static function canView($record): bool
     {
-        return auth()->user()->can('view lead');
+        return false;
     }
 
     public static function table(Table $table): Table
