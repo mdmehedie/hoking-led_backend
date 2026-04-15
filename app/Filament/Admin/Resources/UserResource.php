@@ -16,8 +16,7 @@ class UserResource extends Resource
 
     protected static ?string $navigationLabel = 'Users';
 
-
-    protected static ?int $navigationSort = 0;
+    protected static ?int $navigationSort = 6;
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-users';
 
@@ -28,7 +27,7 @@ class UserResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Users';
+        return 'User Management';
     }
 
     public static function canCreate(): bool

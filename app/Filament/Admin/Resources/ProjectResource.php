@@ -25,7 +25,7 @@ class ProjectResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole('Super Admin');
+        return false;
     }
 
     public static function getNavigationGroup(): ?string
