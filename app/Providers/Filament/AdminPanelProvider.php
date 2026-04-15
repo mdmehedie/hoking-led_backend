@@ -55,13 +55,14 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->navigationGroups([
-                \Filament\Navigation\NavigationGroup::make(fn() => __('Content Management')),
-                \Filament\Navigation\NavigationGroup::make(fn() => __('Product Management')),
-                \Filament\Navigation\NavigationGroup::make(fn() => __('Project Management')),
                 \Filament\Navigation\NavigationGroup::make(fn() => __('Marketing')),
-                \Filament\Navigation\NavigationGroup::make(fn() => __('Settings')),
+                \Filament\Navigation\NavigationGroup::make(fn() => __('Product Management')),
+                \Filament\Navigation\NavigationGroup::make(fn() => __('Content Management')),
+                \Filament\Navigation\NavigationGroup::make(fn() => __('Posts')),
+//                \Filament\Navigation\NavigationGroup::make(fn() => __('Project Management')),
                 \Filament\Navigation\NavigationGroup::make(fn() => __('User Management')),
-            ])
+                \Filament\Navigation\NavigationGroup::make(fn() => __('Settings')),
+                ])
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
             ->pages([
                 Dashboard::class,
@@ -412,6 +413,8 @@ class AdminPanelProvider extends PanelProvider
             })
             ->renderHook('panels::body.end', function () {
                 return view('components.media-file-manager')->render();
-            });
+            })
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('5s');
     }
 }

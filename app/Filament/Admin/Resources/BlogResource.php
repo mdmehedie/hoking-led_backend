@@ -20,9 +20,6 @@ class BlogResource extends Resource
 
     protected static ?string $slug = 'blogs';
 
-
-    protected static ?int $navigationSort = 0;
-
     public static function getNavigationGroup(): ?string
     {
         return 'Posts';

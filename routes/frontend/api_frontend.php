@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\V1\ApiFrontendContactController;
 use App\Http\Controllers\Api\V1\ApiFrontendNewsletterController;
 use App\Http\Controllers\Api\V1\ApiFrontendTeamMemberController;
 use App\Http\Controllers\Api\V1\ApiFrontendLocaleController;
+use App\Http\Controllers\Api\V1\ApiFrontendConversationController;
 use App\Http\Controllers\Api\V1\ApiFrontendFormController;
 
 Route::prefix('v1')->group(function () {
@@ -56,6 +57,10 @@ Route::prefix('v1')->group(function () {
     Route::get('newsletter/confirm/{token}', [ApiFrontendNewsletterController::class, 'confirm'])->name('newsletter.confirm');
 
     Route::post('contact/submit', [ApiFrontendContactController::class, 'submit'])->middleware('throttle:10,1')->name('contact.submit');
+
+    Route::post('conversations', [ApiFrontendConversationController::class, 'start'])->middleware('throttle:5,1')->name('conversations.start');
+    Route::get('conversations/{sessionId}/messages', [ApiFrontendConversationController::class, 'messages'])->name('conversations.messages');
+    Route::post('conversations/{sessionId}/messages', [ApiFrontendConversationController::class, 'sendMessage'])->middleware('throttle:20,1')->name('conversations.send');
 
     Route::get('team-members', [ApiFrontendTeamMemberController::class, 'index'])->name('team-members.index');
     Route::get('team-members/{slug}', [ApiFrontendTeamMemberController::class, 'show'])->name('team-members.show');

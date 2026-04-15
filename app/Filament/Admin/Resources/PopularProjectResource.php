@@ -29,7 +29,8 @@ class PopularProjectResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->can('view any project');
+        return false;
+//        return auth()->user()->can('view any project');
     }
 
     public static function canCreate(): bool

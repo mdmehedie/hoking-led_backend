@@ -21,11 +21,11 @@ class TeamMemberResource extends Resource
     protected static ?string $slug = 'team-members';
 
 
-    protected static ?int $navigationSort = 0;
+    protected static ?int $navigationSort = 6;
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Users';
+        return 'User Management';
     }
 
     public static function canCreate(): bool
