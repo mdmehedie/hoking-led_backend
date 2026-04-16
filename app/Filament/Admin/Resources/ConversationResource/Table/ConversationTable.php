@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\ConversationResource\Table;
 
 use App\Filament\Admin\Resources\ConversationResource;
+use App\Models\Conversation;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -18,12 +19,145 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ConversationTable
 {
     public static function table(Table $table): Table
     {
         return $table
+            ->headerActions([
+                Action::make('export')
+                    ->label(__('Export'))
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->modalHeading(__('Export Contact Submissions'))
+                    ->modalDescription('Select conditions and format for export.')
+                    ->form([
+                        Select::make('status')
+                            ->label('Status')
+                            ->options([
+                                'all' => 'All',
+                                'new' => 'New',
+                                'in_progress' => 'In Progress',
+                                'resolved' => 'Resolved',
+                                'closed' => 'Closed',
+                            ])
+                            ->default('all'),
+                        Select::make('priority')
+                            ->label('Priority')
+                            ->options([
+                                'all' => 'All',
+                                'low' => 'Low',
+                                'medium' => 'Medium',
+                                'high' => 'High',
+                                'urgent' => 'Urgent',
+                            ])
+                            ->default('all'),
+                        Select::make('format')
+                            ->label('Format')
+                            ->options([
+                                'csv' => 'CSV',
+                                'xlsx' => 'Excel (.xlsx)',
+                            ])
+                            ->default('csv')
+                            ->required(),
+                    ])
+                    ->action(function (array $data) {
+                        $query = Conversation::query();
+
+                        if ($data['status'] !== 'all') {
+                            $query->where('status', $data['status']);
+                        }
+
+                        if ($data['priority'] !== 'all') {
+                            $query->where('priority', $data['priority']);
+                        }
+
+                        $rows = $query->get();
+                        $count = $rows->count();
+
+                        if ($count === 0) {
+                            Notification::make()
+                                ->warning()
+                                ->title('No records found')
+                                ->body('No submissions match your selected conditions.')
+                                ->send();
+                            return;
+                        }
+
+                        $columns = ['name', 'email', 'phone', 'country', 'status', 'priority', 'created_at'];
+
+                        if ($data['format'] === 'xlsx') {
+                            $spreadsheet = new Spreadsheet();
+                            $sheet = $spreadsheet->getActiveSheet();
+
+                            $sheet->setCellValue('A1', 'name');
+                            $sheet->setCellValue('B1', 'email');
+                            $sheet->setCellValue('C1', 'phone');
+                            $sheet->setCellValue('D1', 'country');
+                            $sheet->setCellValue('E1', 'status');
+                            $sheet->setCellValue('F1', 'priority');
+                            $sheet->setCellValue('G1', 'created_at');
+
+                            $rowNum = 2;
+                            foreach ($rows as $row) {
+                                $sheet->setCellValue('A' . $rowNum, $row->visitor_name ?? '');
+                                $sheet->setCellValue('B' . $rowNum, $row->visitor_email ?? '');
+                                $sheet->setCellValue('C' . $rowNum, $row->phone ?? '');
+                                $sheet->setCellValue('D' . $rowNum, $row->country ?? '');
+                                $sheet->setCellValue('E' . $rowNum, $row->status ?? '');
+                                $sheet->setCellValue('F' . $rowNum, $row->priority ?? '');
+                                $sheet->setCellValue('G' . $rowNum, $row->created_at?->format('Y-m-d H:i:s') ?? '');
+                                $rowNum++;
+                            }
+
+                            $writer = new Xlsx($spreadsheet);
+                            $fileName = 'contacts_' . now()->format('Y-m-d_His') . '.xlsx';
+                            $tempPath = storage_path('app/temp/' . $fileName);
+
+                            if (!file_exists(dirname($tempPath))) {
+                                mkdir(dirname($tempPath), 0755, true);
+                            }
+
+                            $writer->save($tempPath);
+
+                            return response()->download($tempPath)->deleteFileAfterSend(true);
+                        }
+
+                        $output = fopen('php://temp', 'w');
+                        fputcsv($output, $columns);
+
+                        foreach ($rows as $row) {
+                            fputcsv($output, [
+                                $row->visitor_name ?? '',
+                                $row->visitor_email ?? '',
+                                $row->phone ?? '',
+                                $row->country ?? '',
+                                $row->status ?? '',
+                                $row->priority ?? '',
+                                $row->created_at?->format('Y-m-d H:i:s') ?? '',
+                            ]);
+                        }
+
+                        rewind($output);
+                        $csvContent = stream_get_contents($output);
+                        fclose($output);
+
+                        $fileName = 'contacts_' . now()->format('Y-m-d_His') . '.csv';
+                        $tempPath = storage_path('app/temp/' . $fileName);
+
+                        if (!file_exists(dirname($tempPath))) {
+                            mkdir(dirname($tempPath), 0755, true);
+                        }
+
+                        file_put_contents($tempPath, $csvContent);
+
+                        return response()->download($tempPath)->deleteFileAfterSend(true);
+                    })
+                    ->modalSubmitActionLabel(__('Export'))
+                    ->modalWidth('lg'),
+            ])
             ->defaultSort('last_visitor_message_at', 'desc')
             ->columns([
                 TextColumn::make('visitor_name')
@@ -261,6 +395,7 @@ class ConversationTable
                     }),
             ])
             ->modifyQueryUsing(fn (Builder $query) => $query->with(['assignedUser', 'lastMessage']))
-            ->recordUrl(fn ($record) => ConversationResource::getUrl('view', ['record' => $record]));
+            ->recordUrl(fn ($record) => ConversationResource::getUrl('view', ['record' => $record]))
+            ->extraAttributes(['wire:poll.3s' => '']);
     }
 }

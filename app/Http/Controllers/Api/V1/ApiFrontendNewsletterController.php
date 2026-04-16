@@ -40,7 +40,7 @@ class ApiFrontendNewsletterController extends ApiBaseController
         }
 
         $validator = Validator::make($request->all(), [
-            'email' => ['required', 'email', 'max:255', 'unique:newsletter_subscriptions,email'],
+            'email' => ['required', 'email', 'max:255'],
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
             'source' => ['nullable', 'string', Rule::in(['website', 'footer', 'popup', 'checkout', 'landing_page', 'import'])],
@@ -57,6 +57,15 @@ class ApiFrontendNewsletterController extends ApiBaseController
             return $this->errorResponse(
                 ['email' => __('Disposable email addresses are not allowed')],
                 422
+            );
+        }
+
+        // Check if already subscribed
+        $existing = NewsletterSubscription::where('email', $request->email)->first();
+        if ($existing) {
+            return $this->errorResponse(
+                ['email' => __('This email is already subscribed')],
+                200
             );
         }
 

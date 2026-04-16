@@ -159,6 +159,7 @@ class ViewConversation extends ViewRecord
                             ])
                             ->contained(false)
                             ->grid(1)
+                            ->extraAttributes(['wire:poll.3s' => ''])
                     ])
                     ->columnSpanFull(),
             ]);
