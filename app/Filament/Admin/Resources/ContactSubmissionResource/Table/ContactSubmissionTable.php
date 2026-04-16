@@ -8,6 +8,7 @@ use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
+use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\SelectColumn;
@@ -20,7 +21,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
+use Illuminate\Http\UploadedFile;
 use League\Csv\Reader as CsvReader;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 class ContactSubmissionTable
 {
@@ -86,7 +89,7 @@ class ContactSubmissionTable
                             return;
                         }
 
-                        $columns = ['name', 'email', 'phone', 'place', 'subject', 'message', 'status', 'priority', 'source', 'created_at'];
+                        $columns = ['name', 'email', 'phone', 'country', 'subject', 'message', 'status', 'priority', 'source', 'created_at'];
 
                         if ($data['format'] === 'xlsx') {
                             $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -95,7 +98,7 @@ class ContactSubmissionTable
                             $sheet->setCellValue('A1', 'name');
                             $sheet->setCellValue('B1', 'email');
                             $sheet->setCellValue('C1', 'phone');
-                            $sheet->setCellValue('D1', 'place');
+                            $sheet->setCellValue('D1', 'country');
                             $sheet->setCellValue('E1', 'subject');
                             $sheet->setCellValue('F1', 'message');
                             $sheet->setCellValue('G1', 'status');
@@ -171,11 +174,11 @@ class ContactSubmissionTable
                     ->icon('heroicon-o-arrow-up-tray')
                     ->modalHeading(__('Import Contact Submissions'))
                     ->modalDescription(new \Illuminate\Support\HtmlString(
-                        'Upload a CSV or Excel file with columns: <strong>name</strong>, <strong>email</strong>, <strong>phone</strong> (optional), <strong>place</strong> (optional), <strong>subject</strong>, <strong>message</strong>.<br>' .
+                        'Upload a CSV or Excel file with columns: <strong>name</strong>, <strong>email</strong>, <strong>phone</strong> (optional), <strong>Country</strong> (optional), <strong>subject</strong>, <strong>message</strong>.<br>' .
                         '<a href="' . url('templates/contact-submissions.csv') . '" style="color: #059669;" download>Download CSV</a> | <a href="' . url('templates/contact-submissions.xlsx') . '" style="color: #2563eb;" download>Download Excel</a>'
                     ))
                     ->form([
-                        \Filament\Forms\Components\FileUpload::make('file')
+                        FileUpload::make('file')
                             ->label('File')
                             ->acceptedFileTypes([
                                 'text/csv',
@@ -189,7 +192,7 @@ class ContactSubmissionTable
                     ->action(function (array $data) {
                         $file = $data['file'];
 
-                        if (!$file instanceof \Illuminate\Http\UploadedFile) {
+                        if (!$file instanceof UploadedFile) {
                             Notification::make()
                                 ->danger()
                                 ->title('No file uploaded')
@@ -201,7 +204,7 @@ class ContactSubmissionTable
                         $rows = [];
 
                         if (in_array(strtolower($extension), ['xlsx', 'xls'])) {
-                            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+                            $reader = new Xlsx();
                             $spreadsheet = $reader->load($file->getRealPath());
                             $sheet = $spreadsheet->getActiveSheet();
                             $rows = $sheet->toArray(null, true, true, true);
@@ -275,7 +278,7 @@ class ContactSubmissionTable
                     ->label(__('Phone'))
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('place')
-                    ->label(__('Place'))
+                    ->label(__('Country'))
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('email')
@@ -320,6 +323,34 @@ class ContactSubmissionTable
                 TextColumn::make('resource_label')
                     ->label(__('Related To'))
                     ->placeholder('—')
+                    ->getStateUsing(function ($record) {
+                        $type = $record->extras['resource_type'] ?? null;
+
+                        if (!$type) {
+                            return null;
+                        }
+
+                        return 'View ' . ucfirst(str_replace('_', ' ', $type));
+                    })
+                    ->url(function ($record) {
+                        $type = $record->extras['resource_type'] ?? null;
+                        $id = $record->extras['resource_id'] ?? null;
+
+                        if (!$type || !$id) {
+                            return null;
+                        }
+
+                        $resourceClass = ContactSubmission::RESOURCES[$type] ?? null;
+
+                        if (!$resourceClass) {
+                            return null;
+                        }
+
+                        return $resourceClass::getUrl('edit', ['record' => $id]);
+                    })
+                    ->openUrlInNewTab()
+                    ->color('primary')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
                     ->toggleable(),
                 TextColumn::make('assignedUser.name')
                     ->label(__('Assigned To'))
