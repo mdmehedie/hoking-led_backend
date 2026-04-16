@@ -21,7 +21,7 @@ class ApiFrontendContactController extends ApiBaseController
 
     protected array $validSources = [
         'contact_page', 'footer', 'popup', 'support_page',
-        'quote_request', 'api',
+        'product_page', 'api', 'news_page', 'blog_page',
     ];
 
     protected array $validResourceTypes = [
