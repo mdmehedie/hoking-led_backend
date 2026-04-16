@@ -85,7 +85,7 @@ class ProductInquiryTable
                             return;
                         }
 
-                        $columns = ['name', 'email', 'phone', 'place', 'subject', 'message', 'status', 'priority', 'source', 'created_at'];
+                        $columns = ['name', 'email', 'phone', 'country', 'subject', 'message', 'status', 'priority', 'source', 'created_at'];
 
                         if ($data['format'] === 'xlsx') {
                             $spreadsheet = new Spreadsheet();
@@ -94,7 +94,7 @@ class ProductInquiryTable
                             $sheet->setCellValue('A1', 'name');
                             $sheet->setCellValue('B1', 'email');
                             $sheet->setCellValue('C1', 'phone');
-                            $sheet->setCellValue('D1', 'place');
+                            $sheet->setCellValue('D1', 'country');
                             $sheet->setCellValue('E1', 'subject');
                             $sheet->setCellValue('F1', 'message');
                             $sheet->setCellValue('G1', 'status');
@@ -220,6 +220,34 @@ class ProductInquiryTable
                 TextColumn::make('resource_label')
                     ->label(__('Related To'))
                     ->placeholder('—')
+                    ->getStateUsing(function ($record) {
+                        $type = $record->extras['resource_type'] ?? null;
+
+                        if (!$type) {
+                            return null;
+                        }
+
+                        return 'View ' . ucfirst(str_replace('_', ' ', $type));
+                    })
+                    ->url(function ($record) {
+                        $type = $record->extras['resource_type'] ?? null;
+                        $id = $record->extras['resource_id'] ?? null;
+
+                        if (!$type || !$id) {
+                            return null;
+                        }
+
+                        $resourceClass = ContactSubmission::RESOURCES[$type] ?? null;
+
+                        if (!$resourceClass) {
+                            return null;
+                        }
+
+                        return $resourceClass::getUrl('edit', ['record' => $id]);
+                    })
+                    ->openUrlInNewTab()
+                    ->color('primary')
+                    ->icon('heroicon-o-arrow-top-right-on-square')
                     ->toggleable(),
                 TextColumn::make('assignedUser.name')
                     ->label(__('Assigned To'))
@@ -274,10 +302,10 @@ class ProductInquiryTable
                     ->searchable(),
                 Filter::make('unassigned')
                     ->label(__('Unassigned Only'))
-                    ->query(fn (Builder $query): Builder => $query->whereNull('assigned_to')),
+                    ->query(fn(Builder $query): Builder => $query->whereNull('assigned_to')),
                 Filter::make('has_resource')
                     ->label(__('Has Related Resource'))
-                    ->query(fn (Builder $query): Builder => $query->whereNotNull('extras->resource_type')),
+                    ->query(fn(Builder $query): Builder => $query->whereNotNull('extras->resource_type')),
                 SelectFilter::make('resource_type')
                     ->label(__('Resource Type'))
                     ->options([
@@ -298,7 +326,7 @@ class ProductInquiryTable
                     }),
                 Filter::make('overdue')
                     ->label(__('Overdue (24h+)'))
-                    ->query(fn (Builder $query): Builder => $query->awaitingSLA(24)),
+                    ->query(fn(Builder $query): Builder => $query->awaitingSLA(24)),
                 Filter::make('created_at')
                     ->label(__('Date Range'))
                     ->form([
@@ -307,8 +335,8 @@ class ProductInquiryTable
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
-                            ->when($data['created_from'], fn (Builder $query, $date) => $query->whereDate('created_at', '>=', $date))
-                            ->when($data['created_until'], fn (Builder $query, $date) => $query->whereDate('created_at', '<=', $date));
+                            ->when($data['created_from'], fn(Builder $query, $date) => $query->whereDate('created_at', '>=', $date))
+                            ->when($data['created_until'], fn(Builder $query, $date) => $query->whereDate('created_at', '<=', $date));
                     }),
             ])
             ->actions([
@@ -316,10 +344,10 @@ class ProductInquiryTable
                     Action::make('edit')
                         ->label(__('Edit'))
                         ->icon('heroicon-o-pencil')
-                        ->url(fn ($record) => ContactSubmissionResource::getUrl('edit', ['record' => $record])),
+                        ->url(fn($record) => ContactSubmissionResource::getUrl('edit', ['record' => $record])),
                     Action::make('view')
                         ->label(__('View'))
-                        ->url(fn ($record) => ContactSubmissionResource::getUrl('view', ['record' => $record]))
+                        ->url(fn($record) => ContactSubmissionResource::getUrl('view', ['record' => $record]))
                         ->icon('heroicon-o-eye'),
                     Action::make('assign')
                         ->label(__('Assign'))
@@ -332,7 +360,7 @@ class ProductInquiryTable
                                 ->searchable()
                                 ->required(),
                         ])
-                        ->action(fn ($record, array $data) => $record->update(['assigned_to' => $data['assigned_to']]))
+                        ->action(fn($record, array $data) => $record->update(['assigned_to' => $data['assigned_to']]))
                         ->modalSubmitActionLabel('Assign'),
                     Action::make('link_resource')
                         ->label(__('Link Resource'))
@@ -368,7 +396,7 @@ class ProductInquiryTable
                                 ->searchable()
                                 ->required(),
                         ])
-                        ->fillForm(fn ($record) => [
+                        ->fillForm(fn($record) => [
                             'resource_type' => $record->resource_type,
                             'resource_id' => $record->resource_id,
                         ])
@@ -387,30 +415,30 @@ class ProductInquiryTable
                             unset($extras['resource_type'], $extras['resource_id']);
                             $record->update(['extras' => $extras]);
                         })
-                        ->visible(fn ($record): bool => $record->hasResource())
+                        ->visible(fn($record): bool => $record->hasResource())
                         ->requiresConfirmation()
                         ->color('warning'),
                     Action::make('mark_in_progress')
                         ->label(__('Mark In Progress'))
-                        ->action(fn ($record) => $record->markAsInProgress())
-                        ->visible(fn ($record): bool => $record->status === 'new')
+                        ->action(fn($record) => $record->markAsInProgress())
+                        ->visible(fn($record): bool => $record->status === 'new')
                         ->color('warning')
                         ->icon('heroicon-o-clock'),
                     Action::make('mark_resolved')
                         ->label(__('Mark Resolved'))
-                        ->action(fn ($record) => $record->markAsResolved())
-                        ->visible(fn ($record): bool => $record->status !== 'resolved' && $record->status !== 'closed')
+                        ->action(fn($record) => $record->markAsResolved())
+                        ->visible(fn($record): bool => $record->status !== 'resolved' && $record->status !== 'closed')
                         ->color('success')
                         ->icon('heroicon-o-check-circle'),
                     Action::make('mark_closed')
                         ->label(__('Mark Closed'))
-                        ->action(fn ($record) => $record->markAsClosed())
-                        ->visible(fn ($record): bool => $record->status !== 'closed')
+                        ->action(fn($record) => $record->markAsClosed())
+                        ->visible(fn($record): bool => $record->status !== 'closed')
                         ->color('gray')
                         ->icon('heroicon-o-archive-box'),
                     Action::make('delete')
                         ->label(__('Delete'))
-                        ->action(fn ($record) => $record->delete())
+                        ->action(fn($record) => $record->delete())
                         ->requiresConfirmation()
                         ->color('danger')
                         ->icon('heroicon-o-trash'),

@@ -2,6 +2,12 @@
 
 namespace App\Models;
 
+use App\Filament\Admin\Resources\CaseStudyResource;
+use App\Filament\Admin\Resources\BlogResource;
+use App\Filament\Admin\Resources\BrandResource;
+use App\Filament\Admin\Resources\NewsResource;
+use App\Filament\Admin\Resources\PageResource;
+use App\Filament\Admin\Resources\ProductResource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -45,6 +51,17 @@ class ContactSubmission extends Model
         'case_study' => CaseStudy::class,
         'brand'     => Brand::class,
         'category'  => Category::class,
+    ];
+
+    public const RESOURCES = [
+        'product'   => ProductResource::class,
+        'blog' => BlogResource::class,
+        'news' => NewsResource::class,
+        'project' => ProductResource::class,
+        'page' => PageResource::class,
+        'case_study' => CaseStudyResource::class,
+        'brand' => BrandResource::class,
+        'category' => BrandResource::class,
     ];
 
     // ─── Polymorphic Resource Relationship ─────────────────────
@@ -208,8 +225,10 @@ class ContactSubmission extends Model
             'footer' => 'Footer',
             'popup' => 'Popup',
             'support_page' => 'Support Page',
-            'quote_request' => 'Quote Request',
+            'product_page' => 'Product Page',
             'api' => 'API',
+            'news_page' => 'News Page',
+            'blog_page' => 'Blog Page',
             default => ucfirst(str_replace('_', ' ', $this->source)),
         };
     }
