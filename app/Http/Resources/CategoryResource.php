@@ -23,6 +23,7 @@ class CategoryResource extends JsonResource
                 'name' => $this->parent->name,
             ]),
             'children' => CategoryResource::collection($this->whenLoaded('children')),
+            'sort_order' => $this->sort_order,
             'meta_title' => $this->meta_title,
             'meta_description' => $this->meta_description,
             'meta_keywords' => $this->meta_keywords,
