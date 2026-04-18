@@ -49,6 +49,7 @@ class ProductResource extends JsonResource
                         'short_description' => $p->short_description,
                     ])
             ),
+            'sort_order' => $this->order_column, 
             'meta_title' => $this->meta_title,
             'meta_description' => $this->meta_description,
             'meta_keywords' => $this->meta_keywords,

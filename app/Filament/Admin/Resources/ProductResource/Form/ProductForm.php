@@ -56,6 +56,11 @@ class ProductForm
                 ->relationship('category', 'name')
                 ->label(__('Category'))
                 ->nullable(),
+            TextInput::make('order_column')
+                    ->label(__('Sort Order'))
+                    ->numeric()
+                    ->default(0)
+                    ->helperText(__('Lower numbers appear first')),
             Select::make('status')
                 ->label(__('Status'))
                 ->options([
