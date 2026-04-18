@@ -50,6 +50,11 @@ class CategoryForm
                         ->searchable()
                         ->preload()
                         ->nullable(),
+                    TextInput::make('sort_order')
+                        ->label(__('Sort Order'))
+                        ->numeric()
+                        ->default(0)
+                        ->helperText(__('Lower numbers appear first')),
                     Toggle::make('is_visible')->label(__('Visible'))->default(true),
                 ]),
                 Tab::make(__('Translations'))->schema([

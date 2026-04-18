@@ -30,6 +30,7 @@ class Category extends Model
         'meta_title',
         'meta_description',
         'meta_keywords',
+        'sort_order',
     ];
 
     protected array $mediaAttributes = [
