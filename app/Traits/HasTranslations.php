@@ -77,26 +77,31 @@ trait HasTranslations
                 }
             }
 
-            // If value is array (multiple locales), extract it
+            // If value is array, check if it's actually locale-based (e.g., ['en' => '...', 'bd' => '...'])
             if (is_array($value)) {
-                $translationsToSave[$attribute] = $value;
+                $activeLocales = Locale::activeCodes();
+                $isLocaleArray = !empty($value) && collect($value)->keys()->every(fn ($k) => in_array($k, $activeLocales));
 
-                // Set default locale value for main column (clean payload)
-                $defaultLocale = Locale::defaultCode() ?? 'en';
-                $defaultValue = $value[$defaultLocale] ?? reset($value);
+                if ($isLocaleArray) {
+                    $translationsToSave[$attribute] = $value;
 
-                // JSON-encode if default value is array/object, OR if column is JSON type
-                $columnType = $model->getConnection()->getSchemaBuilder()->getColumnType($model->getTable(), $attribute);
-                
-                if (is_array($defaultValue) || is_object($defaultValue) || $columnType === 'json') {
-                    $model->attributes[$attribute] = json_encode($defaultValue);
-                } else {
-                    $model->attributes[$attribute] = $defaultValue;
-                }
+                    // Set default locale value for main column (clean payload)
+                    $defaultLocale = Locale::defaultCode() ?? 'en';
+                    $defaultValue = $value[$defaultLocale] ?? reset($value);
 
-                // Clean up media for translatable fields
-                if (static::hasTranslatableMedia($model, $attribute)) {
-                    static::cleanupTranslatableMedia($model, $attribute, $value);
+                    // JSON-encode if default value is array/object, OR if column is JSON type
+                    $columnType = $model->getConnection()->getSchemaBuilder()->getColumnType($model->getTable(), $attribute);
+                    
+                    if (is_array($defaultValue) || is_object($defaultValue) || $columnType === 'json') {
+                        $model->attributes[$attribute] = json_encode($defaultValue);
+                    } else {
+                        $model->attributes[$attribute] = $defaultValue;
+                    }
+
+                    // Clean up media for translatable fields
+                    if (static::hasTranslatableMedia($model, $attribute)) {
+                        static::cleanupTranslatableMedia($model, $attribute, $value);
+                    }
                 }
             }
         }
@@ -108,15 +113,19 @@ trait HasTranslations
     }
 
     /**
+     * Get the translatable media keys for the model.
+     */
+    public function getTranslatableMediaKeys(): array
+    {
+        return $this->translatableMediaKeys ?? [];
+    }
+
+    /**
      * Check if a translatable attribute has media paths defined.
      */
     protected static function hasTranslatableMedia($model, string $attribute): bool
     {
-        if (!property_exists($model, 'translatableMediaKeys')) {
-            return false;
-        }
-
-        foreach ($model->translatableMediaKeys as $key) {
+        foreach ($model->getTranslatableMediaKeys() as $key) {
             if (str_starts_with($key, $attribute . '.')) {
                 return true;
             }
@@ -177,7 +186,7 @@ trait HasTranslations
         }
 
         $disk = $model->getMediaDisk() ?? 'public';
-        $dottedKeys = $model->translatableMediaKeys ?? [];
+        $dottedKeys = $model->getTranslatableMediaKeys();
 
         foreach ($model->translatable as $attribute) {
             // Check if this attribute has media paths defined
@@ -210,7 +219,7 @@ trait HasTranslations
         }
 
         // Get dotted notation media keys for this attribute (e.g., 'attribute.*.field')
-        $dottedKeys = $model->translatableMediaKeys ?? [];
+        $dottedKeys = $model->getTranslatableMediaKeys();
         $attributePaths = array_filter($dottedKeys, fn ($key) => str_starts_with($key, $attribute . '.'));
 
         if (empty($attributePaths)) {

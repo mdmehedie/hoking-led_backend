@@ -3,13 +3,10 @@
 namespace App\Filament\Admin\Resources\PageResource\Table;
 
 use Filament\Actions\Action;
-use Filament\Actions\BulkAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Notifications\Notification;
-use Illuminate\Database\Eloquent\Collection;
 
 class PageTable
 {
@@ -48,28 +45,9 @@ class PageTable
                     ->label(__('Edit'))
                     ->url(fn ($record) => \App\Filament\Admin\Resources\PageResource::getUrl('edit', ['record' => $record]))
                     ->icon('heroicon-o-pencil'),
-                Action::make('delete')
-                    ->label(__('Delete'))
-                    ->action(fn ($record) => $record->delete())
-                    ->requiresConfirmation()
-                    ->color('danger')
-                    ->icon('heroicon-o-trash'),
             ])
             ->bulkActions([
-                BulkAction::make('delete')
-                    ->label(__('Delete Selected'))
-                    ->color('danger')
-                    ->icon('heroicon-o-trash')
-                    ->requiresConfirmation()
-                    ->action(function (Collection $records) {
-                        $count = $records->count();
-                        $records->each->delete();
-                        Notification::make()
-                            ->success()
-                            ->title(__('Deleted'))
-                            ->body($count . ' ' . __('items deleted successfully.'))
-                            ->send();
-                    }),
+                //
             ]);
     }
 }

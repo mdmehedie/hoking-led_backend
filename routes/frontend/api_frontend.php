@@ -20,10 +20,14 @@ use App\Http\Controllers\Api\V1\ApiFrontendTeamMemberController;
 use App\Http\Controllers\Api\V1\ApiFrontendLocaleController;
 use App\Http\Controllers\Api\V1\ApiFrontendConversationController;
 use App\Http\Controllers\Api\V1\ApiFrontendFormController;
+use App\Http\Controllers\Api\V1\ApiFrontendVideoController;
 
 Route::prefix('v1')->group(function () {
     Route::get('locales', [ApiFrontendLocaleController::class, 'index'])->name('locales.index');
     Route::get('sliders', [ApiFrontendSliderController::class, 'index'])->name('sliders.index');
+
+    Route::get('videos', [ApiFrontendVideoController::class, 'index'])->name('videos.index');
+    Route::get('videos/{slug}', [ApiFrontendVideoController::class, 'show'])->name('videos.show');
 
     Route::get('blogs', [ApiFrontendBlogController::class, 'index'])->name('blogs.index');
     Route::get('blogs/{slug}', [ApiFrontendBlogController::class, 'show'])->name('blogs.show');

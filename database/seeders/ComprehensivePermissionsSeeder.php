@@ -34,6 +34,7 @@ class ComprehensivePermissionsSeeder extends Seeder
             'lead',
             'slider',
             'appsetting',
+            'video',
         ];
 
         $actions = ['view', 'create', 'edit', 'delete'];
