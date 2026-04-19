@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pages', function (Blueprint $table) {
-            $table->string('canonical_url')->nullable()->after('meta_keywords');
+            if (!Schema::hasColumn('pages', 'canonical_url')) {
+                $table->string('canonical_url')->nullable()->after('meta_keywords');
+            }
         });
     }
 
@@ -22,7 +24,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('pages', function (Blueprint $table) {
-            $table->dropColumn('canonical_url');
+            if (Schema::hasColumn('pages', 'canonical_url')) {
+                $table->dropColumn('canonical_url');
+            }
         });
     }
 };
