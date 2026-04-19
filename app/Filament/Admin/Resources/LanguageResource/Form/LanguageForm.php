@@ -33,6 +33,8 @@ class LanguageForm
                         ->required(),
                     FileUpload::make('flag_path')
                         ->label(__('Flag'))
+                        ->disk('public')
+                        ->visibility('public')
                         ->directory('locales/flags')
                         ->image()
                         ->nullable(),
