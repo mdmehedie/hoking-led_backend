@@ -25,6 +25,8 @@ class AuthorForm
                 Tab::make(__('Profile Image'))->schema([
                     Forms\Components\FileUpload::make('avatar')
                         ->image()
+                        ->disk('public')
+                        ->visibility('public')
                         ->directory('authors')
                         ->imageEditor()
                         ->imageEditorAspectRatios(['1:1']),
