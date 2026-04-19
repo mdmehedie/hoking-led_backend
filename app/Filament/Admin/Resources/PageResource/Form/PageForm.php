@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\PageResource\Form;
 
 use App\Models\Locale;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -88,14 +89,6 @@ class PageForm
 
                 // Default schema for other pages
                 return [
-                    TextInput::make("title.{$locale}")
-                        ->label(__('Title'))
-                        ->required($isDefault)
-                        ->maxLength(255),
-                    Textarea::make("excerpt.{$locale}")
-                        ->label(__('Excerpt'))
-                        ->required($isDefault)
-                        ->maxLength(500),
                     \App\Filament\Forms\Components\TinyEditor::make("content.{$locale}")
                         ->label(__('Content'))
                         ->required($isDefault)
@@ -109,25 +102,28 @@ class PageForm
         $keepOriginal = self::getKeepOriginalName();
 
         return [
-            TextInput::make("title.{$locale}")
-                ->label(__('Title'))
-                ->required($isDefault)
-                ->maxLength(255),
-            Textarea::make("excerpt.{$locale}")
-                ->label(__('Excerpt'))
-                ->required($isDefault)
-                ->maxLength(500),
-
             Section::make(__('Hero Section'))->schema([
                 FileUpload::make("content.{$locale}.hero_bg")
                     ->label(__('Hero Background'))
                     ->image()
                     ->disk('public')
                     ->visibility('public')
-                    ->required($isDefault)
+                    ->required(fn (Get $get) => $isDefault && empty($get("content.{$locale}.hero_video")))
                     ->directory('pages/company')
                     ->getUploadedFileNameForStorageUsing($keepOriginal)
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->live(),
+                FileUpload::make("content.{$locale}.hero_video")
+                    ->label(__('Hero Video'))
+                    ->disk('public')
+                    ->visibility('public')
+                    ->required(fn (Get $get) => $isDefault && empty($get("content.{$locale}.hero_bg")))
+                    ->directory('pages/company/videos')
+                    ->getUploadedFileNameForStorageUsing($keepOriginal)
+                    ->acceptedFileTypes(['video/mp4', 'video/webm', 'video/ogg'])
+                    ->maxSize(51200) // 50MB
+                    ->columnSpanFull()
+                    ->live(),
                 TextInput::make("content.{$locale}.hero_title")
                     ->label(__('Hero Title'))
                     ->required($isDefault)
@@ -252,15 +248,6 @@ class PageForm
         $keepOriginal = self::getKeepOriginalName();
 
         return [
-            TextInput::make("title.{$locale}")
-                ->label(__('Title'))
-                ->required($isDefault)
-                ->maxLength(255),
-            Textarea::make("excerpt.{$locale}")
-                ->label(__('Excerpt'))
-                ->required($isDefault)
-                ->maxLength(500),
-
             Section::make(__('Hero & Intro'))->schema([
                 TextInput::make("content.{$locale}.title")
                     ->label(__('Intro Title'))
@@ -383,15 +370,6 @@ class PageForm
         $keepOriginal = self::getKeepOriginalName();
 
         return [
-            TextInput::make("title.{$locale}")
-                ->label(__('Title'))
-                ->required($isDefault)
-                ->maxLength(255),
-            Textarea::make("excerpt.{$locale}")
-                ->label(__('Excerpt'))
-                ->required($isDefault)
-                ->maxLength(500),
-
             Section::make(__('Hero Section'))->schema([
                 FileUpload::make("content.{$locale}.hero_bg")
                     ->label(__('Hero Background'))
@@ -451,16 +429,16 @@ class PageForm
         $keepOriginal = self::getKeepOriginalName();
 
         return [
-            TextInput::make("title.{$locale}")
-                ->label(__('Title'))
-                ->required($isDefault)
-                ->maxLength(255),
-            Textarea::make("excerpt.{$locale}")
-                ->label(__('Excerpt'))
-                ->required($isDefault)
-                ->maxLength(500),
-
             Section::make(__('Header'))->schema([
+                FileUpload::make("content.{$locale}.background")
+                    ->label(__('Header Background'))
+                    ->image()
+                    ->disk('public')
+                    ->visibility('public')
+                    ->required($isDefault)
+                    ->directory('pages/contact')
+                    ->getUploadedFileNameForStorageUsing($keepOriginal)
+                    ->columnSpanFull(),
                 TextInput::make("content.{$locale}.title")
                     ->label(__('Title'))
                     ->required($isDefault),

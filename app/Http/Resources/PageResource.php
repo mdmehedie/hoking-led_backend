@@ -54,7 +54,7 @@ class PageResource extends JsonResource
      */
     protected function transformCompanyContent(array $content): array
     {
-        $imageFields = ['hero_bg', 'banner', 'bottom_image'];
+        $imageFields = ['hero_bg', 'hero_video', 'banner', 'bottom_image'];
         foreach ($imageFields as $field) {
             if (!empty($content[$field])) {
                 $content[$field] = Storage::disk('public')->url($content[$field]);
@@ -121,6 +121,10 @@ class PageResource extends JsonResource
      */
     protected function transformContactContent(array $content): array
     {
+        if (!empty($content['background'])) {
+            $content['background'] = Storage::disk('public')->url($content['background']);
+        }
+
         if (!empty($content['contacts']) && is_array($content['contacts'])) {
             foreach ($content['contacts'] as &$contact) {
                 if (!empty($contact['icon'])) {

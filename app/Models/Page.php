@@ -49,6 +49,7 @@ class Page extends Model
         return match ($this->slug) {
             'company' => [
                 'content.*.hero_bg',
+                'content.*.hero_video',
                 'content.*.banner',
                 'content.*.our_factory.image_1',
                 'content.*.our_factory.image_2',
@@ -67,6 +68,7 @@ class Page extends Model
                 'content.*.services.*.icon',
             ],
             'contact' => [
+                'content.*.background',
                 'content.*.contacts.*.icon',
             ],
             default => [
