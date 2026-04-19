@@ -35,17 +35,17 @@ class PageResource extends Resource
 
     public static function canCreate(): bool
     {
-        return auth()->user()->can('create page');
+        return false;
+    }
+
+    public static function canDelete($record): bool
+    {
+        return false;
     }
 
     public static function canEdit($record): bool
     {
         return auth()->user()->can('edit page');
-    }
-
-    public static function canDelete($record): bool
-    {
-        return auth()->user()->can('delete page');
     }
 
     public static function canView($record): bool

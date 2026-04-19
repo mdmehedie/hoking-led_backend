@@ -5,7 +5,8 @@ namespace App\Filament\Admin\Resources\PageResource\Form;
 use App\Models\Locale;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
-use App\Filament\Forms\Components\TinyEditor;
+use Filament\Forms\Components\Repeater;
+use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -13,7 +14,6 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Str;
 
 class PageForm
 {
@@ -34,18 +34,8 @@ class PageForm
         return [
             TextInput::make('slug')
                 ->label(__('Slug'))
-                ->unique(ignoreRecord: true)
-                ->required()
-                ->regex('/^[a-z0-9-]+$/')
-                ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
-                ->live(debounce: 300)
-                ->afterStateUpdated(function ($state, callable $set) {
-                    $slug = strtolower(str_replace(' ', '-', $state));
-                    $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
-                    $slug = preg_replace('/-+/', '-', $slug);
-                    $slug = trim($slug, '-');
-                    $set('slug', $slug);
-                }),
+                ->readOnly()
+                ->required(),
             Select::make('status')
                 ->label(__('Status'))
                 ->options([
@@ -77,32 +67,416 @@ class PageForm
     private static function localeTabSchema(string $locale, bool $isDefault): Tab
     {
         return Tab::make(strtoupper($locale))
-            ->schema([
-                TextInput::make("title.{$locale}")
-                    ->label(__('Title'))
+            ->schema(function ($record) use ($locale, $isDefault) {
+                $slug = $record?->slug;
+
+                if ($slug === 'company') {
+                    return self::companyPageSchema($locale, $isDefault);
+                }
+
+                if ($slug === 'about-us') {
+                    return self::aboutUsPageSchema($locale, $isDefault);
+                }
+
+                if ($slug === 'after-sale-service') {
+                    return self::afterSaleServicePageSchema($locale, $isDefault);
+                }
+
+                if ($slug === 'contact') {
+                    return self::contactPageSchema($locale, $isDefault);
+                }
+
+                // Default schema for other pages
+                return [
+                    TextInput::make("title.{$locale}")
+                        ->label(__('Title'))
+                        ->required($isDefault)
+                        ->maxLength(255),
+                    Textarea::make("excerpt.{$locale}")
+                        ->label(__('Excerpt'))
+                        ->required($isDefault)
+                        ->maxLength(500),
+                    \App\Filament\Forms\Components\TinyEditor::make("content.{$locale}")
+                        ->label(__('Content'))
+                        ->required($isDefault)
+                        ->columnSpanFull(),
+                ];
+            })->columns(2);
+    }
+
+    private static function companyPageSchema(string $locale, bool $isDefault): array
+    {
+        $keepOriginal = self::getKeepOriginalName();
+
+        return [
+            TextInput::make("title.{$locale}")
+                ->label(__('Title'))
+                ->required($isDefault)
+                ->maxLength(255),
+            Textarea::make("excerpt.{$locale}")
+                ->label(__('Excerpt'))
+                ->required($isDefault)
+                ->maxLength(500),
+
+            Section::make(__('Hero Section'))->schema([
+                FileUpload::make("content.{$locale}.hero_bg")
+                    ->label(__('Hero Background'))
+                    ->image()
+                    ->required($isDefault)
+                    ->directory('pages/company')
+                    ->getUploadedFileNameForStorageUsing($keepOriginal)
+                    ->columnSpanFull(),
+                TextInput::make("content.{$locale}.hero_title")
+                    ->label(__('Hero Title'))
+                    ->required($isDefault)
+                    ->maxLength(255),
+                TextInput::make("content.{$locale}.hero_secondary_title")
+                    ->label(__('Hero Secondary Title'))
+                    ->required($isDefault)
+                    ->maxLength(255),
+                Textarea::make("content.{$locale}.hero_description")
+                    ->label(__('Hero Description'))
+                    ->required($isDefault)
+                    ->maxLength(1000)
+                    ->columnSpanFull(),
+            ])->columns(2),
+
+            Section::make(__('Banner Section'))->schema([
+                FileUpload::make("content.{$locale}.banner")
+                    ->label(__('Banner Image'))
+                    ->image()
+                    ->required($isDefault)
+                    ->getUploadedFileNameForStorageUsing($keepOriginal)
+                    ->directory('pages/company')
+                    ->columnSpanFull(),
+            ]),
+
+            Section::make(__('Our Company'))->schema([
+                Repeater::make("content.{$locale}.our_company_description")
+                    ->label(__('Company Description Paragraphs'))
+                    ->required($isDefault)
+                    ->simple(
+                        Textarea::make('paragraph')
+                            ->required()
+                    )
+                    ->columnSpanFull(),
+            ]),
+
+            Section::make(__('Our Factory'))->schema([
+                TextInput::make("content.{$locale}.our_factory.title")
+                    ->label(__('Factory Title'))
                     ->required($isDefault)
                     ->maxLength(255)
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
-                        if ($isDefault && blank($get('slug'))) {
-                            $set('slug', static::generateUniqueSlug($state, null));
-                        }
-                    })
-                    ->live()
-                    ->required($isDefault),
-                Textarea::make("excerpt.{$locale}")
-                    ->label(__('Excerpt'))
-                    ->maxLength(500)
                     ->columnSpanFull(),
-                TinyEditor::make("content.{$locale}")
-                    ->label(__('Content'))
+                Textarea::make("content.{$locale}.our_factory.description_1")
+                    ->label(__('Description 1'))
+                    ->required($isDefault)
+                    ->maxLength(1000),
+                Textarea::make("content.{$locale}.our_factory.description_2")
+                    ->label(__('Description 2'))
+                    ->required($isDefault)
+                    ->maxLength(1000),
+                TextInput::make("content.{$locale}.our_factory.redirect_link")
+                    ->label(__('Redirect Link'))
+                    ->required($isDefault)
+                    ->url()
+                    ->maxLength(255)
+                    ->columnSpanFull(),
+                FileUpload::make("content.{$locale}.our_factory.image_1")
+                    ->label(__('Image 1'))
+                    ->image()
+                    ->getUploadedFileNameForStorageUsing($keepOriginal)
+                    ->required($isDefault)
+                    ->directory('pages/company'),
+                FileUpload::make("content.{$locale}.our_factory.image_2")
+                    ->label(__('Image 2'))
+                    ->image()
+                    ->getUploadedFileNameForStorageUsing($keepOriginal)
+                    ->required($isDefault)
+                    ->directory('pages/company'),
+                FileUpload::make("content.{$locale}.our_factory.image_3")
+                    ->label(__('Image 3'))
+                    ->image()
+                    ->getUploadedFileNameForStorageUsing($keepOriginal)
+                    ->required($isDefault)
+                    ->directory('pages/company'),
+            ])->columns(2),
+
+            Section::make(__('Certifications Section'))->schema([
+                TextInput::make("content.{$locale}.certification_title")
+                    ->label(__('Certification Title'))
+                    ->required($isDefault)
+                    ->maxLength(255),
+                Textarea::make("content.{$locale}.certification_description")
+                    ->label(__('Certification Description'))
+                    ->required($isDefault)
+                    ->maxLength(1000)
+                    ->columnSpanFull(),
+            ]),
+
+            Section::make(__('Pillars & Growth'))->schema([
+                Textarea::make("content.{$locale}.mission")
+                    ->label(__('Mission'))
+                    ->required($isDefault),
+                Textarea::make("content.{$locale}.value")
+                    ->label(__('Value'))
+                    ->required($isDefault),
+                Textarea::make("content.{$locale}.growth")
+                    ->label(__('Growth'))
+                    ->required($isDefault),
+                FileUpload::make("content.{$locale}.bottom_image")
+                    ->label(__('Bottom Image'))
+                    ->image()
+                    ->required($isDefault)
+                    ->getUploadedFileNameForStorageUsing($keepOriginal)
+                    ->directory('pages/company')
+                    ->columnSpanFull(),
+            ])->columns(1),
+        ];
+    }
+
+    private static function aboutUsPageSchema(string $locale, bool $isDefault): array
+    {
+        $keepOriginal = self::getKeepOriginalName();
+
+        return [
+            TextInput::make("title.{$locale}")
+                ->label(__('Title'))
+                ->required($isDefault)
+                ->maxLength(255),
+            Textarea::make("excerpt.{$locale}")
+                ->label(__('Excerpt'))
+                ->required($isDefault)
+                ->maxLength(500),
+
+            Section::make(__('Hero & Intro'))->schema([
+                TextInput::make("content.{$locale}.title")
+                    ->label(__('Intro Title'))
+                    ->required($isDefault),
+                TextInput::make("content.{$locale}.secondary_title")
+                    ->label(__('Secondary Title'))
+                    ->required($isDefault),
+                Textarea::make("content.{$locale}.first_description")
+                    ->label(__('First Description'))
                     ->required($isDefault)
                     ->columnSpanFull(),
-            ])->columns(1);
+                TextInput::make("content.{$locale}.first_description_redirect_link")
+                    ->label(__('Redirect Link'))
+                    ->url()
+                    ->required($isDefault),
+                FileUpload::make("content.{$locale}.image_1")
+                    ->label(__('Image 1'))
+                    ->image()
+                    ->required($isDefault)
+                    ->directory('pages/about-us')
+                    ->getUploadedFileNameForStorageUsing($keepOriginal),
+                FileUpload::make("content.{$locale}.image_2")
+                    ->label(__('Image 2'))
+                    ->image()
+                    ->required($isDefault)
+                    ->directory('pages/about-us')
+                    ->getUploadedFileNameForStorageUsing($keepOriginal),
+            ])->columns(2),
+
+            Section::make(__('Stats & Service'))->schema([
+                TextInput::make("content.{$locale}.service")
+                    ->label(__('Service Text'))
+                    ->required($isDefault),
+                TextInput::make("content.{$locale}.countries_active_clients")
+                    ->label(__('Countries with Active Clients'))
+                    ->required($isDefault),
+                TextInput::make("content.{$locale}.years_warranty")
+                    ->label(__('Years Warranty'))
+                    ->required($isDefault),
+                TextInput::make("content.{$locale}.service_warranty")
+                    ->label(__('Service Warranty'))
+                    ->required($isDefault),
+            ])->columns(2),
+
+            Section::make(__('Our Process'))->schema([
+                TextInput::make("content.{$locale}.our_process.title")
+                    ->label(__('Process Title'))
+                    ->required($isDefault)
+                    ->columnSpanFull(),
+                Repeater::make("content.{$locale}.our_process.steps")
+                    ->label(__('Process Steps'))
+                    ->schema([
+                        TextInput::make('title')->required(),
+                        Textarea::make('description')->required(),
+                    ])
+                    ->required($isDefault)
+                    ->columnSpanFull(),
+            ]),
+
+            Section::make(__('Mission & Vision'))->schema([
+                FileUpload::make("content.{$locale}.mission_vision_image")
+                    ->label(__('Main Section Image'))
+                    ->image()
+                    ->required($isDefault)
+                    ->directory('pages/about-us')
+                    ->getUploadedFileNameForStorageUsing($keepOriginal)
+                    ->columnSpanFull(),
+                TextInput::make("content.{$locale}.mission_vision_title")
+                    ->label(__('Section Title'))
+                    ->required($isDefault)
+                    ->columnSpanFull(),
+                
+                Section::make(__('Mission'))->schema([
+                    TextInput::make("content.{$locale}.mission.title")
+                        ->label(__('Mission Title'))
+                        ->required($isDefault),
+                    FileUpload::make("content.{$locale}.mission.icon")
+                        ->label(__('Mission Icon'))
+                        ->image()
+                        ->required($isDefault)
+                        ->directory('pages/about-us')
+                        ->getUploadedFileNameForStorageUsing($keepOriginal),
+                    Textarea::make("content.{$locale}.mission.description")
+                        ->label(__('Mission Description'))
+                        ->required($isDefault)
+                        ->columnSpanFull(),
+                ])->columns(2),
+
+                Section::make(__('Vision'))->schema([
+                    TextInput::make("content.{$locale}.vision.title")
+                        ->label(__('Vision Title'))
+                        ->required($isDefault),
+                    FileUpload::make("content.{$locale}.vision.icon")
+                        ->label(__('Vision Icon'))
+                        ->image()
+                        ->required($isDefault)
+                        ->directory('pages/about-us')
+                        ->getUploadedFileNameForStorageUsing($keepOriginal),
+                    Textarea::make("content.{$locale}.vision.description")
+                        ->label(__('Vision Description'))
+                        ->required($isDefault)
+                        ->columnSpanFull(),
+                ])->columns(2),
+            ]),
+        ];
+    }
+
+    private static function afterSaleServicePageSchema(string $locale, bool $isDefault): array
+    {
+        $keepOriginal = self::getKeepOriginalName();
+
+        return [
+            TextInput::make("title.{$locale}")
+                ->label(__('Title'))
+                ->required($isDefault)
+                ->maxLength(255),
+            Textarea::make("excerpt.{$locale}")
+                ->label(__('Excerpt'))
+                ->required($isDefault)
+                ->maxLength(500),
+
+            Section::make(__('Hero Section'))->schema([
+                FileUpload::make("content.{$locale}.hero_bg")
+                    ->label(__('Hero Background'))
+                    ->image()
+                    ->required($isDefault)
+                    ->directory('pages/after-sale-service')
+                    ->getUploadedFileNameForStorageUsing($keepOriginal)
+                    ->columnSpanFull(),
+                TextInput::make("content.{$locale}.hero_title")
+                    ->label(__('Hero Title'))
+                    ->required($isDefault)
+                    ->maxLength(255),
+                Textarea::make("content.{$locale}.hero_description")
+                    ->label(__('Hero Description'))
+                    ->required($isDefault)
+                    ->maxLength(1000)
+                    ->columnSpanFull(),
+            ]),
+
+            Section::make(__('Services'))->schema([
+                Repeater::make("content.{$locale}.services")
+                    ->label(__('Support Services'))
+                    ->schema([
+                        FileUpload::make('icon')
+                            ->label(__('Icon'))
+                            ->image()
+                            ->required()
+                            ->directory('pages/after-sale-service')
+                            ->getUploadedFileNameForStorageUsing($keepOriginal),
+                        TextInput::make('title')->label(__('Title'))->required(),
+                        Textarea::make('description')->label(__('Description'))->required(),
+                    ])
+                    ->required($isDefault)
+                    ->columns(1)
+                    ->columnSpanFull(),
+            ]),
+
+            Section::make(__('Warranty Policy'))->schema([
+                Repeater::make("content.{$locale}.quality_warranty_policy")
+                    ->label(__('Our Quality Warranty Policy'))
+                    ->required($isDefault)
+                    ->simple(
+                        Textarea::make('policy_text')
+                            ->required()
+                    )
+                    ->columnSpanFull(),
+            ]),
+        ];
+    }
+
+    private static function contactPageSchema(string $locale, bool $isDefault): array
+    {
+        $keepOriginal = self::getKeepOriginalName();
+
+        return [
+            TextInput::make("title.{$locale}")
+                ->label(__('Title'))
+                ->required($isDefault)
+                ->maxLength(255),
+            Textarea::make("excerpt.{$locale}")
+                ->label(__('Excerpt'))
+                ->required($isDefault)
+                ->maxLength(500),
+
+            Section::make(__('Header'))->schema([
+                TextInput::make("content.{$locale}.title")
+                    ->label(__('Title'))
+                    ->required($isDefault),
+                Textarea::make("content.{$locale}.description")
+                    ->label(__('Description'))
+                    ->required($isDefault)
+                    ->columnSpanFull(),
+            ]),
+
+            Section::make(__('Contact Methods'))->schema([
+                Repeater::make("content.{$locale}.contacts")
+                    ->label(__('Contacts'))
+                    ->schema([
+                        FileUpload::make('icon')
+                            ->label(__('Icon'))
+                            ->image()
+                            ->required()
+                            ->directory('pages/contact')
+                            ->getUploadedFileNameForStorageUsing($keepOriginal),
+                        TextInput::make('title')
+                            ->label(__('Title'))
+                            ->required(),
+                        Repeater::make('related_to_contact')
+                            ->label(__('Contact Details'))
+                            ->simple(
+                                TextInput::make('text')->required()
+                            )
+                            ->required()
+                            ->columnSpanFull(),
+                        TextInput::make('contact_link')
+                            ->label(__('Contact Link'))
+                            ->required(),
+                    ])
+                    ->required($isDefault)
+                    ->columnSpanFull(),
+            ]),
+        ];
     }
 
     private static function mediaSchema(): array
     {
-        $keepOriginal = fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName();
+        $keepOriginal = self::getKeepOriginalName();
 
         return [
             FileUpload::make('image_path')
@@ -134,29 +508,8 @@ class PageForm
         ];
     }
 
-    private static function generateUniqueSlug(?string $title, ?int $ignoreId = null): string
+    private static function getKeepOriginalName(): \Closure
     {
-        if (blank($title)) {
-            return '';
-        }
-
-        $base = Str::slug($title);
-        $slug = $base;
-        $counter = 1;
-
-        while (static::slugExists($slug, $ignoreId)) {
-            $slug = $base . '-' . $counter++;
-        }
-
-        return $slug;
-    }
-
-    private static function slugExists(string $slug, ?int $ignoreId = null): bool
-    {
-        $query = \App\Models\Page::where('slug', $slug);
-        if ($ignoreId) {
-            $query->where('id', '!=', $ignoreId);
-        }
-        return $query->exists();
+        return fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName();
     }
 }

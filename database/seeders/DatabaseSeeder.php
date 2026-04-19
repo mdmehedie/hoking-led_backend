@@ -51,13 +51,17 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             BlogSeeder::class,
             NewsSeeder::class,
-            PageSeeder::class,
+            CompanyPageSeeder::class,
+            AboutUsPageSeeder::class,
+            AfterSaleServicePageSeeder::class,
+            ContactPageSeeder::class,
             CaseStudySeeder::class,
             ProjectSeeder::class,
             SliderSeeder::class,
             CoreAdvantageSeeder::class,
             TestimonialSeeder::class,
             BrandSeeder::class,
+            VideoSeeder::class,
         ]);
         
         // 7. Test user (optional)
