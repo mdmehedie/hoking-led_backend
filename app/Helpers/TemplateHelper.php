@@ -7,7 +7,7 @@ use App\Models\ContactSubmission;
 class TemplateHelper
 {
     /**
-     * Parse placeholders in a template string.
+     * Parse placeholders in a template string and convert relative URLs to absolute.
      */
     public static function parse(?string $template, ContactSubmission $submission): string
     {
@@ -27,6 +27,9 @@ class TemplateHelper
             '{{date}}' => $submission->created_at->format('Y-m-d H:i:s'),
         ];
 
-        return str_replace(array_keys($placeholders), array_values($placeholders), $template);
+        $parsed = str_replace(array_keys($placeholders), array_values($placeholders), $template);
+
+        // Convert relative URLs (like images from TinyMCE) to absolute URLs
+        return ContentUrlHelper::convertAllUrlsToAbsolute($parsed);
     }
 }
