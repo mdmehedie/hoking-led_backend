@@ -15,6 +15,7 @@ class CaseStudyResource extends JsonResource
             'title' => $this->title,
             'slug' => $this->slug,
             'excerpt' => $this->excerpt,
+            'category' => new CaseStudyCategoryResource($this->whenLoaded('category')),
             'bullet_fields' => $this->bullet_fields ?? [],
             'project_details' => $this->decodeProjectDetails(),
             'project_description' => $this->decodeProjectDescription(),

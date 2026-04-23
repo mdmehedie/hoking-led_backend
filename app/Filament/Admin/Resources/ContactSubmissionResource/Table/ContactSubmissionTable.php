@@ -89,7 +89,7 @@ class ContactSubmissionTable
                             return;
                         }
 
-                        $columns = ['name', 'email', 'phone', 'country', 'subject', 'message', 'status', 'priority', 'source', 'created_at'];
+                        $columns = ['name', 'email', 'phone', 'country', 'company', 'subject', 'message', 'status', 'priority', 'source', 'created_at'];
 
                         if ($data['format'] === 'xlsx') {
                             $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -99,25 +99,27 @@ class ContactSubmissionTable
                             $sheet->setCellValue('B1', 'email');
                             $sheet->setCellValue('C1', 'phone');
                             $sheet->setCellValue('D1', 'country');
-                            $sheet->setCellValue('E1', 'subject');
-                            $sheet->setCellValue('F1', 'message');
-                            $sheet->setCellValue('G1', 'status');
-                            $sheet->setCellValue('H1', 'priority');
-                            $sheet->setCellValue('I1', 'source');
-                            $sheet->setCellValue('J1', 'created_at');
+                            $sheet->setCellValue('E1', 'company');
+                            $sheet->setCellValue('F1', 'subject');
+                            $sheet->setCellValue('G1', 'message');
+                            $sheet->setCellValue('H1', 'status');
+                            $sheet->setCellValue('I1', 'priority');
+                            $sheet->setCellValue('J1', 'source');
+                            $sheet->setCellValue('K1', 'created_at');
 
                             $rowNum = 2;
                             foreach ($rows as $row) {
                                 $sheet->setCellValue('A' . $rowNum, $row->name ?? '');
                                 $sheet->setCellValue('B' . $rowNum, $row->email ?? '');
                                 $sheet->setCellValue('C' . $rowNum, $row->phone ?? '');
-                                $sheet->setCellValue('D' . $rowNum, $row->place ?? '');
-                                $sheet->setCellValue('E' . $rowNum, $row->subject ?? '');
-                                $sheet->setCellValue('F' . $rowNum, $row->message ?? '');
-                                $sheet->setCellValue('G' . $rowNum, $row->status ?? '');
-                                $sheet->setCellValue('H' . $rowNum, $row->priority ?? '');
-                                $sheet->setCellValue('I' . $rowNum, $row->source ?? '');
-                                $sheet->setCellValue('J' . $rowNum, $row->created_at?->format('Y-m-d H:i:s') ?? '');
+                                $sheet->setCellValue('D' . $rowNum, $row->country ?? '');
+                                $sheet->setCellValue('E' . $rowNum, $row->place ?? '');
+                                $sheet->setCellValue('F' . $rowNum, $row->subject ?? '');
+                                $sheet->setCellValue('G' . $rowNum, $row->message ?? '');
+                                $sheet->setCellValue('H' . $rowNum, $row->status ?? '');
+                                $sheet->setCellValue('I' . $rowNum, $row->priority ?? '');
+                                $sheet->setCellValue('J' . $rowNum, $row->source ?? '');
+                                $sheet->setCellValue('K' . $rowNum, $row->created_at?->format('Y-m-d H:i:s') ?? '');
                                 $rowNum++;
                             }
 
@@ -142,6 +144,7 @@ class ContactSubmissionTable
                                 $row->name ?? '',
                                 $row->email ?? '',
                                 $row->phone ?? '',
+                                $row->country ?? '',
                                 $row->place ?? '',
                                 $row->subject ?? '',
                                 $row->message ?? '',
@@ -174,7 +177,7 @@ class ContactSubmissionTable
                     ->icon('heroicon-o-arrow-up-tray')
                     ->modalHeading(__('Import Contact Submissions'))
                     ->modalDescription(new \Illuminate\Support\HtmlString(
-                        'Upload a CSV or Excel file with columns: <strong>name</strong>, <strong>email</strong>, <strong>phone</strong> (optional), <strong>Country</strong> (optional), <strong>subject</strong>, <strong>message</strong>.<br>' .
+                        'Upload a CSV or Excel file with columns: <strong>name</strong>, <strong>email</strong>, <strong>phone</strong> (optional), <strong>country</strong> (optional), <strong>company</strong> (optional), <strong>subject</strong>, <strong>message</strong>.<br>' .
                         '<a href="' . url('templates/contact-submissions.csv') . '" style="color: #059669;" download>Download CSV</a> | <a href="' . url('templates/contact-submissions.xlsx') . '" style="color: #2563eb;" download>Download Excel</a>'
                     ))
                     ->form([
@@ -204,13 +207,13 @@ class ContactSubmissionTable
                         $rows = [];
 
                         if (in_array(strtolower($extension), ['xlsx', 'xls'])) {
-                            $reader = new Xlsx();
+                            $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
                             $spreadsheet = $reader->load($file->getRealPath());
                             $sheet = $spreadsheet->getActiveSheet();
                             $rows = $sheet->toArray(null, true, true, true);
                             array_shift($rows);
                         } else {
-                            $csv = CsvReader::createFromPath($file->getRealPath(), 'r');
+                            $csv = \League\Csv\Reader::createFromPath($file->getRealPath(), 'r');
                             $csv->setHeaderOffset(0);
                             $rows = iterator_to_array($csv);
                         }
@@ -223,14 +226,16 @@ class ContactSubmissionTable
                                 $name = trim($row['A'] ?? '');
                                 $email = trim($row['B'] ?? '');
                                 $phone = trim($row['C'] ?? '');
-                                $place = trim($row['D'] ?? '');
-                                $subject = trim($row['E'] ?? '');
-                                $message = trim($row['F'] ?? '');
+                                $country = trim($row['D'] ?? '');
+                                $place = trim($row['E'] ?? '');
+                                $subject = trim($row['F'] ?? '');
+                                $message = trim($row['G'] ?? '');
                             } else {
                                 $name = trim($row['name'] ?? $row['Name'] ?? '');
                                 $email = trim($row['email'] ?? $row['Email'] ?? '');
                                 $phone = trim($row['phone'] ?? $row['Phone'] ?? '');
-                                $place = trim($row['place'] ?? $row['Place'] ?? '');
+                                $country = trim($row['country'] ?? $row['Country'] ?? '');
+                                $place = trim($row['company'] ?? $row['Company'] ?? $row['place'] ?? $row['Place'] ?? '');
                                 $subject = trim($row['subject'] ?? $row['Subject'] ?? '');
                                 $message = trim($row['message'] ?? $row['Message'] ?? '');
                             }
@@ -249,6 +254,7 @@ class ContactSubmissionTable
                                 'name' => $name,
                                 'email' => $email,
                                 'phone' => $phone,
+                                'country' => $country,
                                 'place' => $place,
                                 'subject' => $subject,
                                 'message' => $message,
@@ -277,8 +283,13 @@ class ContactSubmissionTable
                 TextColumn::make('phone')
                     ->label(__('Phone'))
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('place')
+                TextColumn::make('country')
                     ->label(__('Country'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('place')
+                    ->label(__('Company'))
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('email')
@@ -325,14 +336,24 @@ class ContactSubmissionTable
                     ->placeholder('—')
                     ->getStateUsing(function ($record) {
                         $type = $record->extras['resource_type'] ?? null;
+                        $publicUrl = $record->extras['public_url'] ?? null;
 
-                        if (!$type) {
-                            return null;
+                        if ($publicUrl) {
+                            return __('View Public Page');
                         }
 
-                        return 'View ' . ucfirst(str_replace('_', ' ', $type));
+                        if ($type) {
+                            return 'View ' . ucfirst(str_replace('_', ' ', $type));
+                        }
+
+                        return null;
                     })
                     ->url(function ($record) {
+                        $publicUrl = $record->extras['public_url'] ?? null;
+                        if ($publicUrl) {
+                            return $publicUrl;
+                        }
+
                         $type = $record->extras['resource_type'] ?? null;
                         $id = $record->extras['resource_id'] ?? null;
 

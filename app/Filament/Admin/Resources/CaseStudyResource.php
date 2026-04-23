@@ -25,7 +25,7 @@ class CaseStudyResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Content';
+        return 'Case Studies';
     }
 
     public static function canCreate(): bool

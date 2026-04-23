@@ -14,7 +14,8 @@ class ApiFrontendCaseStudyController extends ApiBaseController
     {
         $perPage = $request->get('per_page', 10);
 
-        $caseStudies = CaseStudy::published()
+        $caseStudies = CaseStudy::with('category')
+            ->published()
             ->orderBy('published_at', 'desc')
             ->paginate($perPage);
 
@@ -26,7 +27,8 @@ class ApiFrontendCaseStudyController extends ApiBaseController
 
     public function show(Request $request, string $slug): JsonResponse
     {
-        $caseStudy = CaseStudy::published()
+        $caseStudy = CaseStudy::with(['category', 'regions'])
+            ->published()
             ->where('slug', $slug)
             ->first();
 

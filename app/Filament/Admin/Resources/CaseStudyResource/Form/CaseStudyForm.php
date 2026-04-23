@@ -58,6 +58,12 @@ class CaseStudyForm
                 ])
                 ->default('draft')
                 ->required(),
+            Select::make('category_id')
+                ->label(__('Category'))
+                ->options(\App\Models\CaseStudyCategory::all()->pluck('name', 'id'))
+                ->searchable()
+                ->preload()
+                ->nullable(),
             Hidden::make('author_id')
                 ->default(fn () => auth()->id()),
             Hidden::make('published_at')

@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Filament\Admin\Resources\CategoryResource\Form;
+namespace App\Filament\Admin\Resources\CaseStudyCategoryResource\Form;
 
 use App\Models\Locale;
+use App\Models\CaseStudyCategory;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Http\UploadedFile;
 use Filament\Forms\Components\Select;
@@ -14,7 +15,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\DB;
 
-class CategoryForm
+class CaseStudyCategoryForm
 {
     public static function form(Schema $schema): Schema
     {
@@ -41,7 +42,7 @@ class CategoryForm
                     Select::make('parent_id')
                         ->label(__('Parent Category'))
                         ->options(function () {
-                            return \App\Models\Category::query()
+                            return CaseStudyCategory::query()
                                 ->where('is_visible', true)
                                 ->orderBy('name')
                                 ->get()
@@ -84,7 +85,7 @@ class CategoryForm
                         ->label(__('Icon'))
                         ->image()
                         ->disk('public')
-                        ->directory('categories/icons')
+                        ->directory('case-study-categories/icons')
                         ->visibility('public')
                         ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
                         ->nullable(),
@@ -93,7 +94,7 @@ class CategoryForm
                         ->image()
                         ->imageEditor()
                         ->disk('public')
-                        ->directory('categories/thumbnails')
+                        ->directory('case-study-categories/thumbnails')
                         ->visibility('public')
                         ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
                         ->nullable(),
@@ -110,7 +111,7 @@ class CategoryForm
 
     protected static function generateUniqueSlug($title, $id = null)
     {
-        $table = 'categories';
+        $table = 'case_study_categories';
         $baseSlug = \Illuminate\Support\Str::slug($title);
         $slug = $baseSlug;
         $counter = 1;

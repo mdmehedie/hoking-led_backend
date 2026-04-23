@@ -508,7 +508,8 @@ trait HasTranslations
 
                     $current[$locale] = $value;
 
-                    return parent::setAttribute($attribute, $current);
+                    parent::setAttribute($attribute, $current);
+                    return $this;
                 }
             }
 
@@ -519,13 +520,15 @@ trait HasTranslations
                     $isLocaleArray = collect($value)->keys()->every(fn ($k) => is_string($k) && strlen($k) <= 10);
 
                     if ($isLocaleArray) {
-                        return parent::setAttribute($key, $value);
+                        parent::setAttribute($key, $value);
+                        return $this;
                     }
                 }
             }
         }
 
-        return parent::setAttribute($key, $value);
+        parent::setAttribute($key, $value);
+        return $this;
     }
 
     /**
