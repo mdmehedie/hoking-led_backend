@@ -1,3 +1,3 @@
-name,email,phone,place,subject,message
-John Doe,john@example.com,+1234567890,New York,Product Inquiry,Interested in your LED products
-Jane Smith,jane@example.com,+0987654321,London,Support Request,Need help with order #12345
+name,email,phone,country,company,subject,message
+John Doe,john@example.com,+1234567890,United States,Example Corp,Product Inquiry,Interested in your LED products
+Jane Smith,jane@example.com,+44987654321,United Kingdom,Tech Ltd,Support Request,Need help with order #12345

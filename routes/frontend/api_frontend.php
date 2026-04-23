@@ -23,7 +23,7 @@ use App\Http\Controllers\Api\V1\ApiFrontendFormController;
 use App\Http\Controllers\Api\V1\ApiFrontendVideoController;
 
 Route::prefix('v1')->group(function () {
-    Route::get('locales', [ApiFrontendLocaleController::class, 'index'])->name('locales.index');
+    Route::get('languages', [ApiFrontendLocaleController::class, 'index'])->name('locales.index');
     Route::get('sliders', [ApiFrontendSliderController::class, 'index'])->name('sliders.index');
 
     Route::get('videos', [ApiFrontendVideoController::class, 'index'])->name('videos.index');

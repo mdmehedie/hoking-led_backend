@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Helpers\CountryHelper;
 use App\Http\Controllers\Api\ApiBaseController;
 use App\Mail\AdminContactNotification;
 use App\Mail\UserContactAutoReply;
@@ -51,17 +52,19 @@ class ApiFrontendContactController extends ApiBaseController
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'nullable|string|max:50',
-            'place' => 'nullable|string|max:255',
+            'country_code' => 'nullable|string|max:10',
+            'place' => 'nullable|string|max:255', // Company Name
             'subject' => 'required|string|max:500',
             'message' => 'required|string|min:10|max:5000',
             'source' => ['nullable', 'string', Rule::in($this->validSources)],
             'extras' => 'nullable|array',
             'extras.resource_type' => ['nullable', 'string', Rule::in($this->validResourceTypes)],
             'extras.resource_id' => 'nullable|integer',
+            'extras.public_url' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
-            return $this->unprocessableResponse(['errors' => $validator->errors()], __('Validation failed'));
+            return $this->unprocessableResponse($validator->errors()->toArray(), __($validator->errors()->first()));
         }
 
         // Block disposable email domains
@@ -69,8 +72,25 @@ class ApiFrontendContactController extends ApiBaseController
         if (in_array($emailDomain, $this->disposableDomains)) {
             return $this->unprocessableResponse(
                 ['email' => __('Disposable email addresses are not allowed')],
-                __('Validation failed')
+                __('Disposable email addresses are not allowed')
             );
+        }
+
+        // Sanitize phone and concatenate with country code
+        $finalPhone = $request->phone;
+        $countryName = null;
+
+        if ($request->filled('country_code')) {
+            $countryCode = $request->country_code;
+            if (!str_starts_with($countryCode, '+')) {
+                $countryCode = '+' . $countryCode;
+            }
+            
+            $cleanPhone = $request->filled('phone') ? preg_replace('/[^0-9]/', '', $request->phone) : '';
+            $finalPhone = $countryCode . $cleanPhone;
+
+            // Detect country from dial code
+            $countryName = CountryHelper::getCountryByDialCode($countryCode);
         }
 
         // Strip HTML from message (prevent XSS)
@@ -79,8 +99,9 @@ class ApiFrontendContactController extends ApiBaseController
         $submission = ContactSubmission::create([
             'name' => $request->name,
             'email' => $request->email,
-            'phone' => $request->phone,
-            'place' => $request->place,
+            'phone' => $finalPhone,
+            'country' => $countryName,
+            'place' => $request->place, // Company name
             'subject' => $request->subject,
             'message' => $cleanMessage,
             'source' => $request->source ?? 'contact_page',

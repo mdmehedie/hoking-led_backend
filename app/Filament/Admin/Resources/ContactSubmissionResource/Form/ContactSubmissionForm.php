@@ -27,8 +27,12 @@ class ContactSubmissionForm
                 ->label(__('Phone'))
                 ->nullable()
                 ->maxLength(50),
+            TextInput::make('country')
+                ->label(__('Country'))
+                ->nullable()
+                ->maxLength(100),
             TextInput::make('place')
-                ->label(__('Place'))
+                ->label(__('Company'))
                 ->nullable()
                 ->maxLength(255),
             TextInput::make('subject')

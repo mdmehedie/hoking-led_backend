@@ -85,7 +85,7 @@ class ProductInquiryTable
                             return;
                         }
 
-                        $columns = ['name', 'email', 'phone', 'country', 'subject', 'message', 'status', 'priority', 'source', 'created_at'];
+                        $columns = ['name', 'email', 'phone', 'country', 'company', 'subject', 'message', 'status', 'priority', 'source', 'created_at'];
 
                         if ($data['format'] === 'xlsx') {
                             $spreadsheet = new Spreadsheet();
@@ -95,30 +95,32 @@ class ProductInquiryTable
                             $sheet->setCellValue('B1', 'email');
                             $sheet->setCellValue('C1', 'phone');
                             $sheet->setCellValue('D1', 'country');
-                            $sheet->setCellValue('E1', 'subject');
-                            $sheet->setCellValue('F1', 'message');
-                            $sheet->setCellValue('G1', 'status');
-                            $sheet->setCellValue('H1', 'priority');
-                            $sheet->setCellValue('I1', 'source');
-                            $sheet->setCellValue('J1', 'created_at');
+                            $sheet->setCellValue('E1', 'company');
+                            $sheet->setCellValue('F1', 'subject');
+                            $sheet->setCellValue('G1', 'message');
+                            $sheet->setCellValue('H1', 'status');
+                            $sheet->setCellValue('I1', 'priority');
+                            $sheet->setCellValue('J1', 'source');
+                            $sheet->setCellValue('K1', 'created_at');
 
                             $rowNum = 2;
                             foreach ($rows as $row) {
                                 $sheet->setCellValue('A' . $rowNum, $row->name ?? '');
                                 $sheet->setCellValue('B' . $rowNum, $row->email ?? '');
                                 $sheet->setCellValue('C' . $rowNum, $row->phone ?? '');
-                                $sheet->setCellValue('D' . $rowNum, $row->place ?? '');
-                                $sheet->setCellValue('E' . $rowNum, $row->subject ?? '');
-                                $sheet->setCellValue('F' . $rowNum, $row->message ?? '');
-                                $sheet->setCellValue('G' . $rowNum, $row->status ?? '');
-                                $sheet->setCellValue('H' . $rowNum, $row->priority ?? '');
-                                $sheet->setCellValue('I' . $rowNum, $row->source ?? '');
-                                $sheet->setCellValue('J' . $rowNum, $row->created_at?->format('Y-m-d H:i:s') ?? '');
+                                $sheet->setCellValue('D' . $rowNum, $row->country ?? '');
+                                $sheet->setCellValue('E' . $rowNum, $row->place ?? '');
+                                $sheet->setCellValue('F' . $rowNum, $row->subject ?? '');
+                                $sheet->setCellValue('G' . $rowNum, $row->message ?? '');
+                                $sheet->setCellValue('H' . $rowNum, $row->status ?? '');
+                                $sheet->setCellValue('I' . $rowNum, $row->priority ?? '');
+                                $sheet->setCellValue('J' . $rowNum, $row->source ?? '');
+                                $sheet->setCellValue('K' . $rowNum, $row->created_at?->format('Y-m-d H:i:s') ?? '');
                                 $rowNum++;
                             }
 
                             $writer = new Xlsx($spreadsheet);
-                            $fileName = 'contacts_' . now()->format('Y-m-d_His') . '.xlsx';
+                            $fileName = 'product_inquiry_' . now()->format('Y-m-d_His') . '.xlsx';
                             $tempPath = storage_path('app/temp/' . $fileName);
 
                             if (!file_exists(dirname($tempPath))) {
@@ -138,6 +140,7 @@ class ProductInquiryTable
                                 $row->name ?? '',
                                 $row->email ?? '',
                                 $row->phone ?? '',
+                                $row->country ?? '',
                                 $row->place ?? '',
                                 $row->subject ?? '',
                                 $row->message ?? '',
@@ -174,8 +177,13 @@ class ProductInquiryTable
                 TextColumn::make('phone')
                     ->label(__('Phone'))
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('country')
+                    ->label(__('Country'))
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('place')
-                    ->label(__('Place'))
+                    ->label(__('Company'))
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('email')
@@ -222,14 +230,24 @@ class ProductInquiryTable
                     ->placeholder('—')
                     ->getStateUsing(function ($record) {
                         $type = $record->extras['resource_type'] ?? null;
+                        $publicUrl = $record->extras['public_url'] ?? null;
 
-                        if (!$type) {
-                            return null;
+                        if ($publicUrl) {
+                            return __('View Public Page');
                         }
 
-                        return 'View ' . ucfirst(str_replace('_', ' ', $type));
+                        if ($type) {
+                            return 'View ' . ucfirst(str_replace('_', ' ', $type));
+                        }
+
+                        return null;
                     })
                     ->url(function ($record) {
+                        $publicUrl = $record->extras['public_url'] ?? null;
+                        if ($publicUrl) {
+                            return $publicUrl;
+                        }
+
                         $type = $record->extras['resource_type'] ?? null;
                         $id = $record->extras['resource_id'] ?? null;
 

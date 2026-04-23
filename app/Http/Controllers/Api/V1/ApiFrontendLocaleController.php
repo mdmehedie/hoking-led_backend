@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiBaseController;
+use App\Http\Resources\LocaleResource;
 use App\Models\Locale;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,10 +16,10 @@ class ApiFrontendLocaleController extends ApiBaseController
             ->where('is_active', true)
             ->orderByDesc('is_default')
             ->orderBy('code')
-            ->get(['code', 'name', 'direction', 'is_default', 'flag_path']);
+            ->get();
 
         return $this->okResponse([
-            'locales' => $locales,
+            'locales' => LocaleResource::collection($locales),
         ], __('Locales retrieved successfully'));
     }
 }
