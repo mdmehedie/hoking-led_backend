@@ -25,6 +25,10 @@ class CaseStudyTable
                     ->label(__('Title'))
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('category.name')
+                    ->label(__('Category'))
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('status')
                     ->label(__('Status'))
                     ->badge()
@@ -42,6 +46,9 @@ class CaseStudyTable
                         'review' => __('Review'),
                         'published' => __('Published'),
                     ]),
+                SelectFilter::make('category_id')
+                    ->label(__('Category'))
+                    ->relationship('category', 'name'),
             ])
             ->actions([
                 Action::make('edit')

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\ApiFrontendSliderController;
 use App\Http\Controllers\Api\V1\ApiFrontendBlogController;
 use App\Http\Controllers\Api\V1\ApiFrontendCaseStudyController;
+use App\Http\Controllers\Api\V1\ApiFrontendCaseStudyCategoryController;
 use App\Http\Controllers\Api\V1\ApiFrontendProductController;
 use App\Http\Controllers\Api\V1\ApiFrontendCategoryController;
 use App\Http\Controllers\Api\V1\ApiFrontendNewsController;
@@ -34,6 +35,9 @@ Route::prefix('v1')->group(function () {
 
     Route::get('case-studies', [ApiFrontendCaseStudyController::class, 'index'])->name('case-studies.index');
     Route::get('case-studies/{slug}', [ApiFrontendCaseStudyController::class, 'show'])->name('case-studies.show');
+
+    Route::get('case-study-categories', [ApiFrontendCaseStudyCategoryController::class, 'index'])->name('case-study-categories.index');
+    Route::get('case-study-categories/{slug}', [ApiFrontendCaseStudyCategoryController::class, 'show'])->name('case-study-categories.show');
 
     Route::get('products', [ApiFrontendProductController::class, 'index'])->name('products.index');
     Route::get('products/{slug}', [ApiFrontendProductController::class, 'show'])->name('products.show');

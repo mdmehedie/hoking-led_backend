@@ -23,6 +23,7 @@ class CaseStudy extends Model
     ];
 
     protected $fillable = [
+        'category_id',
         'title',
         'slug',
         'excerpt',
@@ -64,6 +65,11 @@ class CaseStudy extends Model
                 $caseStudy->slug = Str::slug($caseStudy->title);
             }
         });
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(CaseStudyCategory::class, 'category_id');
     }
 
     public function author(): BelongsTo
