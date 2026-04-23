@@ -23,17 +23,7 @@ class ContentUrlHelper
             $src = $matches[2];
             $after = $matches[3];
             
-            // Convert relative URLs to absolute
-            if (!preg_match('/^(https?:\/\/|\/\/|data:)/i', $src)) {
-                // If path starts with '/storage/' or 'storage/', just make it absolute
-                if (preg_match('#^/?storage/#i', $src)) {
-                    $src = url($src);
-                } else {
-                    // Otherwise use Storage disk to generate URL
-                    $src = ltrim($src, '/');
-                    $src = url(Storage::disk($disk)->url($src));
-                }
-            }
+            $src = self::convertSingleUrlToAbsolute($src, $disk);
             
             return '<img' . $before . ' src="' . $src . '"' . $after . '>';
         }, $content);
@@ -55,11 +45,7 @@ class ContentUrlHelper
             $attribute = $matches[1];
             $url = $matches[2];
 
-            // Convert relative URLs to absolute
-            if (!preg_match('/^(https?:\/\/|\/\/|#|mailto:|tel:|javascript:|data:)/i', $url)) {
-                $url = ltrim($url, '/');
-                $url = url(Storage::disk($disk)->url($url));
-            }
+            $url = self::convertSingleUrlToAbsolute($url, $disk);
 
             return $attribute . '="' . $url . '"';
         }, $content);
@@ -85,11 +71,19 @@ class ContentUrlHelper
      */
     public static function convertSingleUrlToAbsolute(string $url, string $disk = 'public'): string
     {
-        if (self::isRelativeUrl($url)) {
-            $url = ltrim($url, '/');
-            return url(Storage::disk($disk)->url($url));
+        if (!self::isRelativeUrl($url)) {
+            return $url;
         }
 
-        return $url;
+        // If it starts with /storage/ or storage/, we need to handle it carefully to avoid double storage prefix
+        if (preg_match('#^/?storage/(.*)#i', $url, $matches)) {
+            $innerPath = $matches[1];
+            // $innerPath is what's AFTER 'storage/'
+            return url(Storage::disk($disk)->url($innerPath));
+        }
+
+        // Otherwise, it's a direct relative path (e.g., 'images/logo.png')
+        $url = ltrim($url, '/');
+        return url(Storage::disk($disk)->url($url));
     }
 }
