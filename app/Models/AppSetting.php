@@ -81,9 +81,20 @@ class AppSetting extends Model
         'redis_client',
         // International SEO settings
         'default_region',
+        // Email settings
+        'contact_internal_enabled',
+        'contact_internal_recipients',
+        'contact_internal_subject',
+        'contact_internal_template',
+        'contact_external_enabled',
+        'contact_external_subject',
+        'contact_external_template',
     ];
 
     protected $casts = [
         'organization' => 'array',
+        'contact_internal_recipients' => 'array',
+        'contact_internal_enabled' => 'boolean',
+        'contact_external_enabled' => 'boolean',
     ];
 }

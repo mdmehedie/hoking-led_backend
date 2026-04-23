@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Events\ContactSubmitted;
 use App\Helpers\CountryHelper;
 use App\Http\Controllers\Api\ApiBaseController;
 use App\Mail\AdminContactNotification;
@@ -85,7 +86,7 @@ class ApiFrontendContactController extends ApiBaseController
             if (!str_starts_with($countryCode, '+')) {
                 $countryCode = '+' . $countryCode;
             }
-            
+
             $cleanPhone = $request->filled('phone') ? preg_replace('/[^0-9]/', '', $request->phone) : '';
             $finalPhone = $countryCode . $cleanPhone;
 
@@ -112,17 +113,8 @@ class ApiFrontendContactController extends ApiBaseController
             'auto_delete_at' => now()->addMonths(12),
         ]);
 
-        // Send email notifications (queued) - only if mail server is configured
-        $adminEmail = config('mail.from.address');
-        $mailHost = config('mail.mailers.' . config('mail.default') . '.host');
-        if ($adminEmail && $mailHost && $mailHost !== '127.0.0.1') {
-            try {
-                Mail::to($adminEmail)->queue(new AdminContactNotification($submission));
-                Mail::to($submission->email)->queue(new UserContactAutoReply($submission));
-            } catch (\Exception $e) {
-                \Log::warning('Failed to queue contact form emails: ' . $e->getMessage());
-            }
-        }
+        // Dispatch notification event
+        ContactSubmitted::dispatch($submission);
 
         return $this->createdResponse(
             ['submission' => ['id' => $submission->id]],
