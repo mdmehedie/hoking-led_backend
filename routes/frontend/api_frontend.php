@@ -22,10 +22,12 @@ use App\Http\Controllers\Api\V1\ApiFrontendLocaleController;
 use App\Http\Controllers\Api\V1\ApiFrontendConversationController;
 use App\Http\Controllers\Api\V1\ApiFrontendFormController;
 use App\Http\Controllers\Api\V1\ApiFrontendVideoController;
+use App\Http\Controllers\Api\V1\ApiFrontendSearchController;
 
 Route::prefix('v1')->group(function () {
     Route::get('languages', [ApiFrontendLocaleController::class, 'index'])->name('locales.index');
     Route::get('sliders', [ApiFrontendSliderController::class, 'index'])->name('sliders.index');
+    Route::get('search', [ApiFrontendSearchController::class, 'search'])->name('search');
 
     Route::get('videos', [ApiFrontendVideoController::class, 'index'])->name('videos.index');
     Route::get('videos/{slug}', [ApiFrontendVideoController::class, 'show'])->name('videos.show');
