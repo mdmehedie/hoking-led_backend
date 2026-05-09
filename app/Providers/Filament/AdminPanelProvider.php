@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\HtmlString;
 use App\Models\Locale;
 use App\Http\Middleware\SetLocale;
+use App\Filament\Admin\Pages\EditProfile;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -50,6 +51,7 @@ class AdminPanelProvider extends PanelProvider
                 }
             })
             ->login()
+            ->profile(EditProfile::class)
             ->colors([
                 'primary' => Color::Amber,
             ])

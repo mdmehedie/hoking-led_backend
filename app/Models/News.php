@@ -18,7 +18,6 @@ class News extends Model
         'title',
         'excerpt',
         'content',
-        'image_path',
     ];
 
     protected $fillable = [

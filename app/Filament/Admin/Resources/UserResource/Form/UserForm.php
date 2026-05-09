@@ -23,13 +23,15 @@ class UserForm
                         ->unique(ignoreRecord: true),
                     TextInput::make('password')
                         ->password()
-                        ->required()
-                        ->hiddenOn('edit'),
+                        ->required(fn (string $operation): bool => $operation === 'create')
+                        ->dehydrated(fn (?string $state) => filled($state))
+                        ->label(__('Password')),
                     TextInput::make('password_confirmation')
                         ->password()
-                        ->required()
-                        ->hiddenOn('edit')
-                        ->same('password'),
+                        ->required(fn (string $operation): bool => $operation === 'create')
+                        ->dehydrated(fn (?string $state) => filled($state))
+                        ->same('password')
+                        ->label(__('Confirm Password')),
                 ]),
                 Tab::make(__('Roles & Permissions'))->schema([
                     Select::make('roles')
