@@ -55,7 +55,7 @@ class ApiFrontendContactController extends ApiBaseController
             'phone' => 'nullable|string|max:50',
             'country_code' => 'nullable|string|max:10',
             'place' => 'nullable|string|max:255', // Company Name
-            'subject' => 'required|string|max:500',
+            'subject' => 'nullable|string|max:500',
             'message' => 'required|string|min:10|max:5000',
             'source' => ['nullable', 'string', Rule::in($this->validSources)],
             'extras' => 'nullable|array',
