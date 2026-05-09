@@ -39,6 +39,7 @@ class ApiFrontendSearchController extends ApiBaseController
                 'title_attr' => 'title',
                 'excerpt_attr' => 'short_description',
                 'image_attr' => 'main_image',
+                'with' => ['category'],
             ],
             'blog' => [
                 'model' => Blog::class,
@@ -57,6 +58,7 @@ class ApiFrontendSearchController extends ApiBaseController
                 'title_attr' => 'title',
                 'excerpt_attr' => 'excerpt',
                 'image_attr' => 'image_path',
+                'with' => ['category'],
             ],
             'page' => [
                 'model' => Page::class,
@@ -74,7 +76,13 @@ class ApiFrontendSearchController extends ApiBaseController
         }
 
         foreach ($configsToSearch as $key => $config) {
-            $items = $config['model']::published()
+            $queryBuilder = $config['model']::published();
+
+            if (isset($config['with'])) {
+                $queryBuilder->with($config['with']);
+            }
+
+            $items = $queryBuilder
                 ->where(function (Builder $q) use ($query, $config) {
                     $q->where($config['title_attr'], 'like', "%{$query}%")
                         ->orWhere($config['excerpt_attr'], 'like', "%{$query}%")
@@ -87,12 +95,22 @@ class ApiFrontendSearchController extends ApiBaseController
                 ->get();
 
             foreach ($items as $item) {
+                $categoryName = null;
+                $categorySlug = null;
+
+                if (isset($item->category)) {
+                    $categoryName = $item->category->name;
+                    $categorySlug = $item->category->slug;
+                }
+
                 $results->push([
                     'type' => $key,
                     'title' => $item->{$config['title_attr']},
                     'slug' => $item->slug,
                     'excerpt' => $item->{$config['excerpt_attr']},
                     'image' => $item->{$config['image_attr']} ? Storage::disk('public')->url($item->{$config['image_attr']}) : null,
+                    'category_name' => $categoryName,
+                    'category_slug' => $categorySlug,
                     'published_at' => $item->published_at,
                 ]);
             }

@@ -18,7 +18,6 @@ class Blog extends Model
         'title',
         'excerpt',
         'content',
-        'image_path',
     ];
 
     protected $fillable = [
