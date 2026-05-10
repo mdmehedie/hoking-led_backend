@@ -28,6 +28,8 @@ class SocialMediaSettings extends Page implements \Filament\Tables\Contracts\Has
 
     protected static ?string $navigationLabel = 'Social Media';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function getNavigationLabel(): string
     {
         return __('Social Media');

@@ -4,28 +4,13 @@ namespace App\Models;
 
 use App\Traits\HasMedia;
 use App\Traits\HasSeo;
-use App\Traits\HasTranslations;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
 {
-    use HasTranslations, HasMedia, HasSeo;
-
-    // ─── Properties ───────────────────────────────────────────
-
-    protected $translatable = [
-        'title',
-        'short_description',
-        'detailed_description',
-        'meta_title',
-        'meta_description',
-        'meta_keywords',
-        'features',
-        'video_embeds',
-    ];
+    use HasMedia, HasSeo;
 
     protected $fillable = [
         'title',
@@ -53,18 +38,11 @@ class Product extends Model
         'downloads',
     ];
 
-    /**
-     * Keys inside translatable fields that contain media files.
-     * Uses dotted notation: {attribute}.*.{key} for repeater-like structures.
-     */
-    protected array $translatableMediaKeys = [
-        'detailed_description.*.image',
-        'video_embeds.*.video_file',
-    ];
-
     protected $casts = [
         'technical_specs' => 'array',
         'video_embeds' => 'array',
+        'detailed_description' => 'array',
+        'features' => 'array',
         'gallery' => 'array',
         'downloads' => 'array',
         'tags' => 'array',

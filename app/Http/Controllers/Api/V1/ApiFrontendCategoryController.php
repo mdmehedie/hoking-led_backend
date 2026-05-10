@@ -24,7 +24,7 @@ class ApiFrontendCategoryController extends ApiBaseController
     {
         $slug = $request->route('slug');
         
-        $category = Category::with(['parent', 'children', 'translations'])
+        $category = Category::with(['parent', 'children'])
             ->where('slug', $slug)
             ->where('is_visible', true)
             ->first();

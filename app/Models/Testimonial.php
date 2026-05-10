@@ -3,21 +3,13 @@
 namespace App\Models;
 
 use App\Traits\HasMedia;
-use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 class Testimonial extends Model
 {
-    use HasFactory, HasTranslations, HasMedia;
-
-    protected $translatable = [
-        'client_name',
-        'client_position',
-        'client_company',
-        'testimonial',
-    ];
+    use HasFactory, HasMedia;
 
     protected $fillable = [
         'client_name',

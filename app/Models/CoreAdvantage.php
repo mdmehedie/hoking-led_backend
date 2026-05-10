@@ -3,21 +3,14 @@
 namespace App\Models;
 
 use App\Traits\HasMedia;
-use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 
 class CoreAdvantage extends Model
 {
-    use HasFactory, HasTranslations, HasMedia;
+    use HasFactory, HasMedia;
 
     protected $table = 'core_advantages';
-
-    protected $translatable = [
-        'title',
-        'description',
-    ];
 
     protected $fillable = [
         'title',

@@ -29,14 +29,6 @@ trait HasMedia
     protected function handleMediaCleanup(): void
     {
         foreach ($this->getMediaAttributes() as $attribute) {
-            // Skip translatable attributes — handled by HasTranslations trait
-            if (property_exists($this, 'translatable')
-                && is_array($this->translatable)
-                && in_array($attribute, $this->translatable)
-            ) {
-                continue;
-            }
-
             // Dotted notation support: 'slider_data.background_image'
             if (str_contains($attribute, '.')) {
                 [$root, $key] = explode('.', $attribute, 2);

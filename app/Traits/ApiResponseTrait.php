@@ -33,7 +33,6 @@ trait ApiResponseTrait
             'message' => $message,
             'data' => $data,
             'locale' => app()->getLocale(),
-            'translations' => $this->getCommonTranslations(),
         ], $statusCode);
     }
 

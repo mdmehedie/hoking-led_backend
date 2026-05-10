@@ -12,7 +12,6 @@ class ApiFrontendSliderController extends ApiBaseController
     public function index(): JsonResponse
     {
         $sliders = Slider::where('status', true)
-            ->with(['translations'])
             ->orderBy('sort_order')
             ->get();
 

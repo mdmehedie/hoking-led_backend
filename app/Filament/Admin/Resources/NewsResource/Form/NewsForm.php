@@ -2,11 +2,11 @@
 
 namespace App\Filament\Admin\Resources\NewsResource\Form;
 
-use App\Models\Locale;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use App\Filament\Forms\Components\TinyEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -22,17 +22,27 @@ class NewsForm
     {
         return $schema->schema([
             Tabs::make('News Tabs')->tabs([
-                Tab::make(__('General Information'))->schema(self::generalSchema()),
-                Tab::make(__('Translations'))->schema(self::translationTabsSchema()),
-                Tab::make(__('Media'))->schema(self::mediaSchema()),
+                Tab::make(__('News Content'))->schema(self::contentSchema()),
                 Tab::make(__('SEO'))->schema(self::seoSchema()),
             ])->columnSpanFull(),
         ]);
     }
 
-    private static function generalSchema(): array
+    private static function contentSchema(): array
     {
+        $keepOriginal = fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName();
+
         return [
+            TextInput::make('title')
+                ->label(__('Title'))
+                ->required()
+                ->maxLength(255)
+                ->live(debounce: 300)
+                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                    if (blank($get('slug'))) {
+                        $set('slug', static::generateUniqueSlug($state, null));
+                    }
+                }),
             TextInput::make('slug')
                 ->label(__('Slug'))
                 ->unique(ignoreRecord: true)
@@ -59,56 +69,6 @@ class NewsForm
             Toggle::make('is_popular')
                 ->label(__('Is Popular'))
                 ->default(false),
-            Hidden::make('author_id')
-                ->default(fn () => auth()->id()),
-            Hidden::make('published_at')
-                ->default(fn () => now()),
-        ];
-    }
-
-    private static function translationTabsSchema(): array
-    {
-        $activeLocales = Locale::activeCodes();
-        $defaultLocale = Locale::defaultCode();
-
-        return [
-            Tabs::make('Language Tabs')->tabs(
-                collect($activeLocales)->map(fn (string $locale) => self::localeTabSchema($locale, $locale === $defaultLocale))->all()
-            ),
-        ];
-    }
-
-    private static function localeTabSchema(string $locale, bool $isDefault): Tab
-    {
-        return Tab::make(strtoupper($locale))
-            ->schema([
-                TextInput::make("title.{$locale}")
-                    ->label(__('Title'))
-                    ->required($isDefault)
-                    ->maxLength(255)
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
-                        if ($isDefault && blank($get('slug'))) {
-                            $set('slug', static::generateUniqueSlug($state, null));
-                        }
-                    })
-                    ->live()
-                    ->required($isDefault),
-                Textarea::make("excerpt.{$locale}")
-                    ->label(__('Excerpt'))
-                    ->maxLength(500)
-                    ->columnSpanFull(),
-                TinyEditor::make("content.{$locale}")
-                    ->label(__('Content'))
-                    ->required($isDefault)
-                    ->columnSpanFull(),
-            ])->columns(1);
-    }
-
-    private static function mediaSchema(): array
-    {
-        $keepOriginal = fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName();
-
-        return [
             FileUpload::make('image_path')
                 ->label(__('Featured Image'))
                 ->image()
@@ -118,6 +78,18 @@ class NewsForm
                 ->getUploadedFileNameForStorageUsing($keepOriginal)
                 ->imageEditor()
                 ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+            Textarea::make('excerpt')
+                ->label(__('Excerpt'))
+                ->maxLength(500)
+                ->columnSpanFull(),
+            TinyEditor::make('content')
+                ->label(__('Content'))
+                ->required()
+                ->columnSpanFull(),
+            Hidden::make('author_id')
+                ->default(fn () => auth()->id()),
+            Hidden::make('published_at')
+                ->default(fn () => now()),
         ];
     }
 
@@ -130,7 +102,8 @@ class NewsForm
             Textarea::make('meta_description')
                 ->label(__('Meta Description'))
                 ->maxLength(500),
-            Textarea::make('meta_keywords')
+            TagsInput::make('meta_keywords')
+                ->separator(',')
                 ->label(__('Meta Keywords')),
             TextInput::make('canonical_url')
                 ->label(__('Canonical URL'))

@@ -3,7 +3,6 @@
 namespace App\Filament\Admin\Resources\ProductResource\Form;
 
 use App\Filament\Forms\Components\TableBuilder;
-use App\Models\Locale;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -26,7 +25,7 @@ class ProductForm
         return $schema->schema([
             Tabs::make('Product Tabs')->tabs([
                 Tab::make(__('General Information'))->schema(self::generalSchema()),
-                Tab::make(__('Translations'))->schema(self::translationTabsSchema()),
+                Tab::make(__('Product Details'))->schema(self::productDetailsSchema()),
                 Tab::make(__('Media'))->schema(self::mediaSchema()),
                 Tab::make(__('Technical Specifications'))->schema(self::techSpecsSchema()),
                 Tab::make(__('Tags & Relations'))->schema(self::tagsSchema()),
@@ -38,20 +37,6 @@ class ProductForm
     private static function generalSchema(): array
     {
         return [
-            TextInput::make('slug')
-                ->label(__('Slug'))
-                ->unique(ignoreRecord: true)
-                ->required()
-                ->regex('/^[a-z0-9-]+$/')
-                ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
-                ->live(debounce: 300)
-                ->afterStateUpdated(function ($state, callable $set) {
-                    $slug = strtolower(str_replace(' ', '-', $state));
-                    $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
-                    $slug = preg_replace('/-+/', '-', $slug);
-                    $slug = trim($slug, '-');
-                    $set('slug', $slug);
-                }),
             Select::make('category_id')
                 ->relationship('category', 'name')
                 ->label(__('Category'))
@@ -70,53 +55,52 @@ class ProductForm
                 ])
                 ->required(),
             Hidden::make('published_at')->default(now()),
-            Toggle::make('is_featured')->label(__('Featured Product')),
+//            Toggle::make('is_featured')->label(__('Featured Product')),
             Toggle::make('is_top')->label(__('Top Product')),
         ];
     }
 
-    private static function translationTabsSchema(): array
+    private static function productDetailsSchema(): array
     {
-        $activeLocales = Locale::activeCodes();
-        $defaultLocale = Locale::defaultCode();
-
         return [
-            Tabs::make('Language Tabs')->tabs(
-                collect($activeLocales)->map(fn (string $locale) => self::localeTabSchema($locale, $locale === $defaultLocale))->all()
-            ),
+            TextInput::make('title')
+                ->label(__('Title'))
+                ->live()
+                ->required()
+                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                    if (blank($get('slug'))) {
+                        $set('slug', static::generateUniqueSlug($state, null));
+                    }
+                }),
+            TextInput::make('slug')
+                ->label(__('Slug'))
+                ->unique(ignoreRecord: true)
+                ->required()
+                ->regex('/^[a-z0-9-]+$/')
+                ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
+                ->live(debounce: 300)
+                ->afterStateUpdated(function ($state, callable $set) {
+                    $slug = strtolower(str_replace(' ', '-', $state));
+                    $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
+                    $slug = preg_replace('/-+/', '-', $slug);
+                    $slug = trim($slug, '-');
+                    $set('slug', $slug);
+                }),
+            Textarea::make('short_description')
+                ->label(__('Short Description')),
+            self::detailedDescriptionRepeater(),
+            self::featuresRepeater(),
+            self::videoEmbedsRepeater(),
         ];
     }
 
-    private static function localeTabSchema(string $locale, bool $isDefault): Tab
+    private static function detailedDescriptionRepeater(): Repeater
     {
-        return Tab::make(strtoupper($locale))
-            ->schema([
-                TextInput::make("title.{$locale}")
-                    ->label(__('Title'))
-                    ->live()
-                    ->required($isDefault)
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
-                        if (!$isDefault || blank($get('slug'))) {
-                            return;
-                        }
-                        $set('slug', static::generateUniqueSlug($state, null));
-                    }),
-                Textarea::make("short_description.{$locale}")
-                    ->label(__('Short Description')),
-                self::detailedDescriptionRepeater($locale, $isDefault),
-                self::featuresRepeater($locale, $isDefault),
-                self::videoEmbedsRepeater($locale, $isDefault),
-            ])->columns(1);
-    }
-
-    private static function detailedDescriptionRepeater(string $locale, bool $isDefault): Repeater
-    {
-        return Repeater::make("detailed_description.{$locale}")
+        return Repeater::make('detailed_description')
             ->label(__('Detailed Description'))
             ->schema([
                 TextInput::make('title')
                     ->label(__('Title'))
-                    ->required($isDefault)
                     ->maxLength(255)
                     ->columnSpanFull(),
                 Textarea::make('description')
@@ -129,8 +113,7 @@ class ProductForm
                     ->disk('public')
                     ->directory('products/descriptions')
                     ->visibility('public')
-                    ->required($isDefault)
-                    ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . "_{$locale}_" . $file->getClientOriginalName())
+                    ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
                     ->columnSpanFull(),
             ])
             ->columns(1)
@@ -139,14 +122,13 @@ class ProductForm
             ->columnSpanFull();
     }
 
-    private static function featuresRepeater(string $locale, bool $isDefault): Repeater
+    private static function featuresRepeater(): Repeater
     {
-        return Repeater::make("features.{$locale}")
+        return Repeater::make('features')
             ->label(__('Key Features'))
             ->schema([
                 TextInput::make('feature')
                     ->label(__('Feature'))
-                    ->required($isDefault)
                     ->maxLength(255)
                     ->placeholder(__('Add a feature')),
             ])
@@ -157,9 +139,9 @@ class ProductForm
             ->dehydrateStateUsing(fn ($state) => static::dehydrateFeaturesState($state));
     }
 
-    private static function videoEmbedsRepeater(string $locale, bool $isDefault): Repeater
+    private static function videoEmbedsRepeater(): Repeater
     {
-        return Repeater::make("video_embeds.{$locale}")
+        return Repeater::make('video_embeds')
             ->label(__('Video Embeds'))
             ->schema([
                 Select::make('type')
@@ -170,7 +152,7 @@ class ProductForm
                     ])
                     ->default('embed')
                     ->live()
-                    ->required($isDefault),
+                    ->required(),
                 TextInput::make('title')
                     ->label(__('Title'))
                     ->hidden(fn ($state, callable $get) => $get('type') === 'file'),
@@ -185,7 +167,7 @@ class ProductForm
                     ->directory('products/videos')
                     ->visibility('public')
                     ->hidden(fn ($state, callable $get) => $get('type') === 'embed')
-                    ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . "_{$locale}_" . $file->getClientOriginalName()),
+                    ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName()),
             ])
             ->collapsible()
             ->columnSpanFull();
@@ -256,7 +238,8 @@ class ProductForm
                 ->label(__('Meta Title')),
             Textarea::make('meta_description')
                 ->label(__('Meta Description')),
-            Textarea::make('meta_keywords')
+            TagsInput::make('meta_keywords')
+                ->separator(',')
                 ->label(__('Meta Keywords')),
             TextInput::make('canonical_url')
                 ->label(__('Canonical URL')),

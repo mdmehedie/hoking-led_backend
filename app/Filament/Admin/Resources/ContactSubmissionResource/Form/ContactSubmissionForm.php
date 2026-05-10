@@ -17,33 +17,40 @@ class ContactSubmissionForm
             TextInput::make('name')
                 ->label(__('Name'))
                 ->required()
-                ->maxLength(255),
+                ->maxLength(255)
+                ->disabled(),
             TextInput::make('email')
                 ->label(__('Email'))
                 ->email()
                 ->required()
-                ->maxLength(255),
+                ->maxLength(255)
+                ->disabled(),
             TextInput::make('phone')
                 ->label(__('Phone'))
                 ->nullable()
-                ->maxLength(50),
+                ->maxLength(50)
+                ->disabled(),
             TextInput::make('country')
                 ->label(__('Country'))
                 ->nullable()
-                ->maxLength(100),
+                ->maxLength(100)
+                ->disabled(),
             TextInput::make('place')
                 ->label(__('Company'))
                 ->nullable()
-                ->maxLength(255),
+                ->maxLength(255)
+                ->disabled(),
             TextInput::make('subject')
                 ->label(__('Subject'))
                 ->required()
-                ->maxLength(500),
+                ->maxLength(500)
+                ->disabled(),
             Textarea::make('message')
                 ->label(__('Message'))
                 ->required()
                 ->rows(6)
-                ->columnSpanFull(),
+                ->columnSpanFull()
+                ->disabled(),
             Select::make('status')
                 ->label(__('Status'))
                 ->options([
@@ -77,7 +84,7 @@ class ContactSubmissionForm
                     'quote_request' => __('Quote Request'),
                     'api' => __('API'),
                 ])
-                ->required(),
+                ->nullable(),
             Textarea::make('admin_notes')
                 ->label(__('Admin Notes'))
                 ->nullable()

@@ -8,17 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 use App\Traits\HasMedia;
 use App\Traits\HasSeo;
-use App\Traits\HasTranslations;
 
 class Page extends Model
 {
-    use HasMedia, HasSeo, HasTranslations;
-
-    protected array $translatable = [
-        'title',
-        'excerpt',
-        'content',
-    ];
+    use HasMedia, HasSeo;
 
     protected $fillable = [
         'title',
@@ -40,44 +33,9 @@ class Page extends Model
         'image_path',
     ];
 
-    /**
-     * Get translatable media keys dynamically based on slug.
-     */
-    public function getTranslatableMediaKeys(): array
-    {
-        return match ($this->slug) {
-            'company' => [
-                'content.*.hero_bg',
-                'content.*.hero_video',
-                'content.*.banner',
-                'content.*.our_factory.image_1',
-                'content.*.our_factory.image_2',
-                'content.*.our_factory.image_3',
-                'content.*.bottom_image',
-            ],
-            'about-us' => [
-                'content.*.image_1',
-                'content.*.image_2',
-                'content.*.mission_vision_image',
-                'content.*.mission.icon',
-                'content.*.vision.icon',
-            ],
-            'after-sale-service' => [
-                'content.*.hero_bg',
-                'content.*.services.*.icon',
-            ],
-            'contact' => [
-                'content.*.background',
-                'content.*.contacts.*.icon',
-            ],
-            default => [
-                'content.*.image',
-            ],
-        };
-    }
-
     protected $casts = [
         'published_at' => 'datetime',
+        'content' => 'array',
     ];
 
     protected static function boot()

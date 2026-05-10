@@ -13,12 +13,12 @@ class AuthorTable
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('bio')
+                TextColumn::make('bio')
                     ->limit(50),
-                Tables\Columns\ImageColumn::make('avatar'),
-                Tables\Columns\TextColumn::make('created_at')
+                ImageColumn::make('avatar')->disk('public'),
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),
             ])

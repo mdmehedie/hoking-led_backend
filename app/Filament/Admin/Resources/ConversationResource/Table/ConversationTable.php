@@ -8,17 +8,21 @@ use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
+use Filament\Support\Enums\Alignment;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\HtmlString;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -169,17 +173,16 @@ class ConversationTable
                     ->searchable()
                     ->copyable()
                     ->copyMessage(__('Email copied')),
-                TextColumn::make('phone')
-                    ->label(__('Phone'))
-                    ->searchable()
+                TextColumn::make('last_visitor_message_at')
+                    ->label(__('Last Visitor Message'))
+                    ->dateTime('M j, Y g:i A')
+                    ->sortable()
                     ->toggleable(),
-                TextColumn::make('country')
-                    ->label(__('Country'))
-                    ->searchable()
-                    ->toggleable(),
-                TextColumn::make('company_name')
-                    ->label(__('Company'))
-                    ->searchable()
+                TextColumn::make('last_sender')
+                    ->label(__('Last From'))
+                    ->badge()
+                    ->color(fn (string $state): string => $state === 'visitor' ? 'warning' : 'success')
+                    ->formatStateUsing(fn (string $state): string => $state === 'visitor' ? '👤 Visitor' : '👨‍💼 Admin')
                     ->toggleable(),
                 BadgeColumn::make('status')
                     ->label(__('Status'))
@@ -202,42 +205,28 @@ class ConversationTable
                         default => ucfirst($state),
                     })
                     ->sortable(),
-                TextColumn::make('priority')
+                SelectColumn::make('priority')
                     ->label(__('Priority'))
-                    ->badge()
-                    ->colors([
-                        'gray' => 'low',
-                        'info' => 'medium',
-                        'warning' => 'high',
-                        'danger' => 'urgent',
+                    ->options([
+                        'low' => 'Low',
+                        'medium' => 'Medium',
+                        'high' => 'High',
+                        'urgent' => 'Urgent',
                     ])
-                    ->formatStateUsing(fn (string $state): string => ucfirst($state)),
-                IconColumn::make('has_unread')
-                    ->label('🔔')
-                    ->boolean()
-                    ->trueColor('danger')
-                    ->falseColor('gray')
-                    ->getStateUsing(fn ($record): bool => $record->hasUnreadFromVisitor())
-                    ->toggleable(),
-                TextColumn::make('last_sender')
-                    ->label(__('Last From'))
-                    ->badge()
-                    ->color(fn (string $state): string => $state === 'visitor' ? 'warning' : 'success')
-                    ->formatStateUsing(fn (string $state): string => $state === 'visitor' ? '👤 Visitor' : '👨‍💼 Admin')
-                    ->toggleable(),
+                    ->selectablePlaceholder(false),
                 TextColumn::make('assignedUser.name')
                     ->label(__('Assigned To'))
                     ->placeholder('Unassigned')
                     ->toggleable(),
-                TextColumn::make('last_visitor_message_at')
-                    ->label(__('Last Visitor Message'))
-                    ->dateTime('M j, Y g:i A')
-                    ->sortable()
-                    ->toggleable(),
-                TextColumn::make('created_at')
-                    ->label(__('Started'))
-                    ->dateTime('M j, Y g:i A')
-                    ->sortable(),
+                TextColumn::make('reply')
+                    ->label(__('Reply'))
+                    ->state('Reply')
+                    ->extraAttributes(fn (Conversation $record): array => [
+                        'class' => 'fi-color fi-color-primary fi-bg-color-400 hover:fi-bg-color-300 dark:fi-bg-color-600 dark:hover:fi-bg-color-500 fi-text-color-900 hover:fi-text-color-800 dark:fi-text-color-950 dark:hover:fi-text-color-950 fi-btn fi-size-md  fi-ac-btn-action',
+                        // Prevent row click (recordUrl) from firing when clicking Reply.
+                        'wire:click.stop' => "mountTableAction('reply', '{$record->getKey()}')",
+                        'x-on:click.stop.prevent' => "\$wire.mountTableAction('reply', '{$record->getKey()}')",
+                    ]),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -278,34 +267,7 @@ class ConversationTable
                         ->label(__('View'))
                         ->url(fn ($record) => ConversationResource::getUrl('view', ['record' => $record]))
                         ->icon('heroicon-o-eye'),
-                    Action::make('reply')
-                        ->label(__('Reply'))
-                        ->icon('heroicon-o-paper-airplane')
-                        ->modalHeading(__('Reply to Conversation'))
-                        ->form([
-                            Textarea::make('message')
-                                ->label('Message')
-                                ->required()
-                                ->rows(4),
-                            Select::make('is_internal')
-                                ->label('Visibility')
-                                ->options([
-                                    'false' => 'Visible to Visitor',
-                                    'true' => 'Internal Note (Admin Only)',
-                                ])
-                                ->default('false')
-                                ->required(),
-                        ])
-                        ->action(function ($record, array $data) {
-                            $isInternal = $data['is_internal'] === 'true';
-                            $record->adminReply($data['message'], auth()->id(), $isInternal);
-
-                            Notification::make()
-                                ->success()
-                                ->title($isInternal ? 'Internal note added' : 'Reply sent')
-                                ->send();
-                        })
-                        ->modalSubmitActionLabel('Send Reply'),
+                    self::replyAction(),
                     Action::make('assign')
                         ->label(__('Assign'))
                         ->icon('heroicon-o-user-plus')
@@ -397,5 +359,97 @@ class ConversationTable
             ->modifyQueryUsing(fn (Builder $query) => $query->with(['assignedUser', 'lastMessage']))
             ->recordUrl(fn ($record) => ConversationResource::getUrl('view', ['record' => $record]))
             ->extraAttributes(['wire:poll.3s' => '']);
+    }
+
+    private static function replyAction(): Action
+    {
+        return Action::make('reply')
+            ->label(__('Reply'))
+            ->icon('heroicon-o-paper-airplane')
+            ->modalHeading(__('Reply to Conversation'))
+            ->form([
+                Placeholder::make('context_messages')
+                    ->label('Recent conversation context')
+                    ->content(function (Conversation $record): HtmlString {
+                        $lastAdminAt = $record->messages()
+                            ->where('sender_type', 'admin')
+                            ->latest()
+                            ->value('created_at');
+
+                        $query = $record->messages()
+                            ->visibleToVisitor()
+                            ->when($lastAdminAt, fn ($q) => $q->where('created_at', '>=', $lastAdminAt))
+                            ->orderBy('created_at', 'asc')
+                            ->limit(20);
+
+                        $lines = $query->get()->map(function ($m) {
+                            $who = $m->sender_type === 'visitor' ? 'Visitor' : 'Admin';
+                            $msg = trim((string) $m->message);
+                            return [$who, $msg];
+                        })->all();
+
+                        // Render newest first in the UI.
+                        $lines = array_reverse($lines);
+
+                        if (!count($lines)) {
+                            return new HtmlString('—');
+                        }
+
+                        $html = '<div style="display:flex;flex-direction:column;">';
+                        foreach ($lines as [$who, $msg]) {
+                            $html .= '<div style="display: flex;align-items: center; gap: 8px;padding:12px 12px 10px; ">';
+                            $html .= '<span style="display:inline-flex;align-items:center;font-size:12px;font-weight:600;">' . e($who) . ' :</span>';
+                            $html .= '<span style="white-space:pre-line;font-size:13px;line-height:1.45;">' . e($msg) . '</span>';
+                            $html .= '</div>';
+                        }
+                        $html .= '</div>';
+
+                        return new HtmlString($html);
+                    })
+                    ->columnSpanFull(),
+                Textarea::make('message')
+                    ->label('Message')
+                    ->required()
+                    ->rows(4),
+                Select::make('is_internal')
+                    ->label('Visibility')
+                    ->options([
+                        'false' => 'Visible to Visitor',
+                        'true' => 'Internal Note (Admin Only)',
+                    ])
+                    ->default('false')
+                    ->required(),
+            ])
+            ->action(function (Conversation $record, array $data): void {
+                if ($record->status === 'closed') {
+                    Notification::make()
+                        ->warning()
+                        ->title('Conversation closed')
+                        ->body('You cannot reply to a closed conversation.')
+                        ->send();
+                    return;
+                }
+
+                $isInternal = $data['is_internal'] === 'true';
+                $record->adminReply($data['message'], auth()->id(), $isInternal);
+
+                Notification::make()
+                    ->success()
+                    ->title($isInternal ? 'Internal note added' : 'Reply sent')
+                    ->send();
+            })
+            ->extraModalFooterActions([
+                Action::make('view_messages')
+                    ->label('View Messages')
+                    ->icon('heroicon-o-eye')
+                    ->color('gray')
+                    ->outlined()
+                    ->url(fn (Conversation $record) => ConversationResource::getUrl('view', ['record' => $record])),
+            ])
+            ->modalFooterActionsAlignment(Alignment::Left)
+            ->modalSubmitAction(fn (Action $action, ?Conversation $record) => $action->disabled(
+                (bool) ($record?->status === 'closed')
+            ))
+            ->modalSubmitActionLabel('Send Reply');
     }
 }

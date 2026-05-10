@@ -80,7 +80,7 @@ class EmailSettings extends Page implements HasForms
                     ]),
 
                 Section::make(__('External Acknowledgement (Visitor)'))
-                    ->description(__('Configure the automated "Thank You" email sent to visitors.'))
+                    ->description(__('If enabled, an automated confirmation message will be sent to the visitor.'))
                     ->schema([
                         Toggle::make('contact_external_enabled')
                             ->label(__('Enable Auto-Reply'))

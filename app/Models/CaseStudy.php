@@ -8,19 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 use App\Traits\HasMedia;
 use App\Traits\HasSeo;
-use App\Traits\HasTranslations;
 
 class CaseStudy extends Model
 {
-    use HasMedia, HasSeo, HasTranslations;
-
-    protected array $translatable = [
-        'title',
-        'excerpt',
-        'project_description',
-        'project_details',
-        'bullet_fields',
-    ];
+    use HasMedia, HasSeo;
 
     protected $fillable = [
         'category_id',
@@ -44,16 +35,16 @@ class CaseStudy extends Model
     protected array $mediaAttributes = [
         'image_path',
         'slider_images',
-    ];
-
-    protected array $translatableMediaKeys = [
-        'project_description.*.image',
+        // Contains nested items with `image` keys; HasMedia can clean these up.
+        'project_description',
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
         'slider_images' => 'array',
         'bullet_fields' => 'array',
+        'project_details' => 'array',
+        'project_description' => 'array',
     ];
 
     protected static function boot()

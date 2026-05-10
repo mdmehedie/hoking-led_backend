@@ -3,18 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasTranslations;
 
 class AppSetting extends Model
 {
-    use HasTranslations;
-
-    protected array $translatable = [
-        'app_name',
-        'company_name',
-        'about',
-    ];
-
     protected $fillable = [
         'logo_light',
         'logo_dark',

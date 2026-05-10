@@ -9,16 +9,10 @@ use Kalnoy\Nestedset\NodeTrait;
 use Illuminate\Support\Str;
 use App\Traits\HasMedia;
 use App\Traits\HasSeo;
-use App\Traits\HasTranslations;
 
 class Category extends Model
 {
-    use NodeTrait, HasMedia, HasSeo, HasTranslations;
-
-    protected array $translatable = [
-        'name',
-        'description',
-    ];
+    use NodeTrait, HasMedia, HasSeo;
 
     protected $fillable = [
         'name',

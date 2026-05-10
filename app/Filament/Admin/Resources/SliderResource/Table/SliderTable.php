@@ -24,8 +24,8 @@ class SliderTable
             ->columns([
                 TextColumn::make('title')->label(__('Title'))->sortable()->searchable(),
                 TextColumn::make('label')->label(__('Label'))->sortable()->searchable(),
-                ImageColumn::make('background_image')->label(__('Background'))->circular(),
-                ImageColumn::make('foreground_image')->label(__('Foreground'))->circular(),
+                ImageColumn::make('background_image')->label(__('Background'))->circular()->disk('public'),
+                ImageColumn::make('foreground_image')->label(__('Foreground'))->circular()->disk('public'),
                 BooleanColumn::make('status')->label(__('Status')),
                 TextColumn::make('sort_order')->label(__('Sort Order'))->sortable(),
             ])

@@ -18,6 +18,8 @@ class Message extends Model
 
     protected $casts = [
         'is_internal' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     protected $appends = ['sender_name', 'is_admin'];

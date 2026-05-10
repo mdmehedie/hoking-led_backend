@@ -20,7 +20,8 @@ class TeamMemberTable
                 ImageColumn::make('photo')
                     ->label(__('Photo'))
                     ->circular()
-                    ->size(50),
+                    ->size(50)
+                    ->disk('public'),
                 TextColumn::make('name')
                     ->label(__('Name'))
                     ->searchable()

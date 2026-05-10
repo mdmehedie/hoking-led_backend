@@ -21,7 +21,8 @@ class CoreAdvantageTable
                 ImageColumn::make('icon')
                     ->label(__('Icon'))
                     ->square()
-                    ->size(40),
+                    ->size(40)
+                    ->disk('public'),
                 TextColumn::make('title')
                     ->label(__('Title'))
                     ->searchable()

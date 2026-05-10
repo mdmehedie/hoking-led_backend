@@ -2,13 +2,13 @@
 
 namespace App\Filament\Admin\Resources\CaseStudyResource\Form;
 
-use App\Models\Locale;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use App\Filament\Forms\Components\TinyEditor;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -25,7 +25,7 @@ class CaseStudyForm
         return $schema->schema([
             Tabs::make('Case Study Tabs')->tabs([
                 Tab::make(__('General Information'))->schema(self::generalSchema()),
-                Tab::make(__('Translations'))->schema(self::translationTabsSchema()),
+                Tab::make(__('Case Study Details'))->schema(self::caseStudyDetailsSchema()),
                 Tab::make(__('Media'))->schema(self::mediaSchema()),
                 Tab::make(__('SEO'))->schema(self::seoSchema()),
             ])->columnSpanFull(),
@@ -35,20 +35,6 @@ class CaseStudyForm
     private static function generalSchema(): array
     {
         return [
-            TextInput::make('slug')
-                ->label(__('Slug'))
-                ->unique(ignoreRecord: true)
-                ->required()
-                ->regex('/^[a-z0-9-]+$/')
-                ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
-                ->live(debounce: 300)
-                ->afterStateUpdated(function ($state, callable $set) {
-                    $slug = strtolower(str_replace(' ', '-', $state));
-                    $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
-                    $slug = preg_replace('/-+/', '-', $slug);
-                    $slug = trim($slug, '-');
-                    $set('slug', $slug);
-                }),
             Select::make('status')
                 ->label(__('Status'))
                 ->options([
@@ -71,67 +57,66 @@ class CaseStudyForm
         ];
     }
 
-    private static function translationTabsSchema(): array
+    private static function caseStudyDetailsSchema(): array
     {
-        $activeLocales = Locale::activeCodes();
-        $defaultLocale = Locale::defaultCode();
-
         return [
-            Tabs::make('Language Tabs')->tabs(
-                collect($activeLocales)->map(fn (string $locale) => self::localeTabSchema($locale, $locale === $defaultLocale))->all()
-            ),
+            TextInput::make('title')
+                ->label(__('Title'))
+                ->required()
+                ->maxLength(255)
+                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                    if (blank($get('slug'))) {
+                        $set('slug', static::generateUniqueSlug($state, null));
+                    }
+                })
+                ->live(),
+            TextInput::make('slug')
+                ->label(__('Slug'))
+                ->unique(ignoreRecord: true)
+                ->required()
+                ->regex('/^[a-z0-9-]+$/')
+                ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed. Spaces are not permitted.'))
+                ->live(debounce: 300)
+                ->afterStateUpdated(function ($state, callable $set) {
+                    $slug = strtolower(str_replace(' ', '-', $state));
+                    $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
+                    $slug = preg_replace('/-+/', '-', $slug);
+                    $slug = trim($slug, '-');
+                    $set('slug', $slug);
+                }),
+            Textarea::make('excerpt')
+                ->label(__('Excerpt'))
+                ->maxLength(500)
+                ->columnSpanFull(),
+            Section::make(__('Project Details'))->schema([
+                TextInput::make('project_details.product')
+                    ->label(__('Product'))
+                    ->maxLength(255),
+                TextInput::make('project_details.pixel_pitch')
+                    ->label(__('Pixel Pitch'))
+                    ->maxLength(255),
+                TextInput::make('project_details.client')
+                    ->label(__('Client'))
+                    ->maxLength(255),
+                TextInput::make('project_details.country')
+                    ->label(__('Country'))
+                    ->maxLength(255),
+                DatePicker::make('project_details.date')
+                    ->label(__('Date'))
+                    ->displayFormat('Y-m-d'),
+            ])->columns(2),
+            self::projectDescriptionRepeater(),
+            self::bulletFieldsRepeater(),
         ];
     }
 
-    private static function localeTabSchema(string $locale, bool $isDefault): Tab
+    private static function projectDescriptionRepeater(): Repeater
     {
-        return Tab::make(strtoupper($locale))
-            ->schema([
-                TextInput::make("title.{$locale}")
-                    ->label(__('Title'))
-                    ->required($isDefault)
-                    ->maxLength(255)
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
-                        if ($isDefault && blank($get('slug'))) {
-                            $set('slug', static::generateUniqueSlug($state, null));
-                        }
-                    })
-                    ->live()
-                    ->required($isDefault),
-                Textarea::make("excerpt.{$locale}")
-                    ->label(__('Excerpt'))
-                    ->maxLength(500)
-                    ->columnSpanFull(),
-                Section::make(__('Project Details'))->schema([
-                    TextInput::make("project_details.{$locale}.product")
-                        ->label(__('Product'))
-                        ->maxLength(255),
-                    TextInput::make("project_details.{$locale}.pixel_pitch")
-                        ->label(__('Pixel Pitch'))
-                        ->maxLength(255),
-                    TextInput::make("project_details.{$locale}.client")
-                        ->label(__('Client'))
-                        ->maxLength(255),
-                    TextInput::make("project_details.{$locale}.country")
-                        ->label(__('Country'))
-                        ->maxLength(255),
-                    DatePicker::make("project_details.{$locale}.date")
-                        ->label(__('Date'))
-                        ->displayFormat('Y-m-d'),
-                ])->columns(2),
-                self::projectDescriptionRepeater($locale, $isDefault),
-                self::bulletFieldsRepeater($locale, $isDefault),
-            ])->columns(1);
-    }
-
-    private static function projectDescriptionRepeater(string $locale, bool $isDefault): Repeater
-    {
-        return Repeater::make("project_description.{$locale}")
+        return Repeater::make('project_description')
             ->label(__('Project Description'))
             ->schema([
                 TextInput::make('title')
                     ->label(__('Title'))
-                    ->required($isDefault)
                     ->maxLength(255)
                     ->columnSpanFull(),
                 TinyEditor::make('description')
@@ -143,7 +128,7 @@ class CaseStudyForm
                     ->disk('public')
                     ->directory('case-studies/descriptions')
                     ->visibility('public')
-                    ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . "_{$locale}_" . $file->getClientOriginalName())
+                    ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
                     ->columnSpanFull(),
             ])
             ->columns(1)
@@ -152,15 +137,14 @@ class CaseStudyForm
             ->columnSpanFull();
     }
 
-    private static function bulletFieldsRepeater(string $locale, bool $isDefault): Repeater
+    private static function bulletFieldsRepeater(): Repeater
     {
-        return Repeater::make("bullet_fields.{$locale}")
+        return Repeater::make('bullet_fields')
             ->label(__('Bullet Points'))
             ->schema([
                 TextInput::make('value')
                     ->label('')
                     ->placeholder(__('Enter a bullet point'))
-                    ->required($isDefault)
                     ->maxLength(255),
             ])
             ->columns(1)
@@ -208,7 +192,8 @@ class CaseStudyForm
             Textarea::make('meta_description')
                 ->label(__('Meta Description'))
                 ->maxLength(500),
-            Textarea::make('meta_keywords')
+            TagsInput::make('meta_keywords')
+                ->separator(',')
                 ->label(__('Meta Keywords')),
             TextInput::make('canonical_url')
                 ->label(__('Canonical URL'))

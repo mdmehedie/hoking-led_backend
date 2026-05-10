@@ -2,8 +2,8 @@
 
 namespace App\Filament\Admin\Resources\CategoryResource\Form;
 
-use App\Models\Locale;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TagsInput;
 use Illuminate\Http\UploadedFile;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -18,12 +18,18 @@ class CategoryForm
 {
     public static function form(Schema $schema): Schema
     {
-        $activeLocales = Locale::activeCodes();
-        $defaultLocale = Locale::defaultCode();
-
         return $schema->schema([
             Tabs::make('Category Tabs')->tabs([
-                Tab::make(__('General Information'))->schema([
+                Tab::make(__('Category Details'))->schema([
+                    TextInput::make('name')
+                        ->label(__('Name'))
+                        ->live()
+                        ->required()
+                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                            if (blank($get('slug'))) {
+                                $set('slug', static::generateUniqueSlug($state, null));
+                            }
+                        }),
                     TextInput::make('slug')
                         ->label(__('Slug'))
                         ->unique(ignoreRecord: true)
@@ -50,44 +56,18 @@ class CategoryForm
                         ->searchable()
                         ->preload()
                         ->nullable(),
+                    Toggle::make('is_visible')
+                        ->label(__('Visible'))
+                        ->default(true),
                     TextInput::make('sort_order')
                         ->label(__('Sort Order'))
                         ->numeric()
                         ->default(0)
                         ->helperText(__('Lower numbers appear first')),
-                    Toggle::make('is_visible')->label(__('Visible'))->default(true),
-                ]),
-                Tab::make(__('Translations'))->schema([
-                    Tabs::make('Language tabs')->tabs(
-                        collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
-                            $isDefault = $locale === $defaultLocale;
-
-                            return Tab::make(strtoupper($locale))
-                                ->schema([
-                                    TextInput::make("name.{$locale}")
-                                        ->label(__('Name'))
-                                        ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault, $defaultLocale) {
-                                            if ($isDefault && blank($get('slug'))) {
-                                                $set('slug', static::generateUniqueSlug($state, null));
-                                            }
-                                        })
-                                        ->live()
-                                        ->required($isDefault),
-                                    Textarea::make("description.{$locale}")
-                                        ->label(__('Description')),
-                                ]);
-                        })->all()
-                    ),
-                ]),
-                Tab::make(__('Media'))->schema([
-                    FileUpload::make('icon')
-                        ->label(__('Icon'))
-                        ->image()
-                        ->disk('public')
-                        ->directory('categories/icons')
-                        ->visibility('public')
-                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
-                        ->nullable(),
+                    Textarea::make('description')
+                        ->label(__('Description'))
+                        ->rows(6)
+                        ->columnSpanFull(),
                     FileUpload::make('thumbnail')
                         ->label(__('Thumbnail'))
                         ->image()
@@ -97,11 +77,19 @@ class CategoryForm
                         ->visibility('public')
                         ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
                         ->nullable(),
+                    FileUpload::make('icon')
+                        ->label(__('Icon'))
+                        ->image()
+                        ->disk('public')
+                        ->directory('categories/icons')
+                        ->visibility('public')
+                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                        ->nullable(),
                 ]),
                 Tab::make(__('SEO'))->schema([
                     TextInput::make('meta_title')->label(__('Meta Title')),
                     Textarea::make('meta_description')->label(__('Meta Description')),
-                    Textarea::make('meta_keywords')->label(__('Meta Keywords')),
+                    TagsInput::make('meta_keywords')->separator(',')->label(__('Meta Keywords')),
                     TextInput::make('canonical_url')->label(__('Canonical URL')),
                 ]),
             ])->columnSpanFull()

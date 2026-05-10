@@ -8,17 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 use App\Traits\HasMedia;
 use App\Traits\HasSeo;
-use App\Traits\HasTranslations;
 
 class Blog extends Model
 {
-    use HasMedia, HasSeo, HasTranslations;
-
-    protected array $translatable = [
-        'title',
-        'excerpt',
-        'content',
-    ];
+    use HasMedia, HasSeo;
 
     protected $fillable = [
         'title',
@@ -37,10 +30,6 @@ class Blog extends Model
 
     protected array $mediaAttributes = [
         'image_path',
-    ];
-
-    protected array $translatableMediaKeys = [
-        'content.*.image',
     ];
 
     protected $casts = [
