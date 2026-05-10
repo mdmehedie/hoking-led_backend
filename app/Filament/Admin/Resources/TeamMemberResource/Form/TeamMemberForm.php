@@ -3,15 +3,14 @@
 namespace App\Filament\Admin\Resources\TeamMemberResource\Form;
 
 use App\Filament\Forms\Components\TinyEditor;
-use App\Models\Locale;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Illuminate\Http\UploadedFile;
 use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 
 class TeamMemberForm
@@ -20,18 +19,27 @@ class TeamMemberForm
     {
         return $schema->schema([
             Tabs::make('Team Member Tabs')->tabs([
-                Tab::make(__('General'))->schema(self::generalSchema()),
-                Tab::make(__('Translations'))->schema(self::translationTabsSchema()),
-                Tab::make(__('Media'))->schema(self::mediaSchema()),
-                Tab::make(__('Social Links'))->schema(self::socialSchema()),
-                Tab::make(__('SEO'))->schema(self::seoSchema()),
+                Tabs\Tab::make(__('Member Information'))->schema(self::memberSchema()),
+                Tabs\Tab::make(__('SEO'))->schema(self::seoSchema()),
             ])->columnSpanFull(),
         ]);
     }
 
-    private static function generalSchema(): array
+    private static function memberSchema(): array
     {
+        $keepOriginal = fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName();
+
         return [
+            TextInput::make('name')
+                ->label(__('Name'))
+                ->required()
+                ->maxLength(255)
+                ->live(debounce: 300)
+                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                    if (blank($get('slug'))) {
+                        $set('slug', static::slugify($state));
+                    }
+                }),
             TextInput::make('slug')
                 ->label(__('Slug'))
                 ->required()
@@ -41,63 +49,12 @@ class TeamMemberForm
                 ->helperText(__('Only lowercase letters, numbers, and hyphens.'))
                 ->live(debounce: 300)
                 ->afterStateUpdated(function ($state, callable $set) {
-                    $slug = strtolower(str_replace(' ', '-', $state));
-                    $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
-                    $slug = preg_replace('/-+/', '-', $slug);
-                    $slug = trim($slug, '-');
-                    $set('slug', $slug);
+                    $set('slug', static::slugify($state));
                 }),
-            TextInput::make('email')
-                ->label(__('Email'))
-                ->email()
+            TextInput::make('position')
+                ->label(__('Position'))
+                ->required()
                 ->maxLength(255),
-            TextInput::make('phone')
-                ->label(__('Phone'))
-                ->maxLength(50),
-            TextInput::make('sort_order')
-                ->label(__('Sort Order'))
-                ->numeric()
-                ->default(0)
-                ->helperText(__('Lower numbers appear first.')),
-            Toggle::make('status')
-                ->label(__('Active'))
-                ->default(true),
-        ];
-    }
-
-    private static function translationTabsSchema(): array
-    {
-        $activeLocales = Locale::activeCodes();
-        $defaultLocale = Locale::defaultCode();
-
-        return [
-            Tabs::make('Language Tabs')->tabs(
-                collect($activeLocales)->map(fn (string $locale) => self::localeTabSchema($locale, $locale === $defaultLocale))->all()
-            ),
-        ];
-    }
-
-    private static function localeTabSchema(string $locale, bool $isDefault): Tab
-    {
-        return Tab::make(strtoupper($locale))
-            ->schema([
-                TextInput::make("name.{$locale}")
-                    ->label(__('Name'))
-                    ->required($isDefault)
-                    ->maxLength(255),
-                TextInput::make("position.{$locale}")
-                    ->label(__('Position'))
-                    ->required($isDefault)
-                    ->maxLength(255),
-                TinyEditor::make("bio.{$locale}")
-                    ->label(__('Bio'))
-                    ->columnSpanFull(),
-            ])->columns(1);
-    }
-
-    private static function mediaSchema(): array
-    {
-        return [
             FileUpload::make('photo')
                 ->label(__('Photo'))
                 ->image()
@@ -108,13 +65,17 @@ class TeamMemberForm
                 ->imageEditor()
                 ->imageEditorAspectRatios(['1:1', '4:3', '3:4'])
                 ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName()),
-        ];
-    }
-
-    private static function socialSchema(): array
-    {
-        return [
+                ->getUploadedFileNameForStorageUsing($keepOriginal),
+            TextInput::make('email')
+                ->label(__('Email'))
+                ->email()
+                ->maxLength(255),
+            TextInput::make('phone')
+                ->label(__('Phone'))
+                ->maxLength(50),
+            TinyEditor::make('bio')
+                ->label(__('Bio'))
+                ->columnSpanFull(),
             Repeater::make('social_links')
                 ->label(__('Social Links'))
                 ->schema([
@@ -133,7 +94,27 @@ class TeamMemberForm
                 ->createItemButtonLabel(__('Add social link'))
                 ->columnSpanFull()
                 ->default([['platform' => '', 'url' => '']]),
+            TextInput::make('sort_order')
+                ->label(__('Sort Order'))
+                ->numeric()
+                ->default(0)
+                ->helperText(__('Lower numbers appear first.')),
+            Toggle::make('status')
+                ->label(__('Active'))
+                ->default(true),
         ];
+    }
+
+    private static function slugify(?string $value): string
+    {
+        if (blank($value)) {
+            return '';
+        }
+
+        $slug = strtolower(str_replace(' ', '-', $value));
+        $slug = preg_replace('/[^a-z0-9-]/', '', $slug);
+        $slug = preg_replace('/-+/', '-', $slug);
+        return trim($slug, '-');
     }
 
     private static function seoSchema(): array
@@ -146,9 +127,9 @@ class TeamMemberForm
                 ->label(__('Meta Description'))
                 ->maxLength(500)
                 ->columnSpanFull(),
-            Textarea::make('meta_keywords')
-                ->label(__('Meta Keywords'))
-                ->columnSpanFull(),
+            TagsInput::make('meta_keywords')
+                ->separator(',')
+                ->label(__('Meta Keywords')),
             TextInput::make('canonical_url')
                 ->label(__('Canonical URL'))
                 ->maxLength(255)

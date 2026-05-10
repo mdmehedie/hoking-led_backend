@@ -21,7 +21,8 @@ class BrandTable
                 ImageColumn::make('logo')
                     ->label(__('Logo'))
                     ->square()
-                    ->size(40),
+                    ->size(40)
+                    ->disk('public'),
                 TextColumn::make('name')
                     ->label(__('Name'))
                     ->searchable()

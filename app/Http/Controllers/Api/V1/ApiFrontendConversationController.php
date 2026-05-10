@@ -54,13 +54,13 @@ class ApiFrontendConversationController extends ApiBaseController
         $conversation = Conversation::where('session_id', $sessionId)->first();
 
         if (!$conversation) {
-            return $this->notFoundResponse('Conversation not found');
+            return $this->notFoundResponse([], 'Conversation not found');
         }
 
         $messages = $conversation->messages()
             ->visibleToVisitor()
-            ->when($request->get('after'), function ($query, $after) {
-                $query->where('created_at', '>', $after);
+            ->when($request->get('after'), function (\Illuminate\Database\Eloquent\Builder $query, $after) {
+                return $query->where('created_at', '>', $after);
             })
             ->get()
             ->map(fn ($m) => [
@@ -68,7 +68,19 @@ class ApiFrontendConversationController extends ApiBaseController
                 'sender_type' => $m->sender_type,
                 'message' => $m->message,
                 'created_at' => $m->created_at->toIso8601String(),
+            ])
+            ->values();
+
+        // If the conversation is closed, include a synthetic final message for context.
+        // This does not persist anything to the database.
+        if ($conversation->status === 'closed') {
+            $messages->prepend([
+                'id' => null,
+                'sender_type' => 'admin',
+                'message' => 'This conversation has been closed.',
+                'created_at' => ($conversation->closed_at ?? now())->toIso8601String(),
             ]);
+        }
 
         $conversation->markAdminRead();
 
@@ -84,7 +96,7 @@ class ApiFrontendConversationController extends ApiBaseController
         $conversation = Conversation::where('session_id', $sessionId)->first();
 
         if (!$conversation) {
-            return $this->notFoundResponse('Conversation not found');
+            return $this->notFoundResponse([], 'Conversation not found');
         }
 
         if ($conversation->status === 'closed') {

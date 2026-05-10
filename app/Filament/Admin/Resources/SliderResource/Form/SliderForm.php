@@ -16,13 +16,10 @@ class SliderForm
 {
     public static function form(Schema $schema): Schema
     {
-        $activeLocales = Locale::activeCodes();
-        $defaultLocale = Locale::defaultCode();
-
         return $schema
             ->schema([
                 Tabs::make('Slider Content Tabs')->tabs([
-                    Tab::make(__('Slider Details'))->schema([
+                    Tab::make(__('Slider Info'))->schema([
                         TextInput::make('sort_order')
                             ->label(__('Sort Order'))
                             ->numeric()
@@ -56,32 +53,23 @@ class SliderForm
                             ->url()
                             ->helperText(__('URL the button will navigate to.')),
                     ]),
-                    Tab::make(__('Translations'))->schema([
-                        Tabs::make('Language Tabs')->tabs(
-                            collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
-                                $isDefault = $locale === $defaultLocale;
-
-                                return Tab::make(strtoupper($locale))
-                                    ->schema([
-                                        TextInput::make("title.{$locale}")
-                                            ->label(__('Title'))
-                                            ->required($isDefault)
-                                            ->helperText(__('Main heading displayed on the slider.')),
-                                        TinyEditor::make("description.{$locale}")
-                                            ->label(__('Description'))
-                                            ->required($isDefault)
-                                            ->helperText(__('Text displayed in the bottom-left corner of the slider.')),
-                                        TextInput::make("label.{$locale}")
-                                            ->label(__('Label'))
-                                            ->required($isDefault)
-                                            ->helperText(__('Text displayed on the slider card.')),
-                                        TextInput::make("primary_button_text.{$locale}")
-                                            ->label(__('Primary Button Text'))
-                                            ->required($isDefault)
-                                            ->helperText(__('Text for the button in the bottom-left corner of the slider.')),
-                                    ])->columns(1);
-                            })->all()
-                        ),
+                    Tab::make(__('Slider Details'))->schema([
+                        TextInput::make("title")
+                            ->label(__('Title'))
+                            ->required()
+                            ->helperText(__('Main heading displayed on the slider.')),
+                        TinyEditor::make("description")
+                            ->label(__('Description'))
+                            ->required()
+                            ->helperText(__('Text displayed in the bottom-left corner of the slider.')),
+                        TextInput::make("label")
+                            ->label(__('Label'))
+                            ->required()
+                            ->helperText(__('Text displayed on the slider card.')),
+                        TextInput::make("primary_button_text")
+                            ->label(__('Primary Button Text'))
+                            ->required()
+                            ->helperText(__('Text for the button in the bottom-left corner of the slider.')),
                     ]),
                 ])->columnSpanFull(),
             ]);

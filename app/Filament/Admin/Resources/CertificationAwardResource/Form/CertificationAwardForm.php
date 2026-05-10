@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\CertificationAwardResource\Form;
 
 use App\Models\CertificationAward;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -21,14 +22,13 @@ class CertificationAwardForm
         return $schema
             ->schema([
                 Tabs::make('Certification & Award Tabs')->tabs([
-                    Tab::make(__('Basic Information'))->schema(self::basicSchema()),
-                    Tab::make(__('Media'))->schema(self::mediaSchema()),
+                    Tab::make(__('Certification and Award Content'))->schema(self::contentSchema()),
                     Tab::make(__('SEO'))->schema(self::seoSchema()),
                 ])->columnSpanFull(),
             ]);
     }
 
-    private static function basicSchema(): array
+    private static function contentSchema(): array
     {
         return [
             TextInput::make('title')
@@ -69,21 +69,6 @@ class CertificationAwardForm
                 ->label(__('Description'))
                 ->columnSpanFull(),
 
-            TextInput::make('sort_order')
-                ->label(__('Sort Order'))
-                ->numeric()
-                ->default(0)
-                ->helperText(__('Lower numbers appear first')),
-
-            Toggle::make('is_visible')
-                ->label(__('Visible'))
-                ->default(true),
-        ];
-    }
-
-    private static function mediaSchema(): array
-    {
-        return [
             FileUpload::make('image_path')
                 ->label(__('Image'))
                 ->image()
@@ -94,6 +79,16 @@ class CertificationAwardForm
                 ->imageEditorAspectRatios(['16:9', '4:3', '1:1'])
                 ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                 ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName()),
+
+            TextInput::make('sort_order')
+                ->label(__('Sort Order'))
+                ->numeric()
+                ->default(0)
+                ->helperText(__('Lower numbers appear first')),
+
+            Toggle::make('is_visible')
+                ->label(__('Visible'))
+                ->default(true),
         ];
     }
 
@@ -109,7 +104,8 @@ class CertificationAwardForm
                 ->maxLength(500)
                 ->columnSpanFull(),
 
-            Textarea::make('meta_keywords')
+            TagsInput::make('meta_keywords')
+                ->separator(',')
                 ->label(__('Meta Keywords'))
                 ->columnSpanFull(),
         ];

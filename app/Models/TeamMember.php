@@ -4,12 +4,11 @@ namespace App\Models;
 
 use App\Traits\HasMedia;
 use App\Traits\HasSeo;
-use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Model;
 
 class TeamMember extends Model
 {
-    use HasMedia, HasSeo, HasTranslations;
+    use HasMedia, HasSeo;
 
     protected $fillable = [
         'name',
@@ -26,12 +25,6 @@ class TeamMember extends Model
         'meta_description',
         'meta_keywords',
         'canonical_url',
-    ];
-
-    protected $translatable = [
-        'name',
-        'position',
-        'bio',
     ];
 
     protected array $mediaAttributes = [

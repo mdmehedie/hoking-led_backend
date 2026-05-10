@@ -2,6 +2,9 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Admin\Widgets\ContentCountsWidget;
+use App\Filament\Admin\Widgets\NewsletterStatsWidget;
+use App\Filament\Admin\Widgets\RecentContactsWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -11,11 +14,6 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use App\Models\AppSetting;
-use Filament\Widgets\FilamentInfoWidget;
-use App\Filament\Admin\Widgets\ContentCountsWidget;
-use App\Filament\Admin\Widgets\NewsletterStatsWidget;
-use App\Filament\Admin\Widgets\RecentContactsWidget;
-use App\Filament\Admin\Widgets\RecentLeadsWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -23,7 +21,6 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\HtmlString;
-use App\Models\Locale;
 use App\Http\Middleware\SetLocale;
 use App\Filament\Admin\Pages\EditProfile;
 
@@ -74,7 +71,6 @@ class AdminPanelProvider extends PanelProvider
                 ContentCountsWidget::class,
                 NewsletterStatsWidget::class,
                 RecentContactsWidget::class,
-                RecentLeadsWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -182,118 +178,6 @@ class AdminPanelProvider extends PanelProvider
                         }
                     </style>';
                 }
-            })
-            ->renderHook('panels::topbar.end', function () {
-                $locales = Locale::query()
-                    ->where('is_active', true)
-                    ->orderByDesc('is_default')
-                    ->orderBy('code')
-                    ->get(['code', 'name']);
-
-                return new HtmlString('
-                    <style>
-                        .locale-switcher-wrapper {
-                            position: absolute;
-                            right: 400px;
-                            top: 50%;
-                            transform: translateY(-50%);
-                            z-index: 10;
-                        }
-                        @media (max-width: 768px) {
-                            .locale-switcher-wrapper {
-                                right: 200px;
-                            }
-                        }
-                        /* Custom user menu arrow button */
-                        .custom-user-arrow-btn {
-                            background: none;
-                            border: none;
-                            color: inherit;
-                            font-size: 14px;
-                            cursor: pointer;
-                            padding: 8px;
-                            border-radius: 4px;
-                            display: inline-flex;
-                            align-items: center;
-                            justify-content: center;
-                            margin-left: 4px;
-                            transition: background-color 0.2s ease;
-                        }
-                        .custom-user-arrow-btn:hover {
-                            background-color: rgba(0, 0, 0, 0.1);
-                        }
-                        .custom-user-arrow-btn:focus {
-                            outline: 2px solid rgba(59, 130, 246, 0.5);
-                            outline-offset: 2px;
-                        }
-                        .fi-topbar .fi-user-menu {
-                            display: flex;
-                            align-items: center;
-                        }
-                        .fi-topbar .fi-user-menu .fi-user-menu-trigger {
-                            margin-right: 0;
-                        }
-                    </style>
-                    <div class="locale-switcher-wrapper">' .
-                    view('filament.components.locale-switcher', ['locales' => $locales])->render() .
-                    '</div>
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function() {
-                            const userMenu = document.querySelector(".fi-user-menu");
-                            if (userMenu) {
-                                const trigger = userMenu.querySelector(".fi-user-menu-trigger");
-                                if (trigger) {
-                                    // Create arrow button
-                                    const arrowBtn = document.createElement("button");
-                                    arrowBtn.innerHTML = "&#x25BC;"; // Down arrow
-                                    arrowBtn.className = "custom-user-arrow-btn";
-                                    arrowBtn.setAttribute("aria-label", "User menu");
-                                    arrowBtn.setAttribute("type", "button");
-
-                                    // Insert after the avatar button
-                                    trigger.parentNode.insertBefore(arrowBtn, trigger.nextSibling);
-
-                                    // Handle click on arrow button
-                                    arrowBtn.addEventListener("click", function(e) {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        trigger.click();
-                                    });
-
-                                    // Watch for dropdown state changes to update arrow direction
-                                    const dropdown = userMenu.querySelector("[x-data]");
-                                    if (dropdown) {
-                                        const observer = new MutationObserver(function(mutations) {
-                                            mutations.forEach(function(mutation) {
-                                                if (mutation.attributeName === "aria-expanded") {
-                                                    const isExpanded = dropdown.getAttribute("aria-expanded") === "true";
-                                                    arrowBtn.innerHTML = isExpanded ? "&#x25B2;" : "&#x25BC;"; // Up or down arrow
-                                                }
-                                            });
-                                        });
-
-                                        observer.observe(dropdown, {
-                                            attributes: true,
-                                            attributeFilter: ["aria-expanded"]
-                                        });
-                                    }
-
-                                    // Also make the avatar itself clickable
-                                    trigger.addEventListener("click", function(e) {
-                                        // Update arrow direction when avatar is clicked
-                                        setTimeout(function() {
-                                            const dropdown = userMenu.querySelector("[x-data]");
-                                            if (dropdown) {
-                                                const isExpanded = dropdown.getAttribute("aria-expanded") === "true";
-                                                arrowBtn.innerHTML = isExpanded ? "&#x25B2;" : "&#x25BC;";
-                                            }
-                                        }, 10);
-                                    });
-                                }
-                            }
-                        });
-                    </script>
-                ');
             })
             ->renderHook('scripts.after', function () {
                 try {

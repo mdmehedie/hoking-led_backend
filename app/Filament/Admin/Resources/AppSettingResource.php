@@ -17,7 +17,7 @@ class AppSettingResource extends Resource
 
     protected static \BackedEnum|string|null $navigationIcon = Heroicon::Cog;
 
-    protected static ?string $navigationLabel = 'App Settings';
+    protected static ?string $navigationLabel = 'Web Setting';
 
 
     protected static ?int $navigationSort = 0;
@@ -44,7 +44,7 @@ class AppSettingResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->with('translations');
+        return parent::getEloquentQuery();
     }
 
     public static function form(Schema $schema): Schema

@@ -226,27 +226,6 @@ class Conversation extends Model
         $this->update(['admin_read_at' => now()]);
     }
 
-    public function hasUnreadFromVisitor(): bool
-    {
-        return $this->last_visitor_message_at &&
-            (!$this->admin_read_at || $this->last_visitor_message_at > $this->admin_read_at);
-    }
-
-    public function getUnreadCountAttribute(): int
-    {
-        if (!$this->admin_read_at && !$this->last_admin_message_at) {
-            return 0;
-        }
-
-        $query = $this->messages()->where('sender_type', 'visitor');
-
-        if ($this->admin_read_at) {
-            $query->where('created_at', '>', $this->admin_read_at);
-        }
-
-        return $query->count();
-    }
-
     // ─── Helper Methods ─────────────────────────────────────
 
     public function getLastSenderAttribute(): ?string

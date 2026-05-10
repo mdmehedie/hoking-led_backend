@@ -24,6 +24,8 @@ class FeaturedProductResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Featured Products';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function table(Table $table): Table
     {
         return FeaturedProductTable::table($table);

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Admin\Resources\CoreAdvantageResource\Form;
 
-use App\Models\Locale;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -18,7 +17,16 @@ class CoreAdvantageForm
     {
         return $schema->schema([
             Tabs::make('Core Advantage Tabs')->tabs([
-                Tab::make(__('General Information'))->schema([
+                Tab::make(__('Core Advantage Content'))->schema([
+                    TextInput::make('title')
+                        ->label(__('Title'))
+                        ->required()
+                        ->maxLength(255)
+                        ->columnSpanFull(),
+                    Textarea::make('description')
+                        ->label(__('Description'))
+                        ->required()
+                        ->columnSpanFull(),
                     FileUpload::make('icon')
                         ->label(__('Icon Image'))
                         ->image()
@@ -34,37 +42,8 @@ class CoreAdvantageForm
                         ->label(__('Sort Order'))
                         ->numeric()
                         ->default(0),
-                ])->columns(3),
-
-                Tab::make(__('Translations'))->schema(self::translationTabsSchema()),
+                ])->columns(2),
             ])->columnSpanFull(),
         ]);
-    }
-
-    private static function translationTabsSchema(): array
-    {
-        $activeLocales = Locale::activeCodes();
-        $defaultLocale = Locale::defaultCode();
-
-        return [
-            Tabs::make('Language Tabs')->tabs(
-                collect($activeLocales)->map(fn (string $locale) => self::localeTabSchema($locale, $locale === $defaultLocale))->all()
-            ),
-        ];
-    }
-
-    private static function localeTabSchema(string $locale, bool $isDefault): Tab
-    {
-        return Tab::make(strtoupper($locale))
-            ->schema([
-                TextInput::make("title.{$locale}")
-                    ->label(__('Title'))
-                    ->required($isDefault)
-                    ->maxLength(255),
-                Textarea::make("description.{$locale}")
-                    ->label(__('Description'))
-                    ->required($isDefault)
-                    ->columnSpanFull(),
-            ])->columns(1);
     }
 }

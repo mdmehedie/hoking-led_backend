@@ -2,7 +2,6 @@
 
 namespace App\Filament\Admin\Resources\ProjectResource\Form;
 
-use App\Models\Locale;
 use Filament\Forms\Components\FileUpload;
 use App\Filament\Forms\Components\TinyEditor;
 use Filament\Forms\Components\Select;
@@ -14,6 +13,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
+use Filament\Forms\Components\TagsInput;
 
 class ProjectForm
 {
@@ -22,7 +22,6 @@ class ProjectForm
         return $schema->schema([
             Tabs::make('Project Tabs')->tabs([
                 Tab::make(__('General Information'))->schema(self::generalSchema()),
-                Tab::make(__('Translations'))->schema(self::translationTabsSchema()),
                 Tab::make(__('Media'))->schema(self::mediaSchema()),
                 Tab::make(__('SEO'))->schema(self::seoSchema()),
             ])->columnSpanFull(),
@@ -32,11 +31,22 @@ class ProjectForm
     private static function generalSchema(): array
     {
         return [
+            TextInput::make('title')
+                ->label(__('Title'))
+                ->required()
+                ->maxLength(255)
+                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                    if (blank($get('slug'))) {
+                        $set('slug', static::generateUniqueSlug($state));
+                    }
+                })
+                ->live(onBlur: true),
             TextInput::make('slug')
                 ->label(__('Slug'))
                 ->unique(ignoreRecord: true)
                 ->regex('/^[a-z0-9-]+$/')
                 ->helperText(__('Only lowercase letters, numbers, and hyphens are allowed.'))
+                ->required()
                 ->live(debounce: 300)
                 ->afterStateUpdated(function ($state, callable $set) {
                     $slug = strtolower(str_replace(' ', '-', $state));
@@ -45,6 +55,9 @@ class ProjectForm
                     $slug = trim($slug, '-');
                     $set('slug', $slug);
                 }),
+            TextInput::make('secondary_title')
+                ->label(__('Secondary Title'))
+                ->maxLength(255),
             Select::make('status')
                 ->label(__('Status'))
                 ->options([
@@ -61,48 +74,15 @@ class ProjectForm
             Toggle::make('is_featured')->label(__('Featured')),
             Toggle::make('is_popular')->label(__('Popular')),
             Toggle::make('is_successful')->label(__('Successful')),
+            Textarea::make('excerpt')
+                ->label(__('Excerpt'))
+                ->maxLength(500)
+                ->columnSpanFull(),
+            TinyEditor::make('description')
+                ->label(__('Description'))
+                ->required()
+                ->columnSpanFull(),
         ];
-    }
-
-    private static function translationTabsSchema(): array
-    {
-        $activeLocales = Locale::activeCodes();
-        $defaultLocale = Locale::defaultCode();
-
-        return [
-            Tabs::make('Language Tabs')->tabs(
-                collect($activeLocales)->map(fn (string $locale) => self::localeTabSchema($locale, $locale === $defaultLocale))->all()
-            ),
-        ];
-    }
-
-    private static function localeTabSchema(string $locale, bool $isDefault): Tab
-    {
-        return Tab::make(strtoupper($locale))
-            ->schema([
-                TextInput::make("title.{$locale}")
-                    ->label(__('Title'))
-                    ->required($isDefault)
-                    ->maxLength(255)
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) use ($isDefault) {
-                        if (!$isDefault || blank($get('slug'))) {
-                            return;
-                        }
-                        $set('slug', static::generateUniqueSlug($state, null));
-                    })
-                    ->live(),
-                TextInput::make("secondary_title.{$locale}")
-                    ->label(__('Secondary Title'))
-                    ->maxLength(255),
-                Textarea::make("excerpt.{$locale}")
-                    ->label(__('Excerpt'))
-                    ->maxLength(500)
-                    ->columnSpanFull(),
-                TinyEditor::make("description.{$locale}")
-                    ->label(__('Description'))
-                    ->required($isDefault)
-                    ->columnSpanFull(),
-            ])->columns(2);
     }
 
     private static function mediaSchema(): array
@@ -137,7 +117,8 @@ class ProjectForm
             Textarea::make('meta_description')
                 ->label(__('Meta Description'))
                 ->maxLength(500),
-            Textarea::make('meta_keywords')
+            TagsInput::make('meta_keywords')
+                ->separator(',')
                 ->label(__('Meta Keywords')),
             TextInput::make('canonical_url')
                 ->label(__('Canonical URL'))

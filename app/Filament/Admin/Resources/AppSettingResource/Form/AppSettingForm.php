@@ -27,43 +27,60 @@ class AppSettingForm
         $activeLocales = Locale::activeCodes();
         $defaultLocale = Locale::defaultCode();
 
-        return $schema->schema([
-            Tabs::make('App Settings Tabs')->tabs([
-                Tab::make(__('Branding'))->schema([
-                    Section::make(__('Logos'))->schema([
-                        FileUpload::make('logo_light')
-                            ->label(__('Light Logo'))
-                            ->image()
-                            ->disk('public')
-                            ->visibility('public')
-                            ->directory('settings')
-                            ->acceptedFileTypes(['image/*'])
-                            ->imageEditor()
-                            ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                        FileUpload::make('logo_dark')
-                            ->label(__('Dark Logo'))
-                            ->image()
-                            ->disk('public')
-                            ->visibility('public')
-                            ->directory('settings')
-                            ->acceptedFileTypes(['image/*'])
-                            ->imageEditor()
-                            ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
-                    ]),
-                    Section::make(__('Favicon'))->schema([
-                        FileUpload::make('favicon')
-                            ->label(__('Favicon'))
-                            ->image()
-                            ->disk('public')
-                            ->visibility('public')
-                            ->directory('settings')
-                            ->acceptedFileTypes(['image/*'])
-                            ->imageEditor()
-                            ->imageEditorAspectRatios(['1:1']),
-                    ]),
-                ]),
+        // Keep non-branding tab definitions in the file for later, but do not register them
+        // in the schema right now. Hidden tabs can still trigger validation / required rules.
+        $disabledTabsForNow = true;
 
-                Tab::make(__('General Settings'))->schema([
+        $tabs = [
+            Tab::make(__('Branding'))->schema([
+                Section::make(__('Logos'))->schema([
+                    FileUpload::make('logo_light')
+                        ->label(__('Light Logo'))
+                        ->image()
+                        ->disk('public')
+                        ->visibility('public')
+                        ->directory('settings')
+                        ->acceptedFileTypes(['image/*'])
+                        ->imageEditor()
+                        ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                    FileUpload::make('logo_dark')
+                        ->label(__('Dark Logo'))
+                        ->image()
+                        ->disk('public')
+                        ->visibility('public')
+                        ->directory('settings')
+                        ->acceptedFileTypes(['image/*'])
+                        ->imageEditor()
+                        ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                ]),
+                Section::make(__('Favicon'))->schema([
+                    FileUpload::make('favicon')
+                        ->label(__('Favicon'))
+                        ->image()
+                        ->disk('public')
+                        ->visibility('public')
+                        ->directory('settings')
+                        ->acceptedFileTypes(['image/*'])
+                        ->imageEditor()
+                        ->imageEditorAspectRatios(['1:1']),
+                ]),
+            ]),
+        ];
+
+        return $schema->schema([
+            Tabs::make('App Settings Tabs')->tabs($tabs)->columnSpanFull(),
+        ]);
+    }
+
+    /*
+     * Disabled tabs (kept for later).
+     *
+     * If you need these again, re-add them to the `$tabs` array above.
+     */
+    private static function disabledTabs(array $activeLocales, string $defaultLocale): array
+    {
+        return [
+            Tab::make(__('General Settings'))->schema([
                     Tabs::make('Language tabs')->tabs(
                         collect($activeLocales)->map(function (string $locale) use ($defaultLocale) {
                             $isDefault = $locale === $defaultLocale;
@@ -106,7 +123,7 @@ class AppSettingForm
                     ])->columns(3),
                 ]),
 
-                Tab::make(__('SEO Settings'))->schema([
+            Tab::make(__('SEO Settings'))->schema([
                     Section::make(__('Global SEO'))->schema([
                         Toggle::make('sitemap_enabled')->label(__('Enable Sitemap'))->default(true),
                         TextInput::make('frontend_url')->label(__('Frontend URL'))->url()->placeholder('https://example.com'),
@@ -143,7 +160,7 @@ class AppSettingForm
                     ]),
                 ]),
 
-                Tab::make(__('PWA Icons'))->schema([
+            Tab::make(__('PWA Icons'))->schema([
                     Section::make('PWA Icons')->description('Upload icons for different device sizes (PNG format recommended)')->schema([
                         FileUpload::make('pwa_icon_72')
                             ->label('Icon 72x72')
@@ -282,7 +299,7 @@ class AppSettingForm
                     ])->columns(3),
                 ]),
 
-                Tab::make(__('Redis Config'))->schema([
+            Tab::make(__('Redis Config'))->schema([
                     Section::make(__('Redis Connection'))->schema([
                         TextInput::make('redis_host')->label('Redis Host')->default('127.0.0.1')->columnSpan(2),
                         TextInput::make('redis_port')->label('Redis Port')->default(6379)->numeric(),
@@ -346,7 +363,6 @@ class AppSettingForm
                             ->helperText('Enable Redis for queue management'),
                     ])->columns(4),
                 ]),
-            ])->columnSpanFull(),
-        ]);
+        ];
     }
 }

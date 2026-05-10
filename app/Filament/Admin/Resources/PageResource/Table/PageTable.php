@@ -14,10 +14,6 @@ class PageTable
     {
         return $table
             ->columns([
-                ImageColumn::make('image_path')
-                    ->label(__('Image'))
-                    ->square()
-                    ->size(40),
                 TextColumn::make('title')
                     ->label(__('Title'))
                     ->searchable()

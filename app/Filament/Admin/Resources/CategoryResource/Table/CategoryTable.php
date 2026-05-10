@@ -20,7 +20,8 @@ class CategoryTable
             ImageColumn::make('icon')
                 ->label(__('Icon'))
                 ->square()
-                ->size(30),
+                ->size(30)
+                ->disk('public'),
             TextColumn::make('name')->searchable()->sortable(),
             TextColumn::make('slug')->searchable()->sortable(),
             TextColumn::make('parent.name')->label(__('Parent'))->sortable()->placeholder('-'),

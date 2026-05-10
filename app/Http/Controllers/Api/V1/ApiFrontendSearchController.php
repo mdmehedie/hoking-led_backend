@@ -8,6 +8,7 @@ use App\Models\CaseStudy;
 use App\Models\News;
 use App\Models\Page;
 use App\Models\Product;
+use App\Models\Project;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -24,7 +25,7 @@ class ApiFrontendSearchController extends ApiBaseController
     public function search(Request $request): JsonResponse
     {
         $query = $request->get('q');
-        $type = $request->get('type'); // product, blog, news, case-study, page
+        $type = $request->get('type'); // product, blog, news, case-study, page, project
 
         if (empty($query)) {
             return $this->okResponse(['results' => []], __('Search query is empty'));
@@ -66,6 +67,12 @@ class ApiFrontendSearchController extends ApiBaseController
                 'excerpt_attr' => 'excerpt',
                 'image_attr' => 'image_path',
             ],
+            'project' => [
+                'model' => Project::class,
+                'title_attr' => 'title',
+                'excerpt_attr' => 'excerpt',
+                'image_attr' => 'cover_image',
+            ],
         ];
 
         // Filter configs if type is specified
@@ -85,11 +92,7 @@ class ApiFrontendSearchController extends ApiBaseController
             $items = $queryBuilder
                 ->where(function (Builder $q) use ($query, $config) {
                     $q->where($config['title_attr'], 'like', "%{$query}%")
-                        ->orWhere($config['excerpt_attr'], 'like', "%{$query}%")
-                        ->orWhereHas('translations', function (Builder $t) use ($query) {
-                            $t->where('attribute', 'title')
-                                ->where('value', 'like', "%{$query}%");
-                        });
+                        ->orWhere($config['excerpt_attr'], 'like', "%{$query}%");
                 })
                 ->limit(10)
                 ->get();

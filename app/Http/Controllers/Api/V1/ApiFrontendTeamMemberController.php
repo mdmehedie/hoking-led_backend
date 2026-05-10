@@ -12,7 +12,6 @@ class ApiFrontendTeamMemberController extends ApiBaseController
     public function index(): JsonResponse
     {
         $members = TeamMember::active()
-            ->with(['translations'])
             ->orderBy('sort_order')
             ->get();
 

@@ -10,14 +10,12 @@ class TeamMemberResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $locale = app()->getLocale();
-
         return [
             'id' => $this->id,
-            'name' => $this->getTranslation('name', $locale),
+            'name' => $this->name,
             'slug' => $this->slug,
-            'position' => $this->getTranslation('position', $locale),
-            'bio' => $this->getTranslation('bio', $locale),
+            'position' => $this->position,
+            'bio' => $this->bio,
             'email' => $this->email,
             'phone' => $this->phone,
             'photo' => $this->photo ? url(Storage::url($this->photo)) : null,
@@ -31,21 +29,5 @@ class TeamMemberResource extends JsonResource
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
         ];
-    }
-
-    protected function getTranslation(string $attribute, string $locale): ?string
-    {
-        if (method_exists($this, 'translations')) {
-            $translation = $this->translations
-                ->where('attribute', $attribute)
-                ->where('locale', $locale)
-                ->first();
-
-            if ($translation) {
-                return $translation->value;
-            }
-        }
-
-        return $this->{$attribute};
     }
 }

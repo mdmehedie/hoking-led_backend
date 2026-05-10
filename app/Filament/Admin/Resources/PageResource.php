@@ -20,7 +20,6 @@ class PageResource extends Resource
 
     protected static ?string $slug = 'pages';
 
-
     protected static ?int $navigationSort = 1;
 
     public static function canViewAny(): bool

@@ -20,7 +20,8 @@ class CaseStudyTable
                 ImageColumn::make('image_path')
                     ->label(__('Image'))
                     ->square()
-                    ->size(40),
+                    ->size(40)
+                    ->disk('public'),
                 TextColumn::make('title')
                     ->label(__('Title'))
                     ->searchable()

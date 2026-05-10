@@ -22,7 +22,8 @@ class ProjectTable
                 ImageColumn::make('cover_image')
                     ->label(__('Cover'))
                     ->square()
-                    ->size(40),
+                    ->size(40)
+                    ->disk('public'),
                 TextColumn::make('title')
                     ->label(__('Title'))
                     ->searchable()

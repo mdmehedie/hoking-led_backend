@@ -24,19 +24,9 @@ class BrandForm
                     ->live(onBlur: true)
                     ->afterStateUpdated(function ($state, callable $set) {
                         $set('slug', Str::slug($state));
-                    }),
+                    })
+                    ->columnSpanFull(),
                 Hidden::make('slug'),
-                TextInput::make('website_url')
-                    ->label(__('Website URL'))
-                    ->url()
-                    ->nullable(),
-                TextInput::make('sort_order')
-                    ->label(__('Sort Order'))
-                    ->numeric()
-                    ->default(0),
-                Toggle::make('is_active')
-                    ->label(__('Is Active'))
-                    ->default(true),
                 FileUpload::make('logo')
                     ->label(__('Logo'))
                     ->image()
@@ -46,6 +36,17 @@ class BrandForm
                     ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
                     ->imageEditor()
                     ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                TextInput::make('website_url')
+                    ->label(__('Website URL'))
+                    ->url()
+                    ->nullable(),
+                Toggle::make('is_active')
+                    ->label(__('Is Active'))
+                    ->default(true),
+                TextInput::make('sort_order')
+                    ->label(__('Sort Order'))
+                    ->numeric()
+                    ->default(0),
             ])->columns(2)->columnSpanFull(),
         ]);
     }

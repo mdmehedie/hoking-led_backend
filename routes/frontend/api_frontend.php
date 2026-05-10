@@ -35,6 +35,9 @@ Route::prefix('v1')->group(function () {
     Route::get('blogs', [ApiFrontendBlogController::class, 'index'])->name('blogs.index');
     Route::get('blogs/{slug}', [ApiFrontendBlogController::class, 'show'])->name('blogs.show');
 
+    Route::get('news', [ApiFrontendNewsController::class, 'index'])->name('news.index');
+    Route::get('news/{slug}', [ApiFrontendNewsController::class, 'show'])->name('news.show');
+
     Route::get('case-studies', [ApiFrontendCaseStudyController::class, 'index'])->name('case-studies.index');
     Route::get('case-studies/{slug}', [ApiFrontendCaseStudyController::class, 'show'])->name('case-studies.show');
 
@@ -46,9 +49,6 @@ Route::prefix('v1')->group(function () {
 
     Route::get('categories', [ApiFrontendCategoryController::class, 'index'])->name('categories.index');
     Route::get('categories/{slug}', [ApiFrontendCategoryController::class, 'show'])->name('categories.show');
-
-    Route::get('news', [ApiFrontendNewsController::class, 'index'])->name('news.index');
-    Route::get('news/{slug}', [ApiFrontendNewsController::class, 'show'])->name('news.show');
 
     Route::get('certifications', [ApiFrontendCertificationAwardController::class, 'index'])->name('certifications.index');
     Route::get('certifications/{slug}', [ApiFrontendCertificationAwardController::class, 'show'])->name('certifications.show');

@@ -3,12 +3,11 @@
 namespace App\Models;
 
 use App\Traits\HasMedia;
-use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Model;
 
 class Slider extends Model
 {
-    use HasMedia, HasTranslations;
+    use HasMedia;
 
     protected $fillable = [
         'title',
@@ -20,13 +19,6 @@ class Slider extends Model
         'label',
         'status',
         'sort_order',
-    ];
-
-    protected $translatable = [
-        'title',
-        'description',
-        'label',
-        'primary_button_text',
     ];
 
     protected array $mediaAttributes = [
