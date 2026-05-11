@@ -50,6 +50,16 @@ class FeaturedProductResource extends Resource
         return 'Products';
     }
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->can('view featuredproduct');
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view featuredproduct');
+    }
+
     public static function canCreate(): bool
     {
         return false;

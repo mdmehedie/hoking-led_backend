@@ -28,8 +28,20 @@ class EmailSettings extends Page implements HasForms
 
     public ?array $data = [];
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()->can('viewAny', AppSetting::class);
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
+
     public function mount(): void
     {
+        abort_unless(static::canAccess(), 403);
+
         $settings = AppSetting::first();
         
         if ($settings) {
@@ -105,6 +117,7 @@ class EmailSettings extends Page implements HasForms
         return [
             Action::make('save')
                 ->label(__('Save Settings'))
+                ->visible(fn (): bool => auth()->user()->can('update', AppSetting::first() ?? new AppSetting()))
                 ->submit('save'),
         ];
     }
@@ -112,14 +125,24 @@ class EmailSettings extends Page implements HasForms
     public function save(): void
     {
         $settings = AppSetting::first();
+
+        if ($settings) {
+            abort_unless(auth()->user()->can('update', $settings), 403);
+        } else {
+            abort_unless(auth()->user()->can('create', AppSetting::class), 403);
+        }
         
         if ($settings) {
             $settings->update($this->form->getState());
+        } else {
+            AppSetting::create($this->form->getState());
+            $this->form->fill(AppSetting::first()?->toArray() ?? []);
             
-            Notification::make()
-                ->title(__('Settings saved successfully!'))
-                ->success()
-                ->send();
         }
+
+        Notification::make()
+            ->title(__('Settings saved successfully!'))
+            ->success()
+            ->send();
     }
 }

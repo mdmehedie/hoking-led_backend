@@ -17,6 +17,8 @@ class SuccessfulProjectResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function getNavigationLabel(): string
     {
         return __('Successful Projects');
@@ -29,8 +31,7 @@ class SuccessfulProjectResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return false;
-//        return auth()->user()->can('view any project');
+        return auth()->user()->can('view successfulproject');
     }
 
     public static function canCreate(): bool
@@ -50,7 +51,7 @@ class SuccessfulProjectResource extends Resource
 
     public static function canView($record): bool
     {
-        return auth()->user()->can('view project');
+        return auth()->user()->can('view successfulproject');
     }
 
     public static function table(Table $table): Table

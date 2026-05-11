@@ -8,6 +8,8 @@ use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -34,7 +36,7 @@ class ConversationTable
             ->headerActions([
                 Action::make('export')
                     ->label(__('Export'))
-                    ->icon('heroicon-o-arrow-down-tray')
+                    ->visible(fn () => auth()->user()->can('viewAny', Conversation::class))
                     ->modalHeading(__('Export Contact Submissions'))
                     ->modalDescription('Select conditions and format for export.')
                     ->form([
@@ -68,6 +70,7 @@ class ConversationTable
                             ->required(),
                     ])
                     ->action(function (array $data) {
+                        abort_unless(auth()->user()->can('viewAny', Conversation::class), 403);
                         $query = Conversation::query();
 
                         if ($data['status'] !== 'all') {
@@ -213,6 +216,7 @@ class ConversationTable
                         'high' => 'High',
                         'urgent' => 'Urgent',
                     ])
+                    ->disabled(fn ($record) => ! auth()->user()->can('update', $record))
                     ->selectablePlaceholder(false),
                 TextColumn::make('assignedUser.name')
                     ->label(__('Assigned To'))
@@ -271,6 +275,7 @@ class ConversationTable
                     Action::make('assign')
                         ->label(__('Assign'))
                         ->icon('heroicon-o-user-plus')
+                        ->visible(fn ($record): bool => auth()->user()->can('update', $record))
                         ->form([
                             Select::make('assigned_to')
                                 ->label('Assign to')
@@ -278,32 +283,38 @@ class ConversationTable
                                 ->searchable()
                                 ->required(),
                         ])
-                        ->action(fn ($record, array $data) => $record->assignTo($data['assigned_to']))
+                        ->action(function ($record, array $data): void {
+                            abort_unless(auth()->user()->can('update', $record), 403);
+                            $record->assignTo($data['assigned_to']);
+                        })
                         ->modalSubmitActionLabel('Assign'),
                     Action::make('mark_resolved')
                         ->label(__('Mark Resolved'))
-                        ->action(fn ($record) => $record->markAsResolved())
-                        ->visible(fn ($record): bool => !in_array($record->status, ['resolved', 'closed']))
+                        ->action(function ($record): void {
+                            abort_unless(auth()->user()->can('update', $record), 403);
+                            $record->markAsResolved();
+                        })
+                        ->visible(fn ($record): bool => !in_array($record->status, ['resolved', 'closed']) && auth()->user()->can('update', $record))
                         ->color('success')
                         ->icon('heroicon-o-check-circle'),
                     Action::make('mark_closed')
                         ->label(__('Mark Closed'))
-                        ->action(fn ($record) => $record->markAsClosed())
-                        ->visible(fn ($record): bool => $record->status !== 'closed')
+                        ->action(function ($record): void {
+                            abort_unless(auth()->user()->can('update', $record), 403);
+                            $record->markAsClosed();
+                        })
+                        ->visible(fn ($record): bool => $record->status !== 'closed' && auth()->user()->can('update', $record))
                         ->color('gray')
                         ->icon('heroicon-o-archive-box'),
-                    Action::make('delete')
-                        ->label(__('Delete'))
-                        ->action(fn ($record) => $record->delete())
-                        ->requiresConfirmation()
-                        ->color('danger')
-                        ->icon('heroicon-o-trash'),
+                    DeleteAction::make()
+                        ->visible(fn ($record): bool => auth()->user()->can('delete', $record)),
                 ])->tooltip('Actions'),
             ])
             ->bulkActions([
                 BulkAction::make('assign')
                     ->label(__('Assign To'))
                     ->icon('heroicon-o-user-plus')
+                    ->visible(fn () => auth()->user()->can('update', new Conversation()))
                     ->form([
                         Select::make('assigned_to')
                             ->label('Assign to')
@@ -312,49 +323,44 @@ class ConversationTable
                             ->required(),
                     ])
                     ->action(function (array $data, Collection $records) {
-                        $records->each->assignTo($data['assigned_to']);
+                        abort_unless(auth()->user()->can('update', new Conversation()), 403);
+                        $updatableRecords = $records->filter(fn ($record) => auth()->user()->can('update', $record));
+                        $updatableRecords->each->assignTo($data['assigned_to']);
                         Notification::make()
                             ->success()
                             ->title('Assigned')
-                            ->body($records->count() . ' conversations assigned.')
+                            ->body($updatableRecords->count() . ' conversations assigned.')
                             ->send();
                     })
                     ->requiresConfirmation(),
                 BulkAction::make('mark_resolved')
                     ->label(__('Mark Resolved'))
                     ->action(function (Collection $records) {
-                        $records->each->markAsResolved();
+                        abort_unless(auth()->user()->can('update', new Conversation()), 403);
+                        $updatableRecords = $records->filter(fn ($record) => auth()->user()->can('update', $record));
+                        $updatableRecords->each->markAsResolved();
                         Notification::make()
                             ->success()
                             ->title('Resolved')
-                            ->body($records->count() . ' conversations resolved.')
+                            ->body($updatableRecords->count() . ' conversations resolved.')
                             ->send();
                     })
                     ->color('success'),
                 BulkAction::make('mark_closed')
                     ->label(__('Mark Closed'))
                     ->action(function (Collection $records) {
-                        $records->each->markAsClosed();
+                        abort_unless(auth()->user()->can('update', new Conversation()), 403);
+                        $updatableRecords = $records->filter(fn ($record) => auth()->user()->can('update', $record));
+                        $updatableRecords->each->markAsClosed();
                         Notification::make()
                             ->success()
                             ->title('Closed')
-                            ->body($records->count() . ' conversations closed.')
+                            ->body($updatableRecords->count() . ' conversations closed.')
                             ->send();
                     })
                     ->color('gray'),
-                BulkAction::make('delete')
-                    ->label(__('Delete Selected'))
-                    ->color('danger')
-                    ->icon('heroicon-o-trash')
-                    ->requiresConfirmation()
-                    ->action(function (Collection $records) {
-                        $records->each->delete();
-                        Notification::make()
-                            ->success()
-                            ->title('Deleted')
-                            ->body($records->count() . ' conversations deleted.')
-                            ->send();
-                    }),
+                DeleteBulkAction::make()
+                    ->visible(fn () => auth()->user()->can('delete', new Conversation())),
             ])
             ->modifyQueryUsing(fn (Builder $query) => $query->with(['assignedUser', 'lastMessage']))
             ->recordUrl(fn ($record) => ConversationResource::getUrl('view', ['record' => $record]))
@@ -366,6 +372,7 @@ class ConversationTable
         return Action::make('reply')
             ->label(__('Reply'))
             ->icon('heroicon-o-paper-airplane')
+            ->visible(fn (Conversation $record): bool => auth()->user()->can('update', $record))
             ->modalHeading(__('Reply to Conversation'))
             ->form([
                 Placeholder::make('context_messages')
@@ -421,6 +428,7 @@ class ConversationTable
                     ->required(),
             ])
             ->action(function (Conversation $record, array $data): void {
+                abort_unless(auth()->user()->can('update', $record), 403);
                 if ($record->status === 'closed') {
                     Notification::make()
                         ->warning()

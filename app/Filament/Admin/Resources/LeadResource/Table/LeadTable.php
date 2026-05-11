@@ -2,6 +2,12 @@
 
 namespace App\Filament\Admin\Resources\LeadResource\Table;
 
+use Filament\Tables\Actions\Action;
+
+use Filament\Tables\Actions\ViewAction;
+
+use Filament\Tables\Actions\DeleteAction;
+
 use App\Filament\Admin\Resources\LeadResource;
 use App\Models\Form;
 use Filament\Actions\BulkAction;
@@ -61,7 +67,7 @@ class LeadTable
             ->actions([
                 \Filament\Actions\ViewAction::make()
                     ->label(__('View')),
-                \Filament\Actions\DeleteAction::make()
+                \Filament\Tables\Actions\DeleteAction::make()
                     ->label(__('Delete')),
             ])
             ->bulkActions([

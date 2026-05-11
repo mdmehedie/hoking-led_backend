@@ -2,10 +2,12 @@
 
 namespace App\Filament\Admin\Resources\RegionResource\Table;
 
+use Filament\Tables\Actions\Action;
+
 use App\Filament\Admin\Resources\RegionResource;
-use Filament\Actions\Action;
-use Filament\Actions\BulkAction;
-use Filament\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
@@ -67,16 +69,8 @@ class RegionTable
                     ]),
             ])
             ->actions([
-                Action::make('edit')
-                    ->label('Edit')
-                    ->url(fn ($record) => RegionResource::getUrl('edit', ['record' => $record]))
-                    ->icon('heroicon-o-pencil'),
-                Action::make('delete')
-                    ->label('Delete')
-                    ->action(fn ($record) => $record->delete())
-                    ->requiresConfirmation()
-                    ->color('danger')
-                    ->icon('heroicon-o-trash'),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
                 DeleteBulkAction::make(),

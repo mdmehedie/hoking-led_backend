@@ -2,7 +2,6 @@
 
 namespace App\Filament\Admin\Resources\TopProductResource\Table;
 
-use App\Filament\Admin\Resources\TopProductResource;
 use App\Filament\Admin\Resources\ProductResource;
 use App\Models\Category;
 use App\Models\Product;
@@ -26,6 +25,7 @@ class TopProductTable
                     ->label(__('Add to Top'))
                     ->icon('heroicon-o-plus-circle')
                     ->color('primary')
+                    ->visible(fn () => auth()->user()->can('top product'))
                     ->form([
                         Select::make('product_id')
                             ->label(__('Product'))
@@ -97,11 +97,13 @@ class TopProductTable
                     ->label(__('Edit'))
                     ->icon('heroicon-o-pencil')
                     ->color('primary')
+                    ->visible(fn () => auth()->user()->can('edit product'))
                     ->url(fn ($record) => ProductResource::getUrl('edit', ['record' => $record])),
                 Action::make('remove')
                     ->label(__('Remove from Top'))
                     ->icon('heroicon-o-arrow-down-circle')
                     ->color('danger')
+                    ->visible(fn () => auth()->user()->can('top product'))
                     ->requiresConfirmation()
                     ->modalHeading(__('Remove from Top Products'))
                     ->modalDescription(__('Are you sure you want to remove this product from the top products list?'))
@@ -119,6 +121,7 @@ class TopProductTable
                     ->label(__('Remove from Top'))
                     ->color('danger')
                     ->icon('heroicon-o-arrow-down-circle')
+                    ->visible(fn () => auth()->user()->can('top product'))
                     ->requiresConfirmation()
                     ->action(function (Collection $records) {
                         $count = $records->count();

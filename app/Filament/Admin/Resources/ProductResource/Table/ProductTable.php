@@ -3,21 +3,18 @@
 namespace App\Filament\Admin\Resources\ProductResource\Table;
 
 use App\Filament\Admin\Resources\ProductResource;
-use App\Models\SocialAccount;
-use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
-use Filament\Forms\Components\CheckboxList;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
-use Throwable;
 
 class ProductTable
 {
@@ -41,6 +38,7 @@ class ProductTable
                     ])
                     ->rules(['required'])
                     ->sortable()
+                    ->disabled(fn ($record) => ! ProductResource::canEdit($record))
                     ->afterStateUpdated(function ($state, $record) {
                         Notification::make()
                             ->success()
@@ -128,34 +126,15 @@ class ProductTable
 //                    })
 //                    ->modalHeading(__('Share Product'))
 //                    ->modalSubmitActionLabel(__('Share Now')),
-                Action::make('edit')
-                    ->label(__('Edit'))
-                    ->url(fn ($record) => ProductResource::getUrl('edit', ['record' => $record]))
-                    ->icon('heroicon-o-pencil'),
-                Action::make('delete')
-                    ->label(__('Delete'))
-                    ->action(fn ($record) => $record->delete())
-                    ->requiresConfirmation()
-                    ->color('danger')
-                    ->icon('heroicon-o-trash'),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                BulkAction::make('delete_selected')
-                    ->label(__('Delete Selected'))
-                    ->color('danger')
-                    ->icon('heroicon-o-trash')
-                    ->requiresConfirmation()
-                    ->action(function (Collection $records) {
-                        $count = $records->count();
-                        $records->each->delete();
-                        Notification::make()
-                            ->success()
-                            ->title(__('Deleted'))
-                            ->body($count . ' ' . __('items deleted successfully.'))
-                            ->send();
-                    }),
+                DeleteBulkAction::make()
+                    ->visible(fn () => auth()->user()->can('delete product')),
                 BulkAction::make('change_status')
                     ->label(__('Change Status'))
+                    ->visible(fn () => auth()->user()->can('edit product'))
                     ->form([
                         Select::make('status')
                             ->options([
@@ -166,11 +145,17 @@ class ProductTable
                             ->required(),
                     ])
                     ->action(function (Collection $records, array $data) {
-                        $records->each->update(['status' => $data['status']]);
+                        $updatableRecords = $records->filter(fn ($record) => ProductResource::canEdit($record));
+                        $skippedCount = $records->count() - $updatableRecords->count();
+
+                        $updatableRecords->each->update(['status' => $data['status']]);
                         Notification::make()
                             ->success()
                             ->title(__('Status Updated'))
-                            ->body(__('Selected items have been updated to') . ' ' . $data['status'] . '.')
+                            ->body(
+                                __('Selected items have been updated to') . ' ' . $data['status'] . '.' .
+                                ($skippedCount > 0 ? ' ' . __('Some selected items were skipped due to insufficient permissions.') : '')
+                            )
                             ->send();
                     })
                     ->requiresConfirmation()

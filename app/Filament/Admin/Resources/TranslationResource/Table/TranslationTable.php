@@ -2,10 +2,17 @@
 
 namespace App\Filament\Admin\Resources\TranslationResource\Table;
 
+use Filament\Tables\Actions\ActionGroup;
+
+use Filament\Tables\Actions\Action;
+
+use Filament\Tables\Actions\EditAction;
+
+use Filament\Tables\Actions\DeleteBulkAction;
+
+use Filament\Tables\Actions\DeleteAction;
+
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;

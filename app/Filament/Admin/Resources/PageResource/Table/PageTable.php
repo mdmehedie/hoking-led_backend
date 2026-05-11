@@ -2,8 +2,7 @@
 
 namespace App\Filament\Admin\Resources\PageResource\Table;
 
-use Filament\Actions\Action;
-use Filament\Tables\Columns\ImageColumn;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -37,13 +36,7 @@ class PageTable
                     ]),
             ])
             ->actions([
-                Action::make('edit')
-                    ->label(__('Edit'))
-                    ->url(fn ($record) => \App\Filament\Admin\Resources\PageResource::getUrl('edit', ['record' => $record]))
-                    ->icon('heroicon-o-pencil'),
-            ])
-            ->bulkActions([
-                //
+                EditAction::make(),
             ]);
     }
 }

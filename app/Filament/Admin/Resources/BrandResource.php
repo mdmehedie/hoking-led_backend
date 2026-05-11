@@ -25,7 +25,7 @@ class BrandResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->can('view brand');
+        return auth()->user()->can('viewAny', Brand::class);
     }
 
     public static function getNavigationGroup(): ?string
@@ -35,22 +35,22 @@ class BrandResource extends Resource
 
     public static function canCreate(): bool
     {
-        return auth()->user()->can('create brand');
+        return auth()->user()->can('create', Brand::class);
     }
 
     public static function canEdit($record): bool
     {
-        return auth()->user()->can('edit brand');
+        return auth()->user()->can('update', $record);
     }
 
     public static function canDelete($record): bool
     {
-        return auth()->user()->can('delete brand');
+        return auth()->user()->can('delete', $record);
     }
 
     public static function canView($record): bool
     {
-        return auth()->user()->can('view brand');
+        return auth()->user()->can('view', $record);
     }
 
     public static function form(Schema $schema): Schema

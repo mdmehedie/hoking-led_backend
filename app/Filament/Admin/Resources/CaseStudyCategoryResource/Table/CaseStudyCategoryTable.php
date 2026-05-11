@@ -2,15 +2,13 @@
 
 namespace App\Filament\Admin\Resources\CaseStudyCategoryResource\Table;
 
-use App\Filament\Admin\Resources\CaseStudyCategoryResource;
-use Filament\Actions\Action;
-use Filament\Actions\BulkAction;
-use Filament\Notifications\Notification;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Collection;
 
 class CaseStudyCategoryTable
 {
@@ -32,30 +30,11 @@ class CaseStudyCategoryTable
         ])
         ->defaultSort('name')
         ->actions([
-            Action::make('edit')
-                ->url(fn ($record) => CaseStudyCategoryResource::getUrl('edit', ['record' => $record]))
-                ->icon('heroicon-o-pencil'),
-            Action::make('delete')
-                ->action(fn ($record) => $record->delete())
-                ->requiresConfirmation()
-                ->color('danger')
-                ->icon('heroicon-o-trash'),
+            EditAction::make(),
+            DeleteAction::make(),
         ])
         ->bulkActions([
-            BulkAction::make('delete_selected')
-                ->label('Delete Selected')
-                ->color('danger')
-                ->icon('heroicon-o-trash')
-                ->requiresConfirmation()
-                ->action(function (Collection $records) {
-                    $count = $records->count();
-                    $records->each->delete();
-                    Notification::make()
-                        ->success()
-                        ->title('Deleted')
-                        ->body($count . ' items deleted successfully.')
-                        ->send();
-                }),
+            DeleteBulkAction::make(),
         ]);
     }
 }

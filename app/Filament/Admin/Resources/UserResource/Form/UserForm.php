@@ -7,6 +7,8 @@ use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Utilities\Get;
+use Illuminate\Validation\Rules\Password;
 
 class UserForm
 {
@@ -25,12 +27,13 @@ class UserForm
                         ->password()
                         ->required(fn (string $operation): bool => $operation === 'create')
                         ->dehydrated(fn (?string $state) => filled($state))
-                        ->label(__('Password')),
+                        ->label(__('Password'))
+                        ->rule(Password::default())
+                        ->confirmed(),
                     TextInput::make('password_confirmation')
                         ->password()
-                        ->required(fn (string $operation): bool => $operation === 'create')
-                        ->dehydrated(fn (?string $state) => filled($state))
-                        ->same('password')
+                        ->required(fn (Get $get): bool => filled($get('password')))
+                        ->dehydrated(false)
                         ->label(__('Confirm Password')),
                 ]),
                 Tab::make(__('Roles & Permissions'))->schema([

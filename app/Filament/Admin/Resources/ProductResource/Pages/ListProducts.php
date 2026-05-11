@@ -24,6 +24,7 @@ class ListProducts extends ListRecords
                 ->label('Import Products')
                 ->icon('heroicon-o-arrow-up-tray')
                 ->color('success')
+                ->visible(fn () => auth()->user()->can('create product'))
                 ->modalHeading('Import Products')
                 ->modalDescription('Upload a CSV or Excel file with product data. Required column: title. Optional: slug, short_description, detailed_description, status, published_at, technical_specs (JSON), tags (comma-separated), category (by name or slug)')
                 ->form([
@@ -37,6 +38,7 @@ class ListProducts extends ListRecords
                         ->label('Import Products')
                         ->icon('heroicon-o-check')
                         ->action(function () {
+                            abort_unless(auth()->user()->can('create product'), 403);
                             $data = $this->form->getState();
                             $file = $data['file'];
                             $path = $file->store('imports');

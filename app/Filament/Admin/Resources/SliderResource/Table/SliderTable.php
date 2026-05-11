@@ -2,8 +2,8 @@
 
 namespace App\Filament\Admin\Resources\SliderResource\Table;
 
+use App\Models\Slider;
 use Filament\Actions\BulkAction;
-use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -39,8 +39,10 @@ class SliderTable
             ])
             ->searchable()
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->visible(fn ($record): bool => auth()->user()->can('update', $record)),
+                DeleteAction::make()
+                    ->visible(fn ($record): bool => auth()->user()->can('delete', $record)),
             ])
             ->bulkActions([
                 BulkAction::make('delete_selected')
@@ -48,13 +50,20 @@ class SliderTable
                     ->color('danger')
                     ->icon('heroicon-o-trash')
                     ->requiresConfirmation()
+                    ->visible(fn () => auth()->user()->can('delete', new Slider()))
                     ->action(function (Collection $records) {
+                        abort_unless(auth()->user()->can('delete', new Slider()), 403);
+
+                        $authorized = $records->filter(
+                            fn ($record): bool => auth()->user()->can('delete', $record)
+                        );
+
                         $count = $records->count();
-                        $records->each->delete();
+                        $authorized->each->delete();
                         Notification::make()
                             ->success()
                             ->title(__('Deleted'))
-                            ->body($count . ' ' . __('items deleted successfully.'))
+                            ->body($authorized->count() . ' ' . __('items deleted successfully.'))
                             ->send();
                     }),
                 BulkAction::make('change_status')
@@ -68,8 +77,15 @@ class SliderTable
                             ])
                             ->required(),
                     ])
+                    ->visible(fn () => auth()->user()->can('update', new Slider()))
                     ->action(function (Collection $records, array $data) {
-                        $records->each->update(['status' => $data['status']]);
+                        abort_unless(auth()->user()->can('update', new Slider()), 403);
+
+                        $authorized = $records->filter(
+                            fn ($record): bool => auth()->user()->can('update', $record)
+                        );
+
+                        $authorized->each->update(['status' => $data['status']]);
                         Notification::make()
                             ->success()
                             ->title(__('Status Updated'))

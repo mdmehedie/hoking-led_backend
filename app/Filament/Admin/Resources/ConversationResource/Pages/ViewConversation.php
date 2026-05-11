@@ -132,6 +132,7 @@ class ViewConversation extends ViewRecord
                             ->label('Reply')
                             ->icon('heroicon-o-paper-airplane')
                             ->modalHeading('Reply to Conversation')
+                            ->visible(fn ($record): bool => auth()->user()->can('update', $record))
                             ->form([
                                 Textarea::make('message')
                                     ->label('Message')
@@ -147,6 +148,7 @@ class ViewConversation extends ViewRecord
                                     ->required(),
                             ])
                             ->action(function ($record, array $data) {
+                                abort_unless(auth()->user()->can('update', $record), 403);
                                 $isInternal = $data['is_internal'] === 'true';
                                 $record->adminReply($data['message'], auth()->id(), $isInternal);
 
@@ -206,6 +208,7 @@ class ViewConversation extends ViewRecord
         return [
             Action::make('assign')
                 ->label('Assign To')
+                ->visible(fn ($record): bool => auth()->user()->can('update', $record))
                 ->form([
                     Select::make('assigned_to')
                         ->label('Assign to')
@@ -213,7 +216,10 @@ class ViewConversation extends ViewRecord
                         ->searchable()
                         ->required(),
                 ])
-                ->action(fn ($record, array $data) => $record->assignTo($data['assigned_to']))
+                ->action(function ($record, array $data): void {
+                    abort_unless(auth()->user()->can('update', $record), 403);
+                    $record->assignTo($data['assigned_to']);
+                })
                 ->modalSubmitActionLabel('Assign'),
         ];
     }

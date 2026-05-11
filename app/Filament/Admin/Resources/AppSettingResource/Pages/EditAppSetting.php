@@ -10,11 +10,6 @@ class EditAppSetting extends EditRecord
 {
     protected static string $resource = AppSettingResource::class;
 
-    protected function resolveRecord($key): \Illuminate\Database\Eloquent\Model
-    {
-        return static::getModel()::with('translations')->findOrFail($key);
-    }
-
     protected function getHeaderActions(): array
     {
         return [

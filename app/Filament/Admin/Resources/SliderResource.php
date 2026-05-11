@@ -6,7 +6,6 @@ use App\Filament\Admin\Resources\SliderResource\Form\SliderForm;
 use App\Filament\Admin\Resources\SliderResource\Table\SliderTable;
 use App\Filament\Admin\Resources\SliderResource\Pages;
 use App\Models\Slider;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -30,24 +29,29 @@ class SliderResource extends Resource
         return 'Content';
     }
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->can('viewAny', Slider::class);
+    }
+
     public static function canCreate(): bool
     {
-        return auth()->user()->can('create slider');
+        return auth()->user()->can('create', Slider::class);
     }
 
     public static function canEdit($record): bool
     {
-        return auth()->user()->can('edit slider');
+        return auth()->user()->can('update', $record);
     }
 
     public static function canDelete($record): bool
     {
-        return auth()->user()->can('delete slider');
+        return auth()->user()->can('delete', $record);
     }
 
     public static function canView($record): bool
     {
-        return auth()->user()->can('view slider');
+        return auth()->user()->can('view', $record);
     }
 
     public static function form(Schema $schema): Schema

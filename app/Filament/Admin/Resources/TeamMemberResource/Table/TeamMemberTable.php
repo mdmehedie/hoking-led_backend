@@ -3,6 +3,10 @@
 namespace App\Filament\Admin\Resources\TeamMemberResource\Table;
 
 use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\BooleanColumn;
 use Filament\Tables\Columns\ImageColumn;
@@ -51,28 +55,15 @@ class TeamMemberTable
                     ]),
             ])
             ->actions([
-                \Filament\Actions\EditAction::make()->label(__('Edit')),
-                \Filament\Actions\DeleteAction::make()->label(__('Delete')),
+                EditAction::make()->label(__('Edit')),
+                DeleteAction::make()->label(__('Delete')),
             ])
             ->bulkActions([
-                BulkAction::make('delete')
-                    ->label(__('Delete Selected'))
-                    ->color('danger')
-                    ->icon('heroicon-o-trash')
-                    ->requiresConfirmation()
-                    ->action(function (Collection $records) {
-                        $count = $records->count();
-                        $records->each->delete();
-                        Notification::make()
-                            ->success()
-                            ->title(__('Deleted'))
-                            ->body($count . ' ' . __('items deleted successfully.'))
-                            ->send();
-                    }),
+                DeleteBulkAction::make(),
                 BulkAction::make('change_status')
                     ->label(__('Change Status'))
                     ->form([
-                        \Filament\Forms\Components\Select::make('status')
+                        Select::make('status')
                             ->label(__('Status'))
                             ->options([
                                 '0' => __('Inactive'),

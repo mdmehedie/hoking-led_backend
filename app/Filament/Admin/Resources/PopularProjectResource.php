@@ -17,6 +17,8 @@ class PopularProjectResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function getNavigationLabel(): string
     {
         return __('Popular Projects');
@@ -29,8 +31,7 @@ class PopularProjectResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return false;
-//        return auth()->user()->can('view any project');
+        return auth()->user()->can('view popularproject');
     }
 
     public static function canCreate(): bool
@@ -50,7 +51,7 @@ class PopularProjectResource extends Resource
 
     public static function canView($record): bool
     {
-        return auth()->user()->can('view project');
+        return auth()->user()->can('view popularproject');
     }
 
     public static function table(Table $table): Table

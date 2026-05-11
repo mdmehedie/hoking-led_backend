@@ -2,11 +2,14 @@
 
 namespace App\Filament\Admin\Resources\FeaturedProductResource\Table;
 
+use Filament\Tables\Actions\Action;
+
 use App\Filament\Admin\Resources\FeaturedProductResource;
 use App\Filament\Admin\Resources\ProductResource;
 use App\Models\Category;
 use App\Models\Product;
-use Filament\Actions\Action;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
@@ -24,6 +27,7 @@ class FeaturedProductTable
                     ->label(__('Add to Featured'))
                     ->icon('heroicon-o-plus-circle')
                     ->color('primary')
+                    ->visible(fn () => auth()->user()->can('feature product'))
                     ->form([
                         Select::make('product_id')
                             ->label(__('Product'))
@@ -68,11 +72,13 @@ class FeaturedProductTable
                     ->label(__('Edit'))
                     ->icon('heroicon-o-pencil')
                     ->color('primary')
+                    ->visible(fn () => auth()->user()->can('edit product'))
                     ->url(fn ($record) => ProductResource::getUrl('edit', ['record' => $record])),
                 Action::make('remove')
                     ->label(__('Remove from Featured'))
                     ->icon('heroicon-o-arrow-down-circle')
                     ->color('danger')
+                    ->visible(fn () => auth()->user()->can('feature product'))
                     ->requiresConfirmation()
                     ->modalHeading(__('Remove from Featured Products'))
                     ->modalDescription(__('Are you sure you want to remove this product from the featured products list?'))

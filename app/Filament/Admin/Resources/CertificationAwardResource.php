@@ -28,22 +28,27 @@ class CertificationAwardResource extends Resource
 
     public static function canCreate(): bool
     {
-        return auth()->user()->can('create certificationaward');
+        return auth()->user()->can('create', CertificationAward::class);
     }
 
     public static function canEdit($record): bool
     {
-        return auth()->user()->can('edit certificationaward');
+        return auth()->user()->can('update', $record);
     }
 
     public static function canDelete($record): bool
     {
-        return auth()->user()->can('delete certificationaward');
+        return auth()->user()->can('delete', $record);
     }
 
     public static function canView($record): bool
     {
-        return auth()->user()->can('view certificationaward');
+        return auth()->user()->can('view', $record);
+    }
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->can('viewAny', CertificationAward::class);
     }
 
     public static function form(Schema $schema): Schema

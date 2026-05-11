@@ -8,6 +8,8 @@ use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -29,7 +31,7 @@ class ProductInquiryTable
             ->headerActions([
                 Action::make('export')
                     ->label(__('Export'))
-                    ->icon('heroicon-o-arrow-down-tray')
+                    ->visible(fn () => auth()->user()->can('viewAny', ContactSubmission::class))
                     ->modalHeading(__('Export Contact Submissions'))
                     ->modalDescription('Select conditions and format for export.')
                     ->form([
@@ -63,6 +65,7 @@ class ProductInquiryTable
                             ->required(),
                     ])
                     ->action(function (array $data) {
+                        abort_unless(auth()->user()->can('viewAny', ContactSubmission::class), 403);
                         $query = ContactSubmission::where('source', 'product_page');
 
                         if ($data['status'] !== 'all') {
@@ -209,7 +212,8 @@ class ProductInquiryTable
                         'resolved' => 'Resolved',
                         'closed' => 'Closed',
                     ])
-                    ->sortable(),
+                    ->sortable()
+                    ->disabled(fn ($record) => ! auth()->user()->can('update', $record)),
                 SelectColumn::make('priority')
                     ->label(__('Priority'))
                     ->options([
@@ -218,7 +222,8 @@ class ProductInquiryTable
                         'high' => 'High',
                         'urgent' => 'Urgent',
                     ])
-                    ->sortable(),
+                    ->sortable()
+                    ->disabled(fn ($record) => ! auth()->user()->can('update', $record)),
                 TextColumn::make('source_label')
                     ->label(__('Source'))
                     ->searchable(query: function (Builder $query, string $search): Builder {
@@ -370,6 +375,7 @@ class ProductInquiryTable
                     Action::make('assign')
                         ->label(__('Assign'))
                         ->icon('heroicon-o-user-plus')
+                        ->visible(fn ($record): bool => auth()->user()->can('update', $record))
                         ->modalHeading(__('Assign Submission'))
                         ->form([
                             Select::make('assigned_to')
@@ -378,11 +384,15 @@ class ProductInquiryTable
                                 ->searchable()
                                 ->required(),
                         ])
-                        ->action(fn($record, array $data) => $record->update(['assigned_to' => $data['assigned_to']]))
+                        ->action(function ($record, array $data) {
+                            abort_unless(auth()->user()->can('update', $record), 403);
+                            $record->update(['assigned_to' => $data['assigned_to']]);
+                        })
                         ->modalSubmitActionLabel('Assign'),
                     Action::make('link_resource')
                         ->label(__('Link Resource'))
                         ->icon('heroicon-o-link')
+                        ->visible(fn ($record): bool => auth()->user()->can('update', $record))
                         ->modalHeading(__('Link to Resource'))
                         ->modalDescription('Link this submission to a specific record for context.')
                         ->form([
@@ -419,6 +429,7 @@ class ProductInquiryTable
                             'resource_id' => $record->resource_id,
                         ])
                         ->action(function ($record, array $data) {
+                            abort_unless(auth()->user()->can('update', $record), 403);
                             $extras = $record->extras ?? [];
                             $extras['resource_type'] = $data['resource_type'];
                             $extras['resource_id'] = $data['resource_id'];
@@ -429,43 +440,50 @@ class ProductInquiryTable
                         ->label(__('Unlink'))
                         ->icon('heroicon-o-link-slash')
                         ->action(function ($record) {
+                            abort_unless(auth()->user()->can('update', $record), 403);
                             $extras = $record->extras ?? [];
                             unset($extras['resource_type'], $extras['resource_id']);
                             $record->update(['extras' => $extras]);
                         })
-                        ->visible(fn($record): bool => $record->hasResource())
+                        ->visible(fn ($record): bool => $record->hasResource() && auth()->user()->can('update', $record))
                         ->requiresConfirmation()
                         ->color('warning'),
                     Action::make('mark_in_progress')
                         ->label(__('Mark In Progress'))
-                        ->action(fn($record) => $record->markAsInProgress())
-                        ->visible(fn($record): bool => $record->status === 'new')
+                        ->action(function ($record) {
+                            abort_unless(auth()->user()->can('update', $record), 403);
+                            $record->markAsInProgress();
+                        })
+                        ->visible(fn ($record): bool => $record->status === 'new' && auth()->user()->can('update', $record))
                         ->color('warning')
                         ->icon('heroicon-o-clock'),
                     Action::make('mark_resolved')
                         ->label(__('Mark Resolved'))
-                        ->action(fn($record) => $record->markAsResolved())
-                        ->visible(fn($record): bool => $record->status !== 'resolved' && $record->status !== 'closed')
+                        ->action(function ($record) {
+                            abort_unless(auth()->user()->can('update', $record), 403);
+                            $record->markAsResolved();
+                        })
+                        ->visible(fn ($record): bool => $record->status !== 'resolved' && $record->status !== 'closed' && auth()->user()->can('update', $record))
                         ->color('success')
                         ->icon('heroicon-o-check-circle'),
                     Action::make('mark_closed')
                         ->label(__('Mark Closed'))
-                        ->action(fn($record) => $record->markAsClosed())
-                        ->visible(fn($record): bool => $record->status !== 'closed')
+                        ->action(function ($record) {
+                            abort_unless(auth()->user()->can('update', $record), 403);
+                            $record->markAsClosed();
+                        })
+                        ->visible(fn ($record): bool => $record->status !== 'closed' && auth()->user()->can('update', $record))
                         ->color('gray')
                         ->icon('heroicon-o-archive-box'),
-                    Action::make('delete')
-                        ->label(__('Delete'))
-                        ->action(fn($record) => $record->delete())
-                        ->requiresConfirmation()
-                        ->color('danger')
-                        ->icon('heroicon-o-trash'),
+                    DeleteAction::make()
+                        ->visible(fn ($record): bool => auth()->user()->can('delete', $record)),
                 ])->tooltip('Actions'),
             ])
             ->bulkActions([
                 BulkAction::make('set_status')
                     ->label(__('Set Status'))
                     ->icon('heroicon-o-flag')
+                    ->visible(fn () => auth()->user()->can('update', new ContactSubmission()))
                     ->form([
                         Select::make('status')
                             ->label('Status')
@@ -478,17 +496,20 @@ class ProductInquiryTable
                             ->required(),
                     ])
                     ->action(function (array $data, Collection $records) {
-                        $records->each->update(['status' => $data['status']]);
+                        abort_unless(auth()->user()->can('update', new ContactSubmission()), 403);
+                        $updatableRecords = $records->filter(fn ($record) => auth()->user()->can('update', $record));
+                        $updatableRecords->each->update(['status' => $data['status']]);
                         Notification::make()
                             ->success()
                             ->title('Status Updated')
-                            ->body($records->count() . ' submissions updated.')
+                            ->body($updatableRecords->count() . ' submissions updated.')
                             ->send();
                     })
                     ->requiresConfirmation(),
                 BulkAction::make('set_priority')
                     ->label(__('Set Priority'))
                     ->icon('heroicon-o-exclamation-triangle')
+                    ->visible(fn () => auth()->user()->can('update', new ContactSubmission()))
                     ->form([
                         Select::make('priority')
                             ->label('Priority')
@@ -501,17 +522,20 @@ class ProductInquiryTable
                             ->required(),
                     ])
                     ->action(function (array $data, Collection $records) {
-                        $records->each->update(['priority' => $data['priority']]);
+                        abort_unless(auth()->user()->can('update', new ContactSubmission()), 403);
+                        $updatableRecords = $records->filter(fn ($record) => auth()->user()->can('update', $record));
+                        $updatableRecords->each->update(['priority' => $data['priority']]);
                         Notification::make()
                             ->success()
                             ->title('Priority Updated')
-                            ->body($records->count() . ' submissions updated.')
+                            ->body($updatableRecords->count() . ' submissions updated.')
                             ->send();
                     })
                     ->requiresConfirmation(),
                 BulkAction::make('assign')
                     ->label(__('Assign To'))
                     ->icon('heroicon-o-user-plus')
+                    ->visible(fn () => auth()->user()->can('update', new ContactSubmission()))
                     ->form([
                         Select::make('assigned_to')
                             ->label('Assign to')
@@ -520,11 +544,13 @@ class ProductInquiryTable
                             ->required(),
                     ])
                     ->action(function (array $data, Collection $records) {
-                        $records->each->update(['assigned_to' => $data['assigned_to']]);
+                        abort_unless(auth()->user()->can('update', new ContactSubmission()), 403);
+                        $updatableRecords = $records->filter(fn ($record) => auth()->user()->can('update', $record));
+                        $updatableRecords->each->update(['assigned_to' => $data['assigned_to']]);
                         Notification::make()
                             ->success()
                             ->title('Assigned')
-                            ->body($records->count() . ' submissions assigned.')
+                            ->body($updatableRecords->count() . ' submissions assigned.')
                             ->send();
                     })
                     ->requiresConfirmation(),
@@ -532,24 +558,18 @@ class ProductInquiryTable
                     ->label(__('Unassign Selected'))
                     ->icon('heroicon-o-user-minus')
                     ->action(function (Collection $records) {
-                        $records->each->update(['assigned_to' => null]);
+                        abort_unless(auth()->user()->can('update', new ContactSubmission()), 403);
+                        $updatableRecords = $records->filter(fn ($record) => auth()->user()->can('update', $record));
+                        $updatableRecords->each->update(['assigned_to' => null]);
                         Notification::make()
                             ->success()
                             ->title('Unassigned')
-                            ->body($records->count() . ' submissions unassigned.')
+                            ->body($updatableRecords->count() . ' submissions unassigned.')
                             ->send();
                     })
                     ->requiresConfirmation(),
-                BulkAction::make('delete')
-                    ->label(__('Delete Selected'))
-                    ->color('danger')
-                    ->icon('heroicon-o-trash')
-                    ->requiresConfirmation()
-                    ->action(function (Collection $records) {
-                        $count = $records->count();
-                        $records->each->delete();
-                        Notification::make()->success()->title(__('Deleted'))->body($count . ' items deleted.')->send();
-                    }),
+                DeleteBulkAction::make()
+                    ->visible(fn () => auth()->user()->can('delete', new ContactSubmission())),
             ]);
     }
 }

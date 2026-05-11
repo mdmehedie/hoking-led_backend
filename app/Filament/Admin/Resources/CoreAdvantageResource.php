@@ -25,7 +25,7 @@ class CoreAdvantageResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->can('view coreadvantage');
+        return auth()->user()->can('viewAny', CoreAdvantage::class);
     }
 
     public static function getNavigationGroup(): ?string
@@ -35,22 +35,22 @@ class CoreAdvantageResource extends Resource
 
     public static function canCreate(): bool
     {
-        return auth()->user()->can('create coreadvantage');
+        return auth()->user()->can('create', CoreAdvantage::class);
     }
 
     public static function canEdit($record): bool
     {
-        return auth()->user()->can('edit coreadvantage');
+        return auth()->user()->can('update', $record);
     }
 
     public static function canDelete($record): bool
     {
-        return auth()->user()->can('delete coreadvantage');
+        return auth()->user()->can('delete', $record);
     }
 
     public static function canView($record): bool
     {
-        return auth()->check();
+        return auth()->user()->can('view', $record);
     }
 
     public static function form(Schema $schema): Schema

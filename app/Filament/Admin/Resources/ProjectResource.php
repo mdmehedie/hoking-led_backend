@@ -23,6 +23,8 @@ class ProjectResource extends Resource
 
     protected static ?int $navigationSort = 0;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function canViewAny(): bool
     {
         return false;

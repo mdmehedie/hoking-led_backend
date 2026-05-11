@@ -19,11 +19,13 @@ class ViewContactSubmission extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            Actions\EditAction::make()
+                ->visible(fn (Model $record): bool => auth()->user()->can('update', $record)),
             ActionGroup::make([
                 Action::make('assign')
                     ->label(__('Assign'))
                     ->icon('heroicon-o-user-plus')
+                    ->visible(fn (Model $record): bool => auth()->user()->can('update', $record))
                     ->modalHeading(__('Assign Submission'))
                     ->form([
                         Select::make('assigned_to')
@@ -36,11 +38,15 @@ class ViewContactSubmission extends ViewRecord
                     ->fillForm(fn (Model $record): array => [
                         'assigned_to' => $record->assigned_to,
                     ])
-                    ->action(fn (Model $record, array $data) => $record->update(['assigned_to' => $data['assigned_to']])),
+                    ->action(function (Model $record, array $data): void {
+                        abort_unless(auth()->user()->can('update', $record), 403);
+                        $record->update(['assigned_to' => $data['assigned_to']]);
+                    }),
 
                 Action::make('set_status')
                     ->label(__('Change Status'))
                     ->icon('heroicon-o-adjustments-horizontal')
+                    ->visible(fn (Model $record): bool => auth()->user()->can('update', $record))
                     ->modalHeading(__('Change Status'))
                     ->form([
                         Select::make('status')
@@ -57,6 +63,7 @@ class ViewContactSubmission extends ViewRecord
                         'status' => $record->status,
                     ])
                     ->action(function (Model $record, array $data): void {
+                        abort_unless(auth()->user()->can('update', $record), 403);
                         /** @var ContactSubmission $record */
                         match ($data['status']) {
                             'in_progress' => $record->markAsInProgress(),
@@ -70,6 +77,7 @@ class ViewContactSubmission extends ViewRecord
                     ->label(__('Change Priority'))
                     ->icon('heroicon-o-flag')
                     ->modalHeading(__('Change Priority'))
+                    ->visible(fn (Model $record): bool => auth()->user()->can('update', $record))
                     ->form([
                         Select::make('priority')
                             ->label(__('Priority'))
@@ -84,22 +92,27 @@ class ViewContactSubmission extends ViewRecord
                     ->fillForm(fn (Model $record): array => [
                         'priority' => $record->priority,
                     ])
-                    ->action(fn (Model $record, array $data) => $record->update(['priority' => $data['priority']])),
+                    ->action(function (Model $record, array $data): void {
+                        abort_unless(auth()->user()->can('update', $record), 403);
+                        $record->update(['priority' => $data['priority']]);
+                    }),
 
                 Action::make('unlink_resource')
                     ->label(__('Unlink Resource'))
                     ->icon('heroicon-o-link-slash')
                     ->requiresConfirmation()
                     ->color('warning')
-                    ->visible(fn (Model $record): bool => method_exists($record, 'hasResource') && $record->hasResource())
+                    ->visible(fn (Model $record): bool => auth()->user()->can('update', $record) && method_exists($record, 'hasResource') && $record->hasResource())
                     ->action(function (Model $record): void {
+                        abort_unless(auth()->user()->can('update', $record), 403);
                         /** @var ContactSubmission $record */
                         $extras = $record->extras ?? [];
                         unset($extras['resource_type'], $extras['resource_id']);
                         $record->update(['extras' => $extras]);
                     }),
             ])->label(__('Quick Actions'))->icon('heroicon-o-bolt'),
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->visible(fn (Model $record): bool => auth()->user()->can('delete', $record)),
         ];
     }
 }
