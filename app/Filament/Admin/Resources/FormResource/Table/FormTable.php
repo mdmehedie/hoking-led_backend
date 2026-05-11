@@ -2,10 +2,12 @@
 
 namespace App\Filament\Admin\Resources\FormResource\Table;
 
+use Filament\Tables\Actions\Action;
+
 use App\Filament\Admin\Resources\FormResource;
-use Filament\Actions\Action;
-use Filament\Actions\BulkAction;
-use Filament\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\BooleanColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -47,28 +49,12 @@ class FormTable
                     ]),
             ])
             ->actions([
-                Action::make('edit')
-                    ->label(__('Edit'))
-                    ->url(fn ($record) => FormResource::getUrl('edit', ['record' => $record]))
-                    ->icon('heroicon-o-pencil'),
+                EditAction::make(),
                 DeleteAction::make()
                     ->label(__('Delete')),
             ])
             ->bulkActions([
-                BulkAction::make('delete_selected')
-                    ->label('Delete Selected')
-                    ->color('danger')
-                    ->icon('heroicon-o-trash')
-                    ->requiresConfirmation()
-                    ->action(function (Collection $records) {
-                        $count = $records->count();
-                        $records->each->delete();
-                        Notification::make()
-                            ->success()
-                            ->title('Deleted')
-                            ->body($count . ' items deleted successfully.')
-                            ->send();
-                    }),
+                DeleteBulkAction::make(),
             ]);
     }
 }

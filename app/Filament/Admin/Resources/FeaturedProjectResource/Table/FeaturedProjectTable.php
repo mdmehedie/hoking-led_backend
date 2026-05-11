@@ -2,10 +2,13 @@
 
 namespace App\Filament\Admin\Resources\FeaturedProjectResource\Table;
 
+use Filament\Tables\Actions\Action;
+
 use App\Filament\Admin\Resources\ProjectResource;
 use App\Models\Category;
 use App\Models\Project;
-use Filament\Actions\Action;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
@@ -22,6 +25,7 @@ class FeaturedProjectTable
                     ->label(__('Add to Featured'))
                     ->icon('heroicon-o-plus-circle')
                     ->color('primary')
+                    ->visible(fn () => auth()->user()->can('feature project'))
                     ->form([
                         Select::make('project_id')
                             ->label(__('Project'))
@@ -69,11 +73,13 @@ class FeaturedProjectTable
                     ->label(__('Edit'))
                     ->icon('heroicon-o-pencil')
                     ->color('primary')
+                    ->visible(fn () => auth()->user()->can('edit project'))
                     ->url(fn ($record) => ProjectResource::getUrl('edit', ['record' => $record])),
                 Action::make('remove')
                     ->label(__('Remove from Featured'))
                     ->icon('heroicon-o-arrow-down-circle')
                     ->color('danger')
+                    ->visible(fn () => auth()->user()->can('feature project'))
                     ->requiresConfirmation()
                     ->modalHeading(__('Remove from Featured Projects'))
                     ->modalDescription(__('Are you sure you want to remove this project from the featured projects list?'))

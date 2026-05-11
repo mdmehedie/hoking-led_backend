@@ -2,9 +2,12 @@
 
 namespace App\Filament\Admin\Resources\SuccessfulProjectResource\Table;
 
+use Filament\Tables\Actions\Action;
+
 use App\Filament\Admin\Resources\ProjectResource;
 use App\Models\Project;
-use Filament\Actions\Action;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\TextColumn;
@@ -21,6 +24,7 @@ class SuccessfulProjectTable
                     ->label(__('Add to Successful'))
                     ->icon('heroicon-o-plus-circle')
                     ->color('primary')
+                    ->visible(fn () => auth()->user()->can('successful project'))
                     ->form([
                         Select::make('project_id')
                             ->label(__('Project'))
@@ -68,11 +72,13 @@ class SuccessfulProjectTable
                     ->label(__('Edit'))
                     ->icon('heroicon-o-pencil')
                     ->color('primary')
+                    ->visible(fn () => auth()->user()->can('edit project'))
                     ->url(fn ($record) => ProjectResource::getUrl('edit', ['record' => $record])),
                 Action::make('remove')
                     ->label(__('Remove from Successful'))
                     ->icon('heroicon-o-arrow-down-circle')
                     ->color('danger')
+                    ->visible(fn () => auth()->user()->can('successful project'))
                     ->requiresConfirmation()
                     ->modalHeading(__('Remove from Successful Projects'))
                     ->modalDescription(__('Are you sure you want to remove this project from the successful projects list?'))

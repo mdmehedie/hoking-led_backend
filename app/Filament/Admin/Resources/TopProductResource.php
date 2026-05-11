@@ -29,7 +29,7 @@ class TopProductResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->can('view any product');
+        return auth()->user()->can('view topproduct');
     }
 
     public static function canCreate(): bool
@@ -49,7 +49,7 @@ class TopProductResource extends Resource
 
     public static function canView($record): bool
     {
-        return auth()->user()->can('view product');
+        return auth()->user()->can('view topproduct');
     }
 
     public static function table(Table $table): Table

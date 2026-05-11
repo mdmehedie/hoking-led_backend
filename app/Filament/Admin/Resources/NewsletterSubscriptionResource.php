@@ -28,6 +28,31 @@ class NewsletterSubscriptionResource extends Resource
         return 'Marketing';
     }
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->can('viewAny', NewsletterSubscription::class);
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()->can('view', $record);
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()->can('create', NewsletterSubscription::class);
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->can('update', $record);
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->can('delete', $record);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return NewsletterSubscriptionForm::form($schema);

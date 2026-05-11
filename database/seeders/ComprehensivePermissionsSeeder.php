@@ -30,11 +30,25 @@ class ComprehensivePermissionsSeeder extends Seeder
             'coreadvantage',
             'project',
             'featuredproduct',
+            'topproduct',
+            'featuredproject',
+            'popularproject',
+            'successfulproject',
             'form',
             'lead',
             'slider',
             'appsetting',
             'video',
+            'brand',
+            'contactsubmission',
+            'conversation',
+            'locale',
+            'newslettersubscription',
+            'region',
+            'teammember',
+            'analyticsevent',
+            'uitranslation',
+            'casestudycategory',
         ];
 
         $actions = ['view', 'create', 'edit', 'delete'];
@@ -48,6 +62,13 @@ class ComprehensivePermissionsSeeder extends Seeder
         // Product-specific permissions
         Permission::firstOrCreate(['name' => 'publish product']);
         Permission::firstOrCreate(['name' => 'feature product']);
+        Permission::firstOrCreate(['name' => 'top product']);
+
+        // Project-specific permissions
+        Permission::firstOrCreate(['name' => 'publish project']);
+        Permission::firstOrCreate(['name' => 'feature project']);
+        Permission::firstOrCreate(['name' => 'popular project']);
+        Permission::firstOrCreate(['name' => 'successful project']);
 
         // Content-specific permissions
         Permission::firstOrCreate(['name' => 'publish blog']);

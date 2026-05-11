@@ -2,10 +2,10 @@
 
 namespace App\Filament\Admin\Resources\CertificationAwardResource\Table;
 
-use App\Filament\Admin\Resources\CertificationAwardResource;
+use App\Models\CertificationAward;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -44,12 +44,15 @@ class CertificationAwardTable
                 //
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->visible(fn ($record): bool => auth()->user()->can('update', $record)),
+                DeleteAction::make()
+                    ->visible(fn ($record): bool => auth()->user()->can('delete', $record)),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->visible(fn () => auth()->user()->can('delete', new CertificationAward())),
                 ]),
             ])
             ->defaultSort('sort_order');

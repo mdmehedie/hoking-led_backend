@@ -12,7 +12,7 @@ class TestAppSetting extends Command
 
     public function handle()
     {
-        $setting = AppSetting::with('translations')->first();
+        $setting = AppSetting::first();
         
         if (!$setting) {
             $this->error('No AppSetting found');

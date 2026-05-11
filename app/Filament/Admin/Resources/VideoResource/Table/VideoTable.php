@@ -2,9 +2,7 @@
 
 namespace App\Filament\Admin\Resources\VideoResource\Table;
 
-use App\Filament\Admin\Resources\VideoResource;
-use App\Models\Video;
-use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -29,17 +27,8 @@ class VideoTable
                     ->dateTime()
                     ->sortable(),
             ])
-            ->filters([
-                //
-            ])
             ->actions([
-                Action::make('edit')
-                    ->label(__('Edit'))
-                    ->url(fn ($record) => VideoResource::getUrl('edit', ['record' => $record]))
-                    ->icon('heroicon-o-pencil'),
-            ])
-            ->bulkActions([
-                //
+                EditAction::make(),
             ]);
     }
 }

@@ -2,18 +2,24 @@
 
 namespace App\Filament\Admin\Resources\NewsletterSubscriptionResource\Table;
 
-use App\Filament\Exports\NewsletterSubscriberExporter;
+use App\Filament\Admin\Resources\NewsletterSubscriptionResource;
 use App\Models\NewsletterSubscription;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
-use Filament\Actions\ExportAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\UploadedFile;
 use League\Csv\Reader as CsvReader;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class NewsletterSubscriptionTable
 {
@@ -23,11 +29,10 @@ class NewsletterSubscriptionTable
             ->headerActions([
                 Action::make('export')
                     ->label(__('Export Subscribers'))
-                    ->icon('heroicon-o-arrow-down-tray')
                     ->modalHeading(__('Export Newsletter Subscribers'))
-                    ->modalDescription('Select conditions and format for export.')
+                    ->visible(fn () => auth()->user()->can('viewAny', NewsletterSubscription::class))
                     ->form([
-                        \Filament\Forms\Components\Select::make('status')
+                        Select::make('status')
                             ->label('Status')
                             ->options([
                                 'all' => 'All',
@@ -37,7 +42,7 @@ class NewsletterSubscriptionTable
                                 'bounced' => 'Bounced',
                             ])
                             ->default('all'),
-                        \Filament\Forms\Components\Select::make('source')
+                        Select::make('source')
                             ->label('Source')
                             ->options([
                                 'all' => 'All',
@@ -49,7 +54,7 @@ class NewsletterSubscriptionTable
                                 'import' => 'Import',
                             ])
                             ->default('all'),
-                        \Filament\Forms\Components\Select::make('format')
+                        Select::make('format')
                             ->label('Format')
                             ->options([
                                 'csv' => 'CSV',
@@ -59,6 +64,7 @@ class NewsletterSubscriptionTable
                             ->required(),
                     ])
                     ->action(function (array $data) {
+                        abort_unless(auth()->user()->can('viewAny', NewsletterSubscription::class), 403);
                         $query = NewsletterSubscription::query();
 
                         if ($data['status'] !== 'all') {
@@ -84,7 +90,7 @@ class NewsletterSubscriptionTable
                         }
 
                         if ($data['format'] === 'xlsx') {
-                            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+                            $spreadsheet = new Spreadsheet();
                             $sheet = $spreadsheet->getActiveSheet();
 
                             $sheet->setCellValue('A1', 'email');
@@ -99,7 +105,7 @@ class NewsletterSubscriptionTable
                                 $rowNum++;
                             }
 
-                            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+                            $writer = new Xlsx($spreadsheet);
                             $fileName = 'subscribers_' . now()->format('Y-m-d_His') . '.xlsx';
                             $tempPath = storage_path('app/temp/' . $fileName);
 
@@ -144,11 +150,12 @@ class NewsletterSubscriptionTable
                     ->label(__('Import Subscribers'))
                     ->icon('heroicon-o-arrow-up-tray')
                     ->modalHeading(__('Import Newsletter Subscribers'))
+                    ->visible(fn () => auth()->user()->can('create', NewsletterSubscription::class))
                     ->modalDescription(new \Illuminate\Support\HtmlString(
                         'Upload a CSV or Excel file with columns: <strong>email</strong>, <strong>first_name</strong> (optional), <strong>last_name</strong> (optional).' . ' <a href="' . url('templates/newsletter-subscribers.csv') . '" style="color: #059669;" download>' . __('Download CSV') . '</a> | <a href="' . url('templates/newsletter-subscribers.xlsx') . '" style="color: #2563eb;" download>' . __('Download Excel') . '</a>'
                     ))
                     ->form([
-                        \Filament\Forms\Components\FileUpload::make('file')
+                        FileUpload::make('file')
                             ->label(__('File'))
                             ->acceptedFileTypes([
                                 'text/csv',
@@ -160,9 +167,10 @@ class NewsletterSubscriptionTable
                             ->required(),
                     ])
                     ->action(function (array $data) {
+                        abort_unless(auth()->user()->can('create', NewsletterSubscription::class), 403);
                         $file = $data['file'];
 
-                        if (!$file instanceof \Illuminate\Http\UploadedFile) {
+                        if (!$file instanceof UploadedFile) {
                             Notification::make()
                                 ->danger()
                                 ->title('No file uploaded')
@@ -296,35 +304,38 @@ class NewsletterSubscriptionTable
             ->actions([
                 Action::make('view')
                     ->label(__('View'))
-                    ->url(fn ($record) => \App\Filament\Admin\Resources\NewsletterSubscriptionResource::getUrl('view', ['record' => $record]))
+                    ->url(fn ($record) => NewsletterSubscriptionResource::getUrl('view', ['record' => $record]))
                     ->icon('heroicon-o-eye'),
                 Action::make('activate')
                     ->label(__('Activate'))
-                    ->action(fn ($record) => $record->markAsActive())
+                    ->action(function ($record): void {
+                        abort_unless(auth()->user()->can('update', $record), 403);
+                        $record->markAsActive();
+                    })
                     ->requiresConfirmation()
-                    ->visible(fn ($record): bool => $record->status !== 'active')
+                    ->visible(fn ($record): bool => $record->status !== 'active' && auth()->user()->can('update', $record))
                     ->color('success')
                     ->icon('heroicon-o-check'),
                 Action::make('unsubscribe')
                     ->label(__('Unsubscribe'))
-                    ->action(fn ($record) => $record->unsubscribe())
+                    ->action(function ($record): void {
+                        abort_unless(auth()->user()->can('update', $record), 403);
+                        $record->unsubscribe();
+                    })
                     ->requiresConfirmation()
-                    ->visible(fn ($record): bool => $record->status !== 'unsubscribed')
+                    ->visible(fn ($record): bool => $record->status !== 'unsubscribed' && auth()->user()->can('update', $record))
                     ->color('danger')
                     ->icon('heroicon-o-x-mark'),
-                Action::make('delete')
-                    ->label(__('Delete'))
-                    ->action(fn ($record) => $record->delete())
-                    ->requiresConfirmation()
-                    ->color('danger')
-                    ->icon('heroicon-o-trash'),
+                DeleteAction::make()
+                    ->visible(fn ($record): bool => auth()->user()->can('delete', $record)),
             ])
             ->bulkActions([
                 BulkAction::make('activate')
                     ->label(__('Activate Selected'))
                     ->action(function (Collection $records) {
+                        abort_unless(auth()->user()->can('update', new NewsletterSubscription()), 403);
                         $count = 0;
-                        $records->each(function ($record) use (&$count) {
+                        $records->filter(fn ($record) => auth()->user()->can('update', $record))->each(function ($record) use (&$count) {
                             if ($record->status !== 'active') {
                                 $record->markAsActive();
                                 $count++;
@@ -336,14 +347,16 @@ class NewsletterSubscriptionTable
                             ->body($count . ' ' . __('subscriptions activated.'))
                             ->send();
                     })
+                    ->visible(fn () => auth()->user()->can('update', new NewsletterSubscription()))
                     ->requiresConfirmation()
                     ->color('success')
                     ->icon('heroicon-o-check'),
                 BulkAction::make('unsubscribe')
                     ->label(__('Unsubscribe Selected'))
                     ->action(function (Collection $records) {
+                        abort_unless(auth()->user()->can('update', new NewsletterSubscription()), 403);
                         $count = 0;
-                        $records->each(function ($record) use (&$count) {
+                        $records->filter(fn ($record) => auth()->user()->can('update', $record))->each(function ($record) use (&$count) {
                             if ($record->status !== 'unsubscribed') {
                                 $record->unsubscribe();
                                 $count++;
@@ -355,23 +368,12 @@ class NewsletterSubscriptionTable
                             ->body($count . ' ' . __('subscriptions unsubscribed.'))
                             ->send();
                     })
+                    ->visible(fn () => auth()->user()->can('update', new NewsletterSubscription()))
                     ->requiresConfirmation()
                     ->color('danger')
                     ->icon('heroicon-o-x-mark'),
-                BulkAction::make('delete')
-                    ->label(__('Delete Selected'))
-                    ->color('danger')
-                    ->icon('heroicon-o-trash')
-                    ->requiresConfirmation()
-                    ->action(function (Collection $records) {
-                        $count = $records->count();
-                        $records->each->delete();
-                        Notification::make()
-                            ->success()
-                            ->title(__('Deleted'))
-                            ->body($count . ' ' . __('items deleted successfully.'))
-                            ->send();
-                    }),
+                DeleteBulkAction::make()
+                    ->visible(fn () => auth()->user()->can('delete', new NewsletterSubscription())),
             ]);
     }
 }

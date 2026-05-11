@@ -8,22 +8,24 @@ use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
-use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Illuminate\Http\UploadedFile;
-use League\Csv\Reader as CsvReader;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use Illuminate\Support\HtmlString;
+use League\Csv\Reader;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ContactSubmissionTable
 {
@@ -33,9 +35,8 @@ class ContactSubmissionTable
             ->headerActions([
                 Action::make('export')
                     ->label(__('Export'))
-                    ->icon('heroicon-o-arrow-down-tray')
                     ->modalHeading(__('Export Contact Submissions'))
-                    ->modalDescription('Select conditions and format for export.')
+                    ->visible(fn () => auth()->user()->can('viewAny', ContactSubmission::class))
                     ->form([
                         Select::make('status')
                             ->label('Status')
@@ -67,6 +68,7 @@ class ContactSubmissionTable
                             ->required(),
                     ])
                     ->action(function (array $data) {
+                        abort_unless(auth()->user()->can('viewAny', ContactSubmission::class), 403);
                         $query = ContactSubmission::query();
 
                         if ($data['status'] !== 'all') {
@@ -92,7 +94,7 @@ class ContactSubmissionTable
                         $columns = ['name', 'email', 'phone', 'country', 'company', 'subject', 'message', 'status', 'priority', 'source', 'created_at'];
 
                         if ($data['format'] === 'xlsx') {
-                            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+                            $spreadsheet = new Spreadsheet();
                             $sheet = $spreadsheet->getActiveSheet();
 
                             $sheet->setCellValue('A1', 'name');
@@ -123,7 +125,7 @@ class ContactSubmissionTable
                                 $rowNum++;
                             }
 
-                            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+                            $writer = new Xlsx($spreadsheet);
                             $fileName = 'contacts_' . now()->format('Y-m-d_His') . '.xlsx';
                             $tempPath = storage_path('app/temp/' . $fileName);
 
@@ -176,7 +178,8 @@ class ContactSubmissionTable
                     ->label(__('Import'))
                     ->icon('heroicon-o-arrow-up-tray')
                     ->modalHeading(__('Import Contact Submissions'))
-                    ->modalDescription(new \Illuminate\Support\HtmlString(
+                    ->visible(fn () => auth()->user()->can('create', ContactSubmission::class))
+                    ->modalDescription(new HtmlString(
                         'Upload a CSV or Excel file with columns: <strong>name</strong>, <strong>email</strong>, <strong>phone</strong> (optional), <strong>country</strong> (optional), <strong>company</strong> (optional), <strong>subject</strong>, <strong>message</strong>.<br>' .
                         '<a href="' . url('templates/contact-submissions.csv') . '" style="color: #059669;" download>Download CSV</a> | <a href="' . url('templates/contact-submissions.xlsx') . '" style="color: #2563eb;" download>Download Excel</a>'
                     ))
@@ -193,6 +196,7 @@ class ContactSubmissionTable
                             ->required(),
                     ])
                     ->action(function (array $data) {
+                        abort_unless(auth()->user()->can('create', ContactSubmission::class), 403);
                         $file = $data['file'];
 
                         if (!$file instanceof UploadedFile) {
@@ -213,7 +217,7 @@ class ContactSubmissionTable
                             $rows = $sheet->toArray(null, true, true, true);
                             array_shift($rows);
                         } else {
-                            $csv = \League\Csv\Reader::createFromPath($file->getRealPath(), 'r');
+                            $csv = Reader::createFromPath($file->getRealPath(), 'r');
                             $csv->setHeaderOffset(0);
                             $rows = iterator_to_array($csv);
                         }
@@ -315,7 +319,8 @@ class ContactSubmissionTable
                         'resolved' => 'Resolved',
                         'closed' => 'Closed',
                     ])
-                    ->sortable(),
+                    ->sortable()
+                    ->disabled(fn ($record) => ! auth()->user()->can('update', $record)),
                 SelectColumn::make('priority')
                     ->label(__('Priority'))
                     ->options([
@@ -324,7 +329,8 @@ class ContactSubmissionTable
                         'high' => 'High',
                         'urgent' => 'Urgent',
                     ])
-                    ->sortable(),
+                    ->sortable()
+                    ->disabled(fn ($record) => ! auth()->user()->can('update', $record)),
                 TextColumn::make('source_label')
                     ->label(__('Source'))
                     ->searchable(query: function (Builder $query, string $search): Builder {
@@ -468,7 +474,8 @@ class ContactSubmissionTable
                     Action::make('edit')
                         ->label(__('Edit'))
                         ->icon('heroicon-o-pencil')
-                        ->url(fn ($record) => ContactSubmissionResource::getUrl('edit', ['record' => $record])),
+                        ->url(fn ($record) => ContactSubmissionResource::getUrl('edit', ['record' => $record]))
+                        ->visible(fn ($record): bool => auth()->user()->can('update', $record)),
                     Action::make('view')
                         ->label(__('View'))
                         ->url(fn ($record) => ContactSubmissionResource::getUrl('view', ['record' => $record]))
@@ -476,6 +483,7 @@ class ContactSubmissionTable
                     Action::make('assign')
                         ->label(__('Assign'))
                         ->icon('heroicon-o-user-plus')
+                        ->visible(fn ($record): bool => auth()->user()->can('update', $record))
                         ->modalHeading(__('Assign Submission'))
                         ->form([
                             Select::make('assigned_to')
@@ -484,11 +492,15 @@ class ContactSubmissionTable
                                 ->searchable()
                                 ->required(),
                         ])
-                        ->action(fn ($record, array $data) => $record->update(['assigned_to' => $data['assigned_to']]))
+                        ->action(function ($record, array $data): void {
+                            abort_unless(auth()->user()->can('update', $record), 403);
+                            $record->update(['assigned_to' => $data['assigned_to']]);
+                        })
                         ->modalSubmitActionLabel('Assign'),
                     Action::make('link_resource')
                         ->label(__('Link Resource'))
                         ->icon('heroicon-o-link')
+                        ->visible(fn ($record): bool => auth()->user()->can('update', $record))
                         ->modalHeading(__('Link to Resource'))
                         ->modalDescription('Link this submission to a specific record for context.')
                         ->form([
@@ -525,6 +537,7 @@ class ContactSubmissionTable
                             'resource_id' => $record->resource_id,
                         ])
                         ->action(function ($record, array $data) {
+                            abort_unless(auth()->user()->can('update', $record), 403);
                             $extras = $record->extras ?? [];
                             $extras['resource_type'] = $data['resource_type'];
                             $extras['resource_id'] = $data['resource_id'];
@@ -535,43 +548,50 @@ class ContactSubmissionTable
                         ->label(__('Unlink'))
                         ->icon('heroicon-o-link-slash')
                         ->action(function ($record) {
+                            abort_unless(auth()->user()->can('update', $record), 403);
                             $extras = $record->extras ?? [];
                             unset($extras['resource_type'], $extras['resource_id']);
                             $record->update(['extras' => $extras]);
                         })
-                        ->visible(fn ($record): bool => $record->hasResource())
+                        ->visible(fn ($record): bool => $record->hasResource() && auth()->user()->can('update', $record))
                         ->requiresConfirmation()
                         ->color('warning'),
                     Action::make('mark_in_progress')
                         ->label(__('Mark In Progress'))
-                        ->action(fn ($record) => $record->markAsInProgress())
-                        ->visible(fn ($record): bool => $record->status === 'new')
+                        ->action(function ($record): void {
+                            abort_unless(auth()->user()->can('update', $record), 403);
+                            $record->markAsInProgress();
+                        })
+                        ->visible(fn ($record): bool => $record->status === 'new' && auth()->user()->can('update', $record))
                         ->color('warning')
                         ->icon('heroicon-o-clock'),
                     Action::make('mark_resolved')
                         ->label(__('Mark Resolved'))
-                        ->action(fn ($record) => $record->markAsResolved())
-                        ->visible(fn ($record): bool => $record->status !== 'resolved' && $record->status !== 'closed')
+                        ->action(function ($record): void {
+                            abort_unless(auth()->user()->can('update', $record), 403);
+                            $record->markAsResolved();
+                        })
+                        ->visible(fn ($record): bool => $record->status !== 'resolved' && $record->status !== 'closed' && auth()->user()->can('update', $record))
                         ->color('success')
                         ->icon('heroicon-o-check-circle'),
                     Action::make('mark_closed')
                         ->label(__('Mark Closed'))
-                        ->action(fn ($record) => $record->markAsClosed())
-                        ->visible(fn ($record): bool => $record->status !== 'closed')
+                        ->action(function ($record): void {
+                            abort_unless(auth()->user()->can('update', $record), 403);
+                            $record->markAsClosed();
+                        })
+                        ->visible(fn ($record): bool => $record->status !== 'closed' && auth()->user()->can('update', $record))
                         ->color('gray')
                         ->icon('heroicon-o-archive-box'),
-                    Action::make('delete')
-                        ->label(__('Delete'))
-                        ->action(fn ($record) => $record->delete())
-                        ->requiresConfirmation()
-                        ->color('danger')
-                        ->icon('heroicon-o-trash'),
+                    DeleteAction::make()
+                        ->visible(fn ($record): bool => auth()->user()->can('delete', $record)),
                 ])->tooltip('Actions'),
             ])
             ->bulkActions([
                 BulkAction::make('set_status')
                     ->label(__('Set Status'))
                     ->icon('heroicon-o-flag')
+                    ->visible(fn () => auth()->user()->can('update', new ContactSubmission()))
                     ->form([
                         Select::make('status')
                             ->label('Status')
@@ -584,17 +604,20 @@ class ContactSubmissionTable
                             ->required(),
                     ])
                     ->action(function (array $data, Collection $records) {
-                        $records->each->update(['status' => $data['status']]);
+                        abort_unless(auth()->user()->can('update', new ContactSubmission()), 403);
+                        $updatableRecords = $records->filter(fn ($record) => auth()->user()->can('update', $record));
+                        $updatableRecords->each->update(['status' => $data['status']]);
                         Notification::make()
                             ->success()
                             ->title('Status Updated')
-                            ->body($records->count() . ' submissions updated.')
+                            ->body($updatableRecords->count() . ' submissions updated.')
                             ->send();
                     })
                     ->requiresConfirmation(),
                 BulkAction::make('set_priority')
                     ->label(__('Set Priority'))
                     ->icon('heroicon-o-exclamation-triangle')
+                    ->visible(fn () => auth()->user()->can('update', new ContactSubmission()))
                     ->form([
                         Select::make('priority')
                             ->label('Priority')
@@ -607,17 +630,20 @@ class ContactSubmissionTable
                             ->required(),
                     ])
                     ->action(function (array $data, Collection $records) {
-                        $records->each->update(['priority' => $data['priority']]);
+                        abort_unless(auth()->user()->can('update', new ContactSubmission()), 403);
+                        $updatableRecords = $records->filter(fn ($record) => auth()->user()->can('update', $record));
+                        $updatableRecords->each->update(['priority' => $data['priority']]);
                         Notification::make()
                             ->success()
                             ->title('Priority Updated')
-                            ->body($records->count() . ' submissions updated.')
+                            ->body($updatableRecords->count() . ' submissions updated.')
                             ->send();
                     })
                     ->requiresConfirmation(),
                 BulkAction::make('assign')
                     ->label(__('Assign To'))
                     ->icon('heroicon-o-user-plus')
+                    ->visible(fn () => auth()->user()->can('update', new ContactSubmission()))
                     ->form([
                         Select::make('assigned_to')
                             ->label('Assign to')
@@ -626,11 +652,13 @@ class ContactSubmissionTable
                             ->required(),
                     ])
                     ->action(function (array $data, Collection $records) {
-                        $records->each->update(['assigned_to' => $data['assigned_to']]);
+                        abort_unless(auth()->user()->can('update', new ContactSubmission()), 403);
+                        $updatableRecords = $records->filter(fn ($record) => auth()->user()->can('update', $record));
+                        $updatableRecords->each->update(['assigned_to' => $data['assigned_to']]);
                         Notification::make()
                             ->success()
                             ->title('Assigned')
-                            ->body($records->count() . ' submissions assigned.')
+                            ->body($updatableRecords->count() . ' submissions assigned.')
                             ->send();
                     })
                     ->requiresConfirmation(),
@@ -638,24 +666,18 @@ class ContactSubmissionTable
                     ->label(__('Unassign Selected'))
                     ->icon('heroicon-o-user-minus')
                     ->action(function (Collection $records) {
-                        $records->each->update(['assigned_to' => null]);
+                        abort_unless(auth()->user()->can('update', new ContactSubmission()), 403);
+                        $updatableRecords = $records->filter(fn ($record) => auth()->user()->can('update', $record));
+                        $updatableRecords->each->update(['assigned_to' => null]);
                         Notification::make()
                             ->success()
                             ->title('Unassigned')
-                            ->body($records->count() . ' submissions unassigned.')
+                            ->body($updatableRecords->count() . ' submissions unassigned.')
                             ->send();
                     })
                     ->requiresConfirmation(),
-                BulkAction::make('delete')
-                    ->label(__('Delete Selected'))
-                    ->color('danger')
-                    ->icon('heroicon-o-trash')
-                    ->requiresConfirmation()
-                    ->action(function (Collection $records) {
-                        $count = $records->count();
-                        $records->each->delete();
-                        Notification::make()->success()->title(__('Deleted'))->body($count . ' items deleted.')->send();
-                    }),
+                DeleteBulkAction::make()
+                    ->visible(fn () => auth()->user()->can('delete', new ContactSubmission())),
             ]);
     }
 }

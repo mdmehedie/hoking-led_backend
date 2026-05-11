@@ -2,14 +2,13 @@
 
 namespace App\Filament\Admin\Resources\CaseStudyResource\Table;
 
-use Filament\Actions\Action;
-use Filament\Actions\BulkAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Filament\Notifications\Notification;
-use Illuminate\Database\Eloquent\Collection;
 
 class CaseStudyTable
 {
@@ -52,32 +51,11 @@ class CaseStudyTable
                     ->relationship('category', 'name'),
             ])
             ->actions([
-                Action::make('edit')
-                    ->label(__('Edit'))
-                    ->url(fn ($record) => \App\Filament\Admin\Resources\CaseStudyResource::getUrl('edit', ['record' => $record]))
-                    ->icon('heroicon-o-pencil'),
-                Action::make('delete')
-                    ->label(__('Delete'))
-                    ->action(fn ($record) => $record->delete())
-                    ->requiresConfirmation()
-                    ->color('danger')
-                    ->icon('heroicon-o-trash'),
+                EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
-                BulkAction::make('delete')
-                    ->label(__('Delete Selected'))
-                    ->color('danger')
-                    ->icon('heroicon-o-trash')
-                    ->requiresConfirmation()
-                    ->action(function (Collection $records) {
-                        $count = $records->count();
-                        $records->each->delete();
-                        Notification::make()
-                            ->success()
-                            ->title(__('Deleted'))
-                            ->body($count . ' ' . __('items deleted successfully.'))
-                            ->send();
-                    }),
+                DeleteBulkAction::make(),
             ]);
     }
 }
