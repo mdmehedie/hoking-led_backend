@@ -97,19 +97,7 @@ class ViewContactSubmission extends ViewRecord
                         $record->update(['priority' => $data['priority']]);
                     }),
 
-                Action::make('unlink_resource')
-                    ->label(__('Unlink Resource'))
-                    ->icon('heroicon-o-link-slash')
-                    ->requiresConfirmation()
-                    ->color('warning')
-                    ->visible(fn (Model $record): bool => auth()->user()->can('update', $record) && method_exists($record, 'hasResource') && $record->hasResource())
-                    ->action(function (Model $record): void {
-                        abort_unless(auth()->user()->can('update', $record), 403);
-                        /** @var ContactSubmission $record */
-                        $extras = $record->extras ?? [];
-                        unset($extras['resource_type'], $extras['resource_id']);
-                        $record->update(['extras' => $extras]);
-                    }),
+
             ])->label(__('Quick Actions'))->icon('heroicon-o-bolt'),
             Actions\DeleteAction::make()
                 ->visible(fn (Model $record): bool => auth()->user()->can('delete', $record)),

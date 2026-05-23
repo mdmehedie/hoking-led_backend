@@ -47,7 +47,7 @@ class AdminPanelProvider extends PanelProvider
                     return __('Admin Panel');
                 }
             })
-            ->login()
+            ->login(\App\Filament\Admin\Pages\Auth\Login::class)
             ->profile(EditProfile::class)
             ->colors([
                 'primary' => Color::Amber,
@@ -87,6 +87,12 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->renderHook('panels::head.end', function () {
+                if (! request()->routeIs(['filament.admin.resources.contact-submissions.index', 'filament.admin.resources.product-inquiry.index'])) {
+                    return '';
+                }
+                return new HtmlString('<link rel="stylesheet" href="' . asset('css/contact-submission.css') . '">');
+            })
             ->renderHook('head.end', function () {
                 return new HtmlString('<script src="/assets/tinymce/tinymce.min.js"></script><meta name="csrf-token" content="' . csrf_token() . '">');
             })

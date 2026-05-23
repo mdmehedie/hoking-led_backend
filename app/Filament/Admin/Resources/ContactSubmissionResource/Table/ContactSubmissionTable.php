@@ -319,6 +319,9 @@ class ContactSubmissionTable
                         'resolved' => 'Resolved',
                         'closed' => 'Closed',
                     ])
+                    ->selectablePlaceholder(false)
+                    ->extraAttributes(['style' => 'width: 100px; min-width: 100px;'])
+                    ->extraInputAttributes(['style' => 'width: 100px; min-width: 100px;'])
                     ->sortable()
                     ->disabled(fn ($record) => ! auth()->user()->can('update', $record)),
                 SelectColumn::make('priority')
@@ -329,6 +332,9 @@ class ContactSubmissionTable
                         'high' => 'High',
                         'urgent' => 'Urgent',
                     ])
+                    ->selectablePlaceholder(false)
+                    ->extraAttributes(['style' => 'width: 100px; min-width: 100px;'])
+                    ->extraInputAttributes(['style' => 'width: 100px; min-width: 100px;'])
                     ->sortable()
                     ->disabled(fn ($record) => ! auth()->user()->can('update', $record)),
                 TextColumn::make('source_label')
@@ -341,16 +347,16 @@ class ContactSubmissionTable
                     ->label(__('Related To'))
                     ->placeholder('—')
                     ->getStateUsing(function ($record) {
-                        $type = $record->extras['resource_type'] ?? null;
+//                        $type = $record->extras['resource_type'] ?? null;
                         $publicUrl = $record->extras['public_url'] ?? null;
 
                         if ($publicUrl) {
                             return __('View Public Page');
                         }
 
-                        if ($type) {
-                            return 'View ' . ucfirst(str_replace('_', ' ', $type));
-                        }
+//                        if ($type) {
+//                            return 'View ' . ucfirst(str_replace('_', ' ', $type));
+//                        }
 
                         return null;
                     })
@@ -497,65 +503,7 @@ class ContactSubmissionTable
                             $record->update(['assigned_to' => $data['assigned_to']]);
                         })
                         ->modalSubmitActionLabel('Assign'),
-                    Action::make('link_resource')
-                        ->label(__('Link Resource'))
-                        ->icon('heroicon-o-link')
-                        ->visible(fn ($record): bool => auth()->user()->can('update', $record))
-                        ->modalHeading(__('Link to Resource'))
-                        ->modalDescription('Link this submission to a specific record for context.')
-                        ->form([
-                            Select::make('resource_type')
-                                ->label('Resource Type')
-                                ->options([
-                                    'product' => 'Product',
-                                    'blog' => 'Blog',
-                                    'news' => 'News',
-                                    'project' => 'Project',
-                                    'page' => 'Page',
-                                    'case_study' => 'Case Study',
-                                    'brand' => 'Brand',
-                                    'category' => 'Category',
-                                ])
-                                ->required()
-                                ->live(),
-                            Select::make('resource_id')
-                                ->label('Resource')
-                                ->options(function (callable $get) {
-                                    $type = $get('resource_type');
-                                    if (!$type) return [];
 
-                                    $model = ContactSubmission::RESOURCE_TYPES[$type] ?? null;
-                                    if (!$model) return [];
-
-                                    return $model::limit(100)->pluck('title', 'id')->filter();
-                                })
-                                ->searchable()
-                                ->required(),
-                        ])
-                        ->fillForm(fn ($record) => [
-                            'resource_type' => $record->resource_type,
-                            'resource_id' => $record->resource_id,
-                        ])
-                        ->action(function ($record, array $data) {
-                            abort_unless(auth()->user()->can('update', $record), 403);
-                            $extras = $record->extras ?? [];
-                            $extras['resource_type'] = $data['resource_type'];
-                            $extras['resource_id'] = $data['resource_id'];
-                            $record->update(['extras' => $extras]);
-                        })
-                        ->modalSubmitActionLabel('Link'),
-                    Action::make('unlink_resource')
-                        ->label(__('Unlink'))
-                        ->icon('heroicon-o-link-slash')
-                        ->action(function ($record) {
-                            abort_unless(auth()->user()->can('update', $record), 403);
-                            $extras = $record->extras ?? [];
-                            unset($extras['resource_type'], $extras['resource_id']);
-                            $record->update(['extras' => $extras]);
-                        })
-                        ->visible(fn ($record): bool => $record->hasResource() && auth()->user()->can('update', $record))
-                        ->requiresConfirmation()
-                        ->color('warning'),
                     Action::make('mark_in_progress')
                         ->label(__('Mark In Progress'))
                         ->action(function ($record): void {

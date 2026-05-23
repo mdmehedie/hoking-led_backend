@@ -1,0 +1,11 @@
+/* Fixed height scrollable table content for Contact Inbox */
+.fi-ta-main {
+    max-height: calc(100vh - 230px) !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin !important;
+    position: relative !important;
+}
+
+.fi-ta-content-ctn {
+    max-height: calc(100% - 190px);
+}
