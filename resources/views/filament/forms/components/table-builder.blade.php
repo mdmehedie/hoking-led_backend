@@ -19,7 +19,7 @@
         style="display: grid; gap: 1rem;"
     >
         <!-- Toolbar -->
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.75rem; border: 1px solid var(--gray-300); border-radius: 0.5rem;" class="dark:!border-gray-600">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.75rem; border: 1px solid var(--gray-300); border-radius: 0.5rem;" class="dark:border-gray-600!">
             <div style="display: flex; gap: 0.5rem;">
                 <button
                     type="button"
@@ -83,7 +83,7 @@
             x-show="mergeMode"
             x-transition
             style="padding: 1rem; border: 1px solid var(--warning-300); border-radius: 0.5rem; color: var(--warning-800);"
-            class="dark:!border-warning-700 dark:!text-warning-300"
+            class="dark:border-warning-700! dark:text-warning-300!"
         >
             <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
                 <svg class="fi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 1.25rem; height: 1.25rem; margin-top: 0.125rem; flex-shrink: 0;">
@@ -97,12 +97,12 @@
         </div>
 
         <!-- Table -->
-        <div style="overflow-x: auto; border: 1px solid var(--gray-300); border-radius: 0.5rem;" class="dark:!border-gray-600">
+        <div style="overflow-x: auto; border: 1px solid var(--gray-300); border-radius: 0.5rem;" class="dark:border-gray-600!">
             <table style="width: 100%; border-collapse: collapse;">
                 <thead>
                     <tr>
                         <template x-for="colIndex in getVisibleColumnCount()" :key="'header-' + colIndex">
-                            <th style="border-bottom: 1px solid var(--gray-300); border-right: 1px solid var(--gray-300); padding: 0.75rem 1rem; text-align: left; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--gray-700);" class="dark:!border-gray-600 dark:!text-gray-300">
+                            <th style="border-bottom: 1px solid var(--gray-300); border-right: 1px solid var(--gray-300); padding: 0.75rem 1rem; text-align: left; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--gray-700);" class="dark:border-gray-600! dark:text-gray-300!">
                                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
                                     <span x-text="'Column ' + colIndex"></span>
                                     <button
@@ -120,11 +120,42 @@
                                 </div>
                             </th>
                         </template>
-                        <th style="width: 3rem; border-bottom: 1px solid var(--gray-300); padding: 0.75rem 1rem;" class="dark:!border-gray-600"></th>
+                        <th style="width: 3rem; border-bottom: 1px solid var(--gray-300); padding: 0.75rem 1rem;" class="dark:border-gray-600!"></th>
                     </tr>
+                    
+                    <!-- Header Row Editor (First Row of Cells) -->
+                    <template x-if="getHeaderRow()">
+                        <tr style="background: rgba(148, 163, 184, 0.05); border-bottom: 2px solid var(--gray-300);" class="dark:border-gray-600!">
+                            <template x-for="cell in getHeaderRow().cells" :key="'header-cell-' + cell.id">
+                                <td
+                                    :colspan="cell.colspan || 1"
+                                    :rowspan="cell.rowspan || 1"
+                                    style="border-right: 1px solid var(--gray-300); padding: 0.75rem 1rem; vertical-align: top;"
+                                    class="dark:border-gray-600!"
+                                    :class="[
+                                        mergeMode ? 'cursor-pointer' : '',
+                                        cell.selected ? 'fi-active' : ''
+                                    ]"
+                                    @click="handleCellClick(cell.rowIndex || 0, cell)"
+                                >
+                                    <textarea
+                                        x-model="cell.value"
+                                        @change="updateState()"
+                                        class="fi-input block"
+                                        style="width: 100%; resize: none; border: 1px solid var(--gray-300); border-radius: 0.375rem; padding: 0.5rem 0.75rem; font-size: 0.875rem; font-weight: bold; background: transparent;"
+                                        rows="2"
+                                        placeholder="Header name (e.g. Item, Value)..."
+                                    ></textarea>
+                                </td>
+                            </template>
+                            <td style="border-right: 1px solid var(--gray-300); padding: 0.75rem 1rem; text-align: center; vertical-align: middle; font-size: 0.75rem; font-weight: 800; color: var(--gray-500);" class="dark:border-gray-600!">
+                                <span>HEADER</span>
+                            </td>
+                        </tr>
+                    </template>
                 </thead>
                 <tbody>
-                    <template x-for="(row, rowIndex) in getRows()" :key="'row-' + rowIndex">
+                    <template x-for="(row, rowIndex) in getBodyRows()" :key="'row-' + row.rowIndex">
                         <tr>
                             <template x-for="cell in row.cells" :key="'cell-' + cell.id">
                                 <td
@@ -132,12 +163,12 @@
                                     :colspan="cell.colspan || 1"
                                     :rowspan="cell.rowspan || 1"
                                     style="border-right: 1px solid var(--gray-300); padding: 0.75rem 1rem; vertical-align: top;"
-                                    class="dark:!border-gray-600"
+                                    class="dark:border-gray-600!"
                                     :class="[
                                         mergeMode ? 'cursor-pointer' : '',
                                         cell.selected ? 'fi-active' : ''
                                     ]"
-                                    @click="handleCellClick(rowIndex, cell)"
+                                    @click="handleCellClick(row.rowIndex, cell)"
                                 >
                                     <textarea
                                         x-model="cell.value"
@@ -149,10 +180,10 @@
                                     ></textarea>
                                 </td>
                             </template>
-                            <td style="border-right: 1px solid var(--gray-300); padding: 0.75rem 1rem; vertical-align: middle;" class="dark:!border-gray-600">
+                            <td style="border-right: 1px solid var(--gray-300); padding: 0.75rem 1rem; vertical-align: middle;" class="dark:border-gray-600!">
                                 <button
                                     type="button"
-                                    x-on:click="removeRow(rowIndex)"
+                                    x-on:click="removeRow(row.rowIndex)"
                                     class="fi-icon-btn"
                                     title="Remove row"
                                 >
@@ -168,7 +199,7 @@
         </div>
 
         <!-- Stats -->
-        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: var(--gray-500);" class="dark:!text-gray-400">
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: var(--gray-500);" class="dark:text-gray-400!">
             <span x-text="'Rows: ' + state.rows + ' | Columns: ' + state.columns"></span>
             <span x-show="mergeMode && selectedCells.length > 0" style="font-weight: 500;" class="fi-color-primary" x-text="selectedCells.length + ' cells selected'"></span>
         </div>
@@ -215,6 +246,7 @@ function tableBuilderFormComponent({ state, initialRows, initialColumns }) {
                 colspan: 1,
                 rowspan: 1,
                 selected: false,
+                is_header: rowIndex === 0,
             };
         },
 
@@ -246,6 +278,28 @@ function tableBuilderFormComponent({ state, initialRows, initialColumns }) {
                     cells: row.filter(cell => !cell.merged)
                 }))
                 .filter(row => row.cells && row.cells.length > 0);
+        },
+
+        getBodyRows() {
+            const rows = this.getRows();
+            const hasHeaderFlag = rows.some(row => row.cells.some(cell => cell.is_header));
+            if (hasHeaderFlag) {
+                return rows.filter(row => !row.cells.some(cell => cell.is_header));
+            }
+            return rows.slice(1);
+        },
+
+        getHeaderRow() {
+            if (!this.state.cells || !Array.isArray(this.state.cells)) {
+                return null;
+            }
+            const headerRow = this.state.cells.find(row => row.some(cell => cell.is_header));
+            if (headerRow) {
+                return {
+                    cells: headerRow.filter(cell => !cell.merged)
+                };
+            }
+            return this.state.cells[0] ? { cells: this.state.cells[0].filter(cell => !cell.merged) } : null;
         },
 
         getVisibleColumnCount() {
