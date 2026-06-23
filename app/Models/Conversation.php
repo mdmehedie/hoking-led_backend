@@ -7,6 +7,7 @@ use App\Models\Message;
 use App\Notifications\NewChatMessage;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Notification as MailNotification;
 use Filament\Notifications\Events\DatabaseNotificationsSent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -186,7 +187,7 @@ class Conversation extends Model
 
             foreach ($recipients as $recipient) {
                 if (filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
-                     Notification::route('mail', $recipient)
+                     MailNotification::route('mail', $recipient)
                         ->notify(new NewChatMessage($this, $message));
                 }
             }
@@ -226,7 +227,7 @@ class Conversation extends Model
 
             foreach ($recipients as $recipient) {
                 if (filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
-                     Notification::route('mail', $recipient)
+                     MailNotification::route('mail', $recipient)
                         ->notify(new NewChatMessage($this, "Started a new conversation."));
                 }
             }
