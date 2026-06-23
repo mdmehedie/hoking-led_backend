@@ -76,7 +76,8 @@ class CategoryForm
                         ->directory('categories/thumbnails')
                         ->visibility('public')
                         ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
-                        ->nullable(),
+                        ->nullable()
+                        ->helperText(__('Recommended size: 800px x 600px (4:3 aspect ratio) or 1200px x 800px landscape.')),
                     FileUpload::make('icon')
                         ->label(__('Icon'))
                         ->image()
@@ -84,7 +85,8 @@ class CategoryForm
                         ->directory('categories/icons')
                         ->visibility('public')
                         ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
-                        ->nullable(),
+                        ->nullable()
+                        ->helperText(__('Recommended: SVG format, or a square PNG/JPEG (e.g. 64px x 64px).')),
                 ]),
                 Tab::make(__('SEO'))->schema([
                     TextInput::make('meta_title')->label(__('Meta Title')),
