@@ -6,11 +6,14 @@ use App\Filament\Forms\Components\TableBuilder;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Placeholder;
+use Illuminate\Support\HtmlString;
 use Illuminate\Http\UploadedFile;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -86,7 +89,7 @@ class ProductForm
                     $slug = trim($slug, '-');
                     $set('slug', $slug);
                 }),
-            Textarea::make('short_description')
+            RichEditor::make('short_description')
                 ->label(__('Short Description')),
             self::detailedDescriptionRepeater(),
             self::featuresRepeater(),
@@ -99,6 +102,87 @@ class ProductForm
         return Repeater::make('detailed_description')
             ->label(__('Detailed Description'))
             ->schema([
+                Select::make('layout')
+                    ->label(__('Layout Style'))
+                    ->options([
+                        'stacked' => __('Vertical Stack (Default)'),
+                        'image_left_50_50' => __('Side-by-Side (Image on Left, 50/50 Split)'),
+                        'image_right_50_50' => __('Side-by-Side (Image on Right, 50/50 Split)'),
+                        'image_left_text_wide' => __('Side-by-Side (Image on Left, Wide Text)'),
+                        'image_right_text_wide' => __('Side-by-Side (Image on Right, Wide Text)'),
+                    ])
+                    ->default('stacked')
+                    ->live()
+                    ->required()
+                    ->columnSpanFull()
+                    ->helperText(function (callable $get) {
+                        $layout = $get('layout') ?: 'stacked';
+                        $previewLabel = __('Layout Preview:');
+                        
+                        $sizeGuide = match ($layout) {
+                            'stacked' => __('Recommended Image Size: 800px - 1200px width (Aspect Ratio: 16:9 or auto)'),
+                            'image_left_50_50', 'image_right_50_50' => __('Recommended Image Size: 500px - 800px width (Aspect Ratio: 1:1 square or 4:3 landscape)'),
+                            'image_left_text_wide', 'image_right_text_wide' => __('Recommended Image Size: 400px - 600px width (Aspect Ratio: 1:1 square or 4:3 landscape)'),
+                            default => '',
+                        };
+
+                        $skeleton = match ($layout) {
+                            'image_left_50_50' => '
+                                <div style="display: flex; align-items: stretch; gap: 16px; border: 1px solid rgba(148, 163, 184, 0.3); padding: 16px; border-radius: 12px; max-width: 500px; background: rgba(148, 163, 184, 0.05); margin-top: 10px;">
+                                    <div style="width: 50%; height: 90px; background: rgba(59, 130, 246, 0.15); border: 1px dashed rgba(59, 130, 246, 0.4); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #3b82f6; font-weight: bold; flex-shrink: 0;">Image</div>
+                                    <div style="width: 50%; border: 1px solid rgba(148, 163, 184, 0.2); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; text-align: left;">
+                                        <div style="font-size: 14px; font-weight: bold; opacity: 0.9; margin-bottom: 4px;">Title</div>
+                                        <div style="font-size: 11px; line-height: 1.3; opacity: 0.6;">Text Content (50%)</div>
+                                    </div>
+                                </div>
+                            ',
+                            'image_right_50_50' => '
+                                <div style="display: flex; align-items: stretch; gap: 16px; border: 1px solid rgba(148, 163, 184, 0.3); padding: 16px; border-radius: 12px; max-width: 500px; background: rgba(148, 163, 184, 0.05); margin-top: 10px;">
+                                    <div style="width: 50%; border: 1px solid rgba(148, 163, 184, 0.2); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; text-align: left;">
+                                        <div style="font-size: 14px; font-weight: bold; opacity: 0.9; margin-bottom: 4px;">Title</div>
+                                        <div style="font-size: 11px; line-height: 1.3; opacity: 0.6;">Text Content (50%)</div>
+                                    </div>
+                                    <div style="width: 50%; height: 90px; background: rgba(59, 130, 246, 0.15); border: 1px dashed rgba(59, 130, 246, 0.4); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #3b82f6; font-weight: bold; flex-shrink: 0;">Image</div>
+                                </div>
+                            ',
+                            'image_left_text_wide' => '
+                                <div style="display: flex; align-items: stretch; gap: 16px; border: 1px solid rgba(148, 163, 184, 0.3); padding: 16px; border-radius: 12px; max-width: 500px; background: rgba(148, 163, 184, 0.05); margin-top: 10px;">
+                                    <div style="width: 35%; height: 90px; background: rgba(59, 130, 246, 0.15); border: 1px dashed rgba(59, 130, 246, 0.4); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #3b82f6; font-weight: bold; flex-shrink: 0;">Image</div>
+                                    <div style="width: 65%; border: 1px solid rgba(148, 163, 184, 0.2); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; text-align: left;">
+                                        <div style="font-size: 14px; font-weight: bold; opacity: 0.9; margin-bottom: 4px;">Title</div>
+                                        <div style="font-size: 11px; line-height: 1.3; opacity: 0.6;">Wide Text Content (60%)</div>
+                                    </div>
+                                </div>
+                            ',
+                            'image_right_text_wide' => '
+                                <div style="display: flex; align-items: stretch; gap: 16px; border: 1px solid rgba(148, 163, 184, 0.3); padding: 16px; border-radius: 12px; max-width: 500px; background: rgba(148, 163, 184, 0.05); margin-top: 10px;">
+                                    <div style="width: 65%; border: 1px solid rgba(148, 163, 184, 0.2); padding: 10px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; text-align: left;">
+                                        <div style="font-size: 14px; font-weight: bold; opacity: 0.9; margin-bottom: 4px;">Title</div>
+                                        <div style="font-size: 11px; line-height: 1.3; opacity: 0.6;">Wide Text Content (60%)</div>
+                                    </div>
+                                    <div style="width: 35%; height: 90px; background: rgba(59, 130, 246, 0.15); border: 1px dashed rgba(59, 130, 246, 0.4); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #3b82f6; font-weight: bold; flex-shrink: 0;">Image</div>
+                                </div>
+                            ',
+                            'stacked' => '
+                                <div style="border: 1px solid rgba(148, 163, 184, 0.3); padding: 16px; border-radius: 12px; max-width: 500px; background: rgba(148, 163, 184, 0.05); margin-top: 10px;">
+                                    <div style="border: 1px solid rgba(148, 163, 184, 0.2); padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 12px;">
+                                        <div style="font-size: 14px; font-weight: bold; opacity: 0.9; margin-bottom: 4px;">Title</div>
+                                        <div style="font-size: 11px; line-height: 1.3; opacity: 0.6;">Text stacked above the image.</div>
+                                    </div>
+                                    <div style="width: 100%; height: 80px; background: rgba(59, 130, 246, 0.15); border: 1px dashed rgba(59, 130, 246, 0.4); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #3b82f6; font-weight: bold;">Image</div>
+                                </div>
+                            ',
+                            default => '',
+                        };
+                        
+                        return new HtmlString('
+                            <div style="margin-bottom: 8px;">
+                                <div style="font-size: 0.75rem; font-weight: 600; color: #64748b;">' . $previewLabel . '</div>
+                                <div style="font-size: 0.75rem; color: #eab308; font-weight: 600; margin-top: 2px;">' . $sizeGuide . '</div>
+                            </div>
+                            ' . $skeleton
+                        );
+                    }),
                 TextInput::make('title')
                     ->label(__('Title'))
                     ->maxLength(255)
@@ -114,7 +198,16 @@ class ProductForm
                     ->directory('products/descriptions')
                     ->visibility('public')
                     ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->helperText(function (callable $get) {
+                        $layout = $get('layout') ?: 'stacked';
+                        return match ($layout) {
+                            'stacked' => __('Recommended Image Size: 800px - 1200px width (Aspect Ratio: 16:9 landscape or original).'),
+                            'image_left_50_50', 'image_right_50_50' => __('Recommended Image Size: 500px - 800px width (Aspect Ratio: 1:1 square or 4:3 landscape).'),
+                            'image_left_text_wide', 'image_right_text_wide' => __('Recommended Image Size: 400px - 600px width (Aspect Ratio: 1:1 square or 4:3 landscape).'),
+                            default => __('Select a layout to see recommended dimensions.'),
+                        };
+                    }),
             ])
             ->columns(1)
             ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
@@ -186,7 +279,8 @@ class ProductForm
                 ->visibility('public')
                 ->imageEditor()
                 ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1'])
-                ->getUploadedFileNameForStorageUsing($keepOriginal),
+                ->getUploadedFileNameForStorageUsing($keepOriginal)
+                ->helperText(__('Recommended size: 800px x 800px (1:1 square aspect ratio) for card display and gallery slides.')),
             FileUpload::make('gallery')
                 ->label(__('Gallery'))
                 ->multiple()
@@ -196,7 +290,8 @@ class ProductForm
                 ->visibility('public')
                 ->imageEditor()
                 ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1'])
-                ->getUploadedFileNameForStorageUsing($keepOriginal),
+                ->getUploadedFileNameForStorageUsing($keepOriginal)
+                ->helperText(__('Recommended size: 800px x 600px (4:3 aspect ratio) or 800px x 800px (1:1 square). Keep image sizes consistent.')),
             FileUpload::make('downloads')
                 ->label(__('Downloads'))
                 ->multiple()

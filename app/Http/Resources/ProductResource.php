@@ -75,7 +75,16 @@ class ProductResource extends JsonResource
             return [];
         }
 
-        return $this->convertMediaPathsToUrls($value);
+        $items = $this->convertMediaPathsToUrls($value);
+
+        return array_map(function ($item) {
+            if (is_array($item)) {
+                if (!isset($item['layout'])) {
+                    $item['layout'] = 'stacked';
+                }
+            }
+            return $item;
+        }, $items);
     }
 
     private function transformFeatures(): array
