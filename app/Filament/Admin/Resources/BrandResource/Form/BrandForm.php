@@ -35,8 +35,9 @@ class BrandForm
                     ->visibility('public')
                     ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
                     ->imageEditor()
-                    ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1'])
-                    ->helperText(__('Recommended size: 200px x 110px (16:9 aspect ratio)')),
+                    ->imageAspectRatio('25:7')
+                    ->automaticallyOpenImageEditorForAspectRatio()
+                    ->helperText(__('Recommended size: 200px x 56px (25:7 aspect ratio)')),
                 TextInput::make('website_url')
                     ->label(__('Website URL'))
                     ->url()

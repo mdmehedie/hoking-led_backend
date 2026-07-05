@@ -2,10 +2,19 @@
 
 namespace App\Models;
 
+use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Model;
 
 class AppSetting extends Model
 {
+    use HasMedia;
+
+    protected array $mediaAttributes = [
+        'logo_light',
+        'logo_dark',
+        'favicon',
+    ];
+
     protected $fillable = [
         'logo_light',
         'logo_dark',

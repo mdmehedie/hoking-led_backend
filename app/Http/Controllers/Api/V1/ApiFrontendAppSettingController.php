@@ -7,21 +7,31 @@ use App\Http\Resources\AppSettingResource;
 use App\Models\AppSetting;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 
 class ApiFrontendAppSettingController extends ApiBaseController
 {
     public function index(Request $request): JsonResponse
     {
         $perPage = $request->get('per_page', 10);
+        $page = $request->get('page', 1);
 
-        $appSettings = AppSetting::orderBy('id')->paginate($perPage);
+        $appSettings = Cache::tags(['app_settings'])->remember(
+            "app_settings.index.page_{$page}.per_page_{$perPage}",
+            now()->addHour(),
+            fn () => AppSetting::orderBy('id')->paginate($perPage)
+        );
 
         return $this->okResponse(['app_settings' => AppSettingResource::collection($appSettings)], __('App settings retrieved successfully'));
     }
 
     public function show($column): JsonResponse
     {
-        $appSetting = AppSetting::first(); // Assuming there's only one app setting record
+        $appSetting = Cache::tags(['app_settings'])->remember(
+            'app_settings.first',
+            now()->addHour(),
+            fn () => AppSetting::first()
+        ); // Assuming there's only one app setting record
 
         if (!$appSetting) {
             return $this->notFoundResponse([], __('App setting not found'));

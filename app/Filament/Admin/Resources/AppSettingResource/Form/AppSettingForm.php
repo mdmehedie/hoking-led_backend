@@ -19,6 +19,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
+use Illuminate\Http\UploadedFile;
 
 class AppSettingForm
 {
@@ -41,8 +42,11 @@ class AppSettingForm
                         ->visibility('public')
                         ->directory('settings')
                         ->acceptedFileTypes(['image/*'])
+                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
                         ->imageEditor()
-                        ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                        ->imageAspectRatio('179:32')
+                        ->automaticallyOpenImageEditorForAspectRatio()
+                        ->helperText(__('Recommended size: 179px x 32px (179:32 aspect ratio)')),
                     FileUpload::make('logo_dark')
                         ->label(__('Dark Logo'))
                         ->image()
@@ -50,8 +54,11 @@ class AppSettingForm
                         ->visibility('public')
                         ->directory('settings')
                         ->acceptedFileTypes(['image/*'])
+                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
                         ->imageEditor()
-                        ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                        ->imageAspectRatio('179:32')
+                        ->automaticallyOpenImageEditorForAspectRatio()
+                        ->helperText(__('Recommended size: 179px x 32px (179:32 aspect ratio)')),
                 ]),
                 Section::make(__('Favicon'))->schema([
                     FileUpload::make('favicon')
@@ -61,8 +68,11 @@ class AppSettingForm
                         ->visibility('public')
                         ->directory('settings')
                         ->acceptedFileTypes(['image/*'])
+                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
                         ->imageEditor()
-                        ->imageEditorAspectRatios(['1:1']),
+                        ->imageAspectRatio('1:1')
+                        ->automaticallyOpenImageEditorForAspectRatio()
+                        ->helperText(__('Recommended size: 512px x 512px (1:1 aspect ratio)')),
                 ]),
             ]),
         ];
