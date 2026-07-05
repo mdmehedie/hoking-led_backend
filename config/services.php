@@ -40,4 +40,9 @@ return [
         'credentials_path' => env('GA4_CREDENTIALS_PATH'),
     ],
 
+    'frontend' => [
+        'url' => env('FRONTEND_URL', 'http://localhost:3000'),
+        'revalidate_secret' => env('FRONTEND_REVALIDATE_SECRET'),
+    ],
+
 ];
