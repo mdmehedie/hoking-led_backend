@@ -41,7 +41,7 @@ class GA4Service
      */
     public function getPageViews(int $days = 7): array
     {
-        return Cache::tags(['ga4_analytics', 'page_views'])->remember("ga4_page_views_{$days}d", 3600, function () use ($days) {
+        return taggedCache(['ga4_analytics', 'page_views'])->remember("ga4_page_views_{$days}d", 3600, function () use ($days) {
             try {
                 $request = (new RunReportRequest())
                     ->setProperty('properties/' . $this->propertyId)
@@ -76,7 +76,7 @@ class GA4Service
      */
     public function getSessions(int $days = 7): array
     {
-        return Cache::tags(['ga4_analytics', 'sessions'])->remember("ga4_sessions_{$days}d", 3600, function () use ($days) {
+        return taggedCache(['ga4_analytics', 'sessions'])->remember("ga4_sessions_{$days}d", 3600, function () use ($days) {
             try {
                 $request = (new RunReportRequest())
                     ->setProperty('properties/' . $this->propertyId)
@@ -123,7 +123,7 @@ class GA4Service
      */
     public function getTopPages(int $days = 7, int $limit = 10): array
     {
-        return Cache::tags(['ga4_analytics', 'top_pages'])->remember("ga4_top_pages_{$days}d_{$limit}", 3600, function () use ($days, $limit) {
+        return taggedCache(['ga4_analytics', 'top_pages'])->remember("ga4_top_pages_{$days}d_{$limit}", 3600, function () use ($days, $limit) {
             try {
                 $request = (new RunReportRequest())
                     ->setProperty('properties/' . $this->propertyId)
@@ -165,7 +165,7 @@ class GA4Service
      */
     public function getDeviceBreakdown(int $days = 7): array
     {
-        return Cache::tags(['ga4_analytics', 'devices'])->remember("ga4_devices_{$days}d", 3600, function () use ($days) {
+        return taggedCache(['ga4_analytics', 'devices'])->remember("ga4_devices_{$days}d", 3600, function () use ($days) {
             try {
                 $request = (new RunReportRequest())
                     ->setProperty('properties/' . $this->propertyId)
@@ -206,7 +206,7 @@ class GA4Service
      */
     public function getTrafficSources(int $days = 7, int $limit = 10): array
     {
-        return Cache::tags(['ga4_analytics', 'traffic_sources'])->remember("ga4_traffic_sources_{$days}d_{$limit}", 3600, function () use ($days, $limit) {
+        return taggedCache(['ga4_analytics', 'traffic_sources'])->remember("ga4_traffic_sources_{$days}d_{$limit}", 3600, function () use ($days, $limit) {
             try {
                 $request = (new RunReportRequest())
                     ->setProperty('properties/' . $this->propertyId)
@@ -248,7 +248,7 @@ class GA4Service
      */
     public function getRealTimeData(): array
     {
-        return Cache::tags(['ga4_analytics', 'realtime'])->remember('ga4_realtime', 60, function () {
+        return taggedCache(['ga4_analytics', 'realtime'])->remember('ga4_realtime', 60, function () {
             try {
                 // Note: This would require the Realtime Reporting API
                 // For now, we'll return cached recent data
@@ -271,7 +271,7 @@ class GA4Service
      */
     public function getDashboardMetrics(int $days = 7): array
     {
-        return Cache::tags(['ga4_analytics', 'dashboard'])->remember("ga4_dashboard_{$days}d", 3600, function () use ($days) {
+        return taggedCache(['ga4_analytics', 'dashboard'])->remember("ga4_dashboard_{$days}d", 3600, function () use ($days) {
             try {
                 $request = (new RunReportRequest())
                     ->setProperty('properties/' . $this->propertyId)

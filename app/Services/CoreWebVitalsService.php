@@ -26,7 +26,7 @@ class CoreWebVitalsService
             return [];
         }
 
-        return Cache::tags(['core_web_vitals', 'pagespeed'])->remember(
+        return taggedCache(['core_web_vitals', 'pagespeed'])->remember(
             "pagespeed_{$url}", 
             86400, // 24 hours
             function () use ($url) {
@@ -59,7 +59,7 @@ class CoreWebVitalsService
      */
     public function getLocalVitalsData(int $days = 7): array
     {
-        return Cache::tags(['core_web_vitals', 'local'])->remember(
+        return taggedCache(['core_web_vitals', 'local'])->remember(
             "local_vitals_{$days}d", 
             3600,
             function () use ($days) {

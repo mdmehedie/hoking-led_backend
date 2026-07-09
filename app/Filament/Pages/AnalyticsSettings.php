@@ -144,8 +144,8 @@ class AnalyticsSettings extends Page
         }
 
         // Clear relevant caches
-        Cache::tags(['ga4_analytics'])->flush();
-        Cache::tags(['analytics_settings'])->flush();
+        taggedCache(['ga4_analytics'])->flush();
+        taggedCache(['analytics_settings'])->flush();
 
         $this->notify('success', 'Analytics settings saved successfully.');
     }

@@ -49,32 +49,48 @@ class CaseStudyResource extends JsonResource
 
     private function decodeProjectDescription(): array
     {
-        if (blank($this->project_description)) {
-            return [];
-        }
+        $raw = $this->project_description;
+        $items = [];
 
-        // If already decoded (array), return as-is
-        if (is_array($this->project_description)) {
-            // Convert image paths to URLs
-            return array_map(function ($item) {
-                if (is_array($item) && isset($item['image'])) {
-                    $item['image'] = Storage::disk('public')->url($item['image']);
+        if (!blank($raw)) {
+            if (is_array($raw)) {
+                $items = $raw;
+            } else {
+                $decoded = json_decode($raw, true);
+                if (is_array($decoded)) {
+                    $items = $decoded;
                 }
-                return $item;
-            }, $this->project_description);
-        }
-
-        // If JSON string, decode first then convert
-        $decoded = json_decode($this->project_description, true);
-        if (!is_array($decoded)) {
-            return [];
-        }
-
-        return array_map(function ($item) {
-            if (is_array($item) && isset($item['image'])) {
-                $item['image'] = Storage::disk('public')->url($item['image']);
             }
-            return $item;
-        }, $decoded);
+        }
+
+        $items = array_map(function ($item) {
+            if (is_array($item)) {
+                if (isset($item['image']) && !blank($item['image'])) {
+                    $item['image'] = Storage::disk('public')->url($item['image']);
+                } else {
+                    $item['image'] = null;
+                }
+                return [
+                    'title' => $item['title'] ?? null,
+                    'description' => $item['description'] ?? null,
+                    'image' => $item['image'],
+                ];
+            }
+            return [
+                'title' => null,
+                'description' => null,
+                'image' => null,
+            ];
+        }, $items);
+
+        while (count($items) < 2) {
+            $items[] = [
+                'title' => null,
+                'description' => null,
+                'image' => null,
+            ];
+        }
+
+        return array_slice($items, 0, 2);
     }
 }

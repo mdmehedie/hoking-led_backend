@@ -16,7 +16,7 @@ class ApiFrontendAppSettingController extends ApiBaseController
         $perPage = $request->get('per_page', 10);
         $page = $request->get('page', 1);
 
-        $appSettings = Cache::tags(['app_settings'])->remember(
+        $appSettings = taggedCache(['app_settings'])->remember(
             "app_settings.index.page_{$page}.per_page_{$perPage}",
             now()->addHour(),
             fn () => AppSetting::orderBy('id')->paginate($perPage)
@@ -27,7 +27,7 @@ class ApiFrontendAppSettingController extends ApiBaseController
 
     public function show($column): JsonResponse
     {
-        $appSetting = Cache::tags(['app_settings'])->remember(
+        $appSetting = taggedCache(['app_settings'])->remember(
             'app_settings.first',
             now()->addHour(),
             fn () => AppSetting::first()
