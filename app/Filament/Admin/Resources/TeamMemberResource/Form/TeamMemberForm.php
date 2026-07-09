@@ -65,7 +65,8 @@ class TeamMemberForm
                 ->imageEditor()
                 ->imageEditorAspectRatios(['1:1', '4:3', '3:4'])
                 ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                ->getUploadedFileNameForStorageUsing($keepOriginal),
+                ->getUploadedFileNameForStorageUsing($keepOriginal)
+                ->helperText(__('Recommended Image Size: 500px x 500px (1:1 square aspect ratio) for team member display.')),
             TextInput::make('email')
                 ->label(__('Email'))
                 ->email()

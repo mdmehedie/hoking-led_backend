@@ -23,6 +23,8 @@ class SliderResource extends JsonResource
             'primary_button_text' => $this->primary_button_text,
             'primary_button_link' => $this->primary_button_link,
             'background_image' => $this->background_image ? url(Storage::url($this->background_image)) : null,
+            'video_url' => $this->video_url ? (str_starts_with($this->video_url, 'http://') || str_starts_with($this->video_url, 'https://') ? $this->video_url : url(Storage::url($this->video_url))) : null,
+            'background_type' => $this->background_type ?? 'image',
             'foreground_image' => $this->foreground_image ? url(Storage::url($this->foreground_image)) : null,
             'sort_order' => $this->sort_order,
             'status' => $this->status,

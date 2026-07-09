@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\AppSetting;
+use App\Models\Message;
+use App\Notifications\NewChatMessage;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Notification as MailNotification;
 use Filament\Notifications\Events\DatabaseNotificationsSent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class Conversation extends Model
@@ -153,9 +158,8 @@ class Conversation extends Model
      */
     public function notifyAdminsAboutNewMessage($message, $senderName = null)
     {
-        // Get all admin users (assuming you have an 'is_admin' column)
+        // 1. Database notifications for all users
         $admins = User::all();
-
         $visitorName = $senderName ?? $this->visitor_name;
 
         foreach ($admins as $admin) {
@@ -174,6 +178,20 @@ class Conversation extends Model
 
             event(new DatabaseNotificationsSent($admin));
         }
+
+        // 2. Email notifications for configured recipients
+        $settings =  Cache::remember('app_settings', 3600, fn () => AppSetting::first());
+
+        if ($settings && $settings->contact_internal_enabled && !empty($settings->contact_internal_recipients)) {
+            $recipients = $settings->contact_internal_recipients;
+
+            foreach ($recipients as $recipient) {
+                if (filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+                     MailNotification::route('mail', $recipient)
+                        ->notify(new NewChatMessage($this, $message));
+                }
+            }
+        }
     }
 
     /**
@@ -181,6 +199,7 @@ class Conversation extends Model
      */
     public function notifyAdminsAboutNewConversation()
     {
+        // 1. Database notifications
         $admins = User::all();
 
         foreach ($admins as $admin) {
@@ -198,6 +217,20 @@ class Conversation extends Model
                 ->sendToDatabase($admin);
 
             event(new DatabaseNotificationsSent($admin));
+        }
+
+        // 2. Email notifications
+        $settings =  Cache::remember('app_settings', 3600, fn () => AppSetting::first());
+
+        if ($settings && $settings->contact_internal_enabled && !empty($settings->contact_internal_recipients)) {
+            $recipients = $settings->contact_internal_recipients;
+
+            foreach ($recipients as $recipient) {
+                if (filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+                     MailNotification::route('mail', $recipient)
+                        ->notify(new NewChatMessage($this, "Started a new conversation."));
+                }
+            }
         }
     }
 

@@ -51,6 +51,33 @@ class Product extends Model
         'is_top' => 'boolean',
     ];
 
+    public function getDetailedDescriptionAttribute($value)
+    {
+        if (empty($value)) {
+            return [];
+        }
+
+        $data = is_array($value) ? $value : json_decode($value, true);
+
+        if (!is_array($data)) {
+            return [];
+        }
+
+        // Normalize format for each item in the repeater
+        return array_map(function ($item) {
+            if (is_array($item)) {
+                if (!isset($item['layout'])) {
+                    $item['layout'] = 'stacked';
+                } elseif ($item['layout'] === 'image_left') {
+                    $item['layout'] = 'image_left_50_50';
+                } elseif ($item['layout'] === 'image_right') {
+                    $item['layout'] = 'image_right_50_50';
+                }
+            }
+            return $item;
+        }, $data);
+    }
+
     // ─── Relationships ────────────────────────────────────────
 
     public function category(): BelongsTo

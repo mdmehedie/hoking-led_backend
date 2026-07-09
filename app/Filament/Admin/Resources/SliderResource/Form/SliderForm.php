@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\SliderResource\Form;
 
 use App\Filament\Forms\Components\TinyEditor;
 use App\Models\Locale;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -29,6 +30,21 @@ class SliderForm
                             ->label(__('Show / Hide'))
                             ->default(true)
                             ->helperText(__('Toggles the visibility of the slider on the frontend.')),
+                        Select::make('background_type')
+                            ->label(__('Background Type'))
+                            ->options([
+                                'image' => __('Image'),
+                                'video' => __('Video'),
+                            ])
+                            ->default('image')
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                if ($state === 'image') {
+                                    $set('video_url', null);
+                                } else {
+                                    $set('background_image', null);
+                                }
+                            }),
                         FileUpload::make('background_image')
                             ->label(__('Background Image'))
                             ->disk('public')
@@ -37,7 +53,20 @@ class SliderForm
                             ->image()
                             ->imageEditor()
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName()),
+                            ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                            ->helperText(__('Recommended size: 1920px width x 600px to 800px height (aspect ratio: ~3:1 or 16:9 for full desktop viewport coverage).'))
+                            ->visible(fn (callable $get) => $get('background_type') === 'image')
+                            ->required(fn (callable $get) => $get('background_type') === 'image'),
+                        FileUpload::make('video_url')
+                            ->label(__('Background Video'))
+                            ->disk('public')
+                            ->directory('sliders/videos')
+                            ->visibility('public')
+                            ->acceptedFileTypes(['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'])
+                            ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                            ->helperText(__('Recommended: MP4 format, 1920x1080 or 1920x600, under 10MB for optimal loading performance.'))
+                            ->visible(fn (callable $get) => $get('background_type') === 'video')
+                            ->required(fn (callable $get) => $get('background_type') === 'video'),
                         FileUpload::make('foreground_image')
                             ->label(__('Foreground Image'))
                             ->disk('public')
@@ -47,7 +76,7 @@ class SliderForm
                             ->imageEditor()
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
-                            ->helperText(__('Image displayed on the card.')),
+                            ->helperText(__('Image displayed on the card. Recommended size: 223px width x 159px height (aspect ratio: ~7:5 or 1.4:1).')),
                         TextInput::make('primary_button_link')
                             ->label(__('Primary Button Link'))
                             ->url()
@@ -56,19 +85,15 @@ class SliderForm
                     Tab::make(__('Slider Details'))->schema([
                         TextInput::make("title")
                             ->label(__('Title'))
-                            ->required()
                             ->helperText(__('Main heading displayed on the slider.')),
                         TinyEditor::make("description")
                             ->label(__('Description'))
-                            ->required()
                             ->helperText(__('Text displayed in the bottom-left corner of the slider.')),
                         TextInput::make("label")
                             ->label(__('Label'))
-                            ->required()
                             ->helperText(__('Text displayed on the slider card.')),
                         TextInput::make("primary_button_text")
                             ->label(__('Primary Button Text'))
-                            ->required()
                             ->helperText(__('Text for the button in the bottom-left corner of the slider.')),
                     ]),
                 ])->columnSpanFull(),

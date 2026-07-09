@@ -24,7 +24,16 @@ class SliderTable
             ->columns([
                 TextColumn::make('title')->label(__('Title'))->sortable()->searchable(),
                 TextColumn::make('label')->label(__('Label'))->sortable()->searchable(),
-                ImageColumn::make('background_image')->label(__('Background'))->circular()->disk('public'),
+                ImageColumn::make('background_image')
+                    ->label(__('Background'))
+                    ->circular()
+                    ->disk('public')
+                    ->defaultImageUrl(fn ($record) => $record->video_url ? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&h=100&fit=crop' : null),
+                TextColumn::make('background_type')
+                    ->label(__('Bg Type'))
+                    ->state(fn ($record) => $record->video_url ? __('Video') : __('Image'))
+                    ->badge()
+                    ->color(fn ($state) => $state === __('Video') ? 'success' : 'info'),
                 ImageColumn::make('foreground_image')->label(__('Foreground'))->circular()->disk('public'),
                 BooleanColumn::make('status')->label(__('Status')),
                 TextColumn::make('sort_order')->label(__('Sort Order'))->sortable(),

@@ -17,6 +17,8 @@ class Slider extends Model
         'background_image',
         'foreground_image',
         'label',
+        'video_url',
+        'background_type',
         'status',
         'sort_order',
     ];
@@ -24,6 +26,7 @@ class Slider extends Model
     protected array $mediaAttributes = [
         'background_image',
         'foreground_image',
+        'video_url',
     ];
 
     protected $casts = [

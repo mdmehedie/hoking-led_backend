@@ -212,6 +212,9 @@ class ProductInquiryTable
                         'resolved' => 'Resolved',
                         'closed' => 'Closed',
                     ])
+                    ->selectablePlaceholder(false)
+                    ->extraAttributes(['style' => 'width: 100px; min-width: 100px;'])
+                    ->extraInputAttributes(['style' => 'width: 100px; min-width: 100px;'])
                     ->sortable()
                     ->disabled(fn ($record) => ! auth()->user()->can('update', $record)),
                 SelectColumn::make('priority')
@@ -222,6 +225,9 @@ class ProductInquiryTable
                         'high' => 'High',
                         'urgent' => 'Urgent',
                     ])
+                    ->selectablePlaceholder(false)
+                    ->extraAttributes(['style' => 'width: 100px; min-width: 100px;'])
+                    ->extraInputAttributes(['style' => 'width: 100px; min-width: 100px;'])
                     ->sortable()
                     ->disabled(fn ($record) => ! auth()->user()->can('update', $record)),
                 TextColumn::make('source_label')
