@@ -44,8 +44,8 @@ class AppSettingForm
                         ->acceptedFileTypes(['image/*'])
                         ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
                         ->imageEditor()
-                        ->imageAspectRatio('179:32')
-                        ->automaticallyOpenImageEditorForAspectRatio()
+                        ->imageCropAspectRatio('179:32')
+                        ->imageEditorAspectRatios(['179:32'])
                         ->helperText(__('Recommended size: 179px x 32px (179:32 aspect ratio)')),
                     FileUpload::make('logo_dark')
                         ->label(__('Dark Logo'))
@@ -56,8 +56,8 @@ class AppSettingForm
                         ->acceptedFileTypes(['image/*'])
                         ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
                         ->imageEditor()
-                        ->imageAspectRatio('179:32')
-                        ->automaticallyOpenImageEditorForAspectRatio()
+                        ->imageCropAspectRatio('179:32')
+                        ->imageEditorAspectRatios(['179:32'])
                         ->helperText(__('Recommended size: 179px x 32px (179:32 aspect ratio)')),
                 ]),
                 Section::make(__('Favicon'))->schema([
@@ -70,8 +70,8 @@ class AppSettingForm
                         ->acceptedFileTypes(['image/*'])
                         ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
                         ->imageEditor()
-                        ->imageAspectRatio('1:1')
-                        ->automaticallyOpenImageEditorForAspectRatio()
+                        ->imageCropAspectRatio('1:1')
+                        ->imageEditorAspectRatios(['1:1'])
                         ->helperText(__('Recommended size: 512px x 512px (1:1 aspect ratio)')),
                 ]),
             ]),

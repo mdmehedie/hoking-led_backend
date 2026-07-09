@@ -20,7 +20,7 @@ class AppSettingObserver
 
     protected function flush(): void
     {
-        Cache::tags(['app_settings'])->flush();
+        taggedCache(['app_settings'])->flush();
 
         FrontendRevalidationService::revalidate('app-settings');
     }
