@@ -105,24 +105,23 @@ class CaseStudyForm
                     ->label(__('Date'))
                     ->displayFormat('Y-m-d'),
             ])->columns(2),
-            self::projectDescriptionRepeater(),
-            self::bulletFieldsRepeater(),
-        ];
-    }
-
-    private static function projectDescriptionRepeater(): Repeater
-    {
-        return Repeater::make('project_description')
-            ->label(__('Project Description'))
-            ->schema([
-                TextInput::make('title')
+            Section::make(__('Description Block 1'))->schema([
+                TextInput::make('project_description.0.title')
                     ->label(__('Title'))
-                    ->maxLength(255)
-                    ->columnSpanFull(),
-                TinyEditor::make('description')
+                    ->maxLength(255),
+                TinyEditor::make('project_description.0.description')
                     ->label(__('Description'))
                     ->columnSpanFull(),
-                FileUpload::make('image')
+                self::bulletFieldsRepeater(),
+            ])->columnSpanFull(),
+            Section::make(__('Description Block 2'))->schema([
+                TextInput::make('project_description.1.title')
+                    ->label(__('Title'))
+                    ->maxLength(255),
+                TinyEditor::make('project_description.1.description')
+                    ->label(__('Description'))
+                    ->columnSpanFull(),
+                FileUpload::make('project_description.1.image')
                     ->label(__('Image'))
                     ->image()
                     ->disk('public')
@@ -130,11 +129,8 @@ class CaseStudyForm
                     ->visibility('public')
                     ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
                     ->columnSpanFull(),
-            ])
-            ->columns(1)
-            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
-            ->createItemButtonLabel(__('Add item'))
-            ->columnSpanFull();
+            ])->columnSpanFull(),
+        ];
     }
 
     private static function bulletFieldsRepeater(): Repeater
