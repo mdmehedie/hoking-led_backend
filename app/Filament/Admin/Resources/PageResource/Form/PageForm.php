@@ -249,7 +249,10 @@ class PageForm
                     ->visibility('public')
                     ->required()
                     ->directory('pages/about-us')
-                    ->getUploadedFileNameForStorageUsing($keepOriginal),
+                    ->getUploadedFileNameForStorageUsing($keepOriginal)
+                    ->imageEditor()
+                    ->imageEditorAspectRatios(['4:3', '8:6'])
+                    ->helperText(__('Recommended size: 800px x 600px (4:3 aspect ratio).')),
                 FileUpload::make("content.image_2")
                     ->label(__('Image 2'))
                     ->image()
@@ -257,7 +260,10 @@ class PageForm
                     ->visibility('public')
                     ->required()
                     ->directory('pages/about-us')
-                    ->getUploadedFileNameForStorageUsing($keepOriginal),
+                    ->getUploadedFileNameForStorageUsing($keepOriginal)
+                    ->imageEditor()
+                    ->imageEditorAspectRatios(['6:5', '12:10'])
+                    ->helperText(__('Recommended size: 1200px x 1000px (6:5 aspect ratio).')),
             ])->columns(2),
 
             Section::make(__('Stats & Service'))->schema([
@@ -299,6 +305,9 @@ class PageForm
                     ->required()
                     ->directory('pages/about-us')
                     ->getUploadedFileNameForStorageUsing($keepOriginal)
+                    ->imageEditor()
+                    ->imageEditorAspectRatios(['4:5', '8:10'])
+                    ->helperText(__('Recommended size: 1000px x 1250px (4:5 portrait aspect ratio). Fills a dynamic-height container, so a taller image avoids cropping on tall screens.'))
                     ->columnSpanFull(),
                 TextInput::make("content.mission_vision_title")
                     ->label(__('Section Title'))
@@ -316,7 +325,10 @@ class PageForm
                         ->visibility('public')
                         ->required()
                         ->directory('pages/about-us')
-                        ->getUploadedFileNameForStorageUsing($keepOriginal),
+                        ->getUploadedFileNameForStorageUsing($keepOriginal)
+                        ->imageEditor()
+                        ->imageEditorAspectRatios(['1:1', '2:2'])
+                        ->helperText(__('Recommended size: 128px x 128px (1:1 square icon, transparent PNG/SVG).')),
                     Textarea::make("content.mission.description")
                         ->label(__('Mission Description'))
                         ->required()
@@ -334,7 +346,10 @@ class PageForm
                         ->visibility('public')
                         ->required()
                         ->directory('pages/about-us')
-                        ->getUploadedFileNameForStorageUsing($keepOriginal),
+                        ->getUploadedFileNameForStorageUsing($keepOriginal)
+                        ->imageEditor()
+                        ->imageEditorAspectRatios(['1:1', '2:2'])
+                        ->helperText(__('Recommended size: 128px x 128px (1:1 square icon, transparent PNG/SVG).')),
                     Textarea::make("content.vision.description")
                         ->label(__('Vision Description'))
                         ->required()
@@ -358,6 +373,9 @@ class PageForm
                     ->required()
                     ->directory('pages/after-sale-service')
                     ->getUploadedFileNameForStorageUsing($keepOriginal)
+                    ->imageEditor()
+                    ->imageEditorAspectRatios(['16:9', '32:18'])
+                    ->helperText(__('Recommended size: 1920px x 1080px (16:9 aspect ratio). This image is displayed with background-size: contain, so an off-ratio image will show empty space instead of being cropped.'))
                     ->columnSpanFull(),
                 TextInput::make("content.hero_title")
                     ->label(__('Hero Title'))
@@ -381,7 +399,10 @@ class PageForm
                             ->visibility('public')
                             ->required()
                             ->directory('pages/after-sale-service')
-                            ->getUploadedFileNameForStorageUsing($keepOriginal),
+                            ->getUploadedFileNameForStorageUsing($keepOriginal)
+                            ->imageEditor()
+                            ->imageEditorAspectRatios(['1:1', '2:2'])
+                            ->helperText(__('Recommended size: 128px x 128px (1:1 square icon, transparent PNG/SVG).')),
                         TextInput::make('title')->label(__('Title'))->required(),
                         Textarea::make('description')->label(__('Description'))->required(),
                     ])
@@ -417,6 +438,9 @@ class PageForm
                     ->required()
                     ->directory('pages/contact')
                     ->getUploadedFileNameForStorageUsing($keepOriginal)
+                    ->imageEditor()
+                    ->imageEditorAspectRatios(['16:9', '32:18'])
+                    ->helperText(__('Recommended size: 1920px x 1080px (16:9 aspect ratio). This image is displayed with background-size: contain, so an off-ratio image will show empty space instead of being cropped.'))
                     ->columnSpanFull(),
                 TextInput::make("content.title")
                     ->label(__('Title'))
@@ -438,7 +462,10 @@ class PageForm
                             ->visibility('public')
                             ->required()
                             ->directory('pages/contact')
-                            ->getUploadedFileNameForStorageUsing($keepOriginal),
+                            ->getUploadedFileNameForStorageUsing($keepOriginal)
+                            ->imageEditor()
+                            ->imageEditorAspectRatios(['1:1', '2:2'])
+                            ->helperText(__('Recommended size: 128px x 128px (1:1 square icon, transparent PNG/SVG).')),
                         TextInput::make('title')
                             ->label(__('Title'))
                             ->required(),

@@ -40,7 +40,10 @@ class TestimonialForm
                         ->disk('public')
                         ->directory('testimonials')
                         ->visibility('public')
-                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName()),
+                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                        ->imageEditor()
+                        ->imageEditorAspectRatios(['1:1', '2:2'])
+                        ->helperText(__('Recommended size: 300px x 300px (1:1 square client photo).')),
                     Select::make('rating')
                         ->label(__('Rating'))
                         ->options([

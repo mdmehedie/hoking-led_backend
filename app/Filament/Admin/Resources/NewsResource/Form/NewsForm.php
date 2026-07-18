@@ -77,7 +77,8 @@ class NewsForm
                 ->visibility('public')
                 ->getUploadedFileNameForStorageUsing($keepOriginal)
                 ->imageEditor()
-                ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1'])
+                ->helperText(__('Recommended size: 1200px x 675px (16:9) or 800px x 600px (4:3) — used as the featured/card image.')),
             Textarea::make('excerpt')
                 ->label(__('Excerpt'))
                 ->maxLength(500)

@@ -34,6 +34,9 @@ class CoreAdvantageForm
                         ->directory('core-advantages/icons')
                         ->visibility('public')
                         ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                        ->imageEditor()
+                        ->imageEditorAspectRatios(['1:1', '2:2'])
+                        ->helperText(__('Recommended size: 128px x 128px (1:1 square icon, transparent PNG/SVG).'))
                         ->columnSpanFull(),
                     Toggle::make('is_active')
                         ->label(__('Active'))

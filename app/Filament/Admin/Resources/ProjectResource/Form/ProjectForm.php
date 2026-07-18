@@ -96,7 +96,10 @@ class ProjectForm
                 ->disk('public')
                 ->directory('projects/cover')
                 ->visibility('public')
-                ->getUploadedFileNameForStorageUsing($keepOriginal),
+                ->getUploadedFileNameForStorageUsing($keepOriginal)
+                ->imageEditor()
+                ->imageEditorAspectRatios(['16:9', '4:3', '1:1'])
+                ->helperText(__('Recommended size: 1200px x 675px (16:9 aspect ratio) — used as the project cover/thumbnail image.')),
             FileUpload::make('gallery')
                 ->label(__('Gallery'))
                 ->multiple()
@@ -104,7 +107,10 @@ class ProjectForm
                 ->disk('public')
                 ->directory('projects/gallery')
                 ->visibility('public')
-                ->getUploadedFileNameForStorageUsing($keepOriginal),
+                ->getUploadedFileNameForStorageUsing($keepOriginal)
+                ->imageEditor()
+                ->imageEditorAspectRatios(['4:3', '1:1'])
+                ->helperText(__('Recommended size: 800px x 600px (4:3 aspect ratio) or 800px x 800px (1:1 square). Keep image sizes consistent.')),
         ];
     }
 
