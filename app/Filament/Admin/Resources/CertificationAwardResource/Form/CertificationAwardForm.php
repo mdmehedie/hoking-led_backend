@@ -76,7 +76,8 @@ class CertificationAwardForm
                 ->directory('certifications')
                 ->visibility('public')
                 ->imageEditor()
-                ->imageEditorAspectRatios(['16:9', '4:3', '1:1'])
+                ->imageEditorAspectRatios(['4:5', '1:1', '3:4'])
+                ->helperText(__('Recommended size: 640px x 800px (4:5 portrait aspect ratio) — displayed in a narrow, tall slider card.'))
                 ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                 ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName()),
 

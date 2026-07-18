@@ -59,7 +59,10 @@ class VideoForm
                 ->disk('public')
                 ->directory('videos/thumbnails')
                 ->visibility('public')
-                ->getUploadedFileNameForStorageUsing($keepOriginal),
+                ->getUploadedFileNameForStorageUsing($keepOriginal)
+                ->imageEditor()
+                ->imageEditorAspectRatios(['16:9', '4:3'])
+                ->helperText(__('Recommended size: 1280px x 720px (16:9 aspect ratio).')),
         ];
     }
 }

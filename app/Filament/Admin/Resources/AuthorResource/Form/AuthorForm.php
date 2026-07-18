@@ -29,7 +29,8 @@ class AuthorForm
                         ->visibility('public')
                         ->directory('authors')
                         ->imageEditor()
-                        ->imageEditorAspectRatios(['1:1']),
+                        ->imageEditorAspectRatios(['1:1', '2:2'])
+                        ->helperText(__('Recommended size: 300px x 300px (1:1 square avatar).')),
                 ]),
                 Tab::make(__('Social Links'))->schema([
                     Forms\Components\Repeater::make('social_links')

@@ -37,6 +37,9 @@ class LanguageForm
                         ->visibility('public')
                         ->directory('locales/flags')
                         ->image()
+                        ->imageEditor()
+                        ->imageEditorAspectRatios(['1:1', '2:2'])
+                        ->helperText(__('Recommended size: 64px x 64px (1:1 square flag icon).'))
                         ->nullable(),
                 ]),
                 Tab::make(__('Settings'))->schema([

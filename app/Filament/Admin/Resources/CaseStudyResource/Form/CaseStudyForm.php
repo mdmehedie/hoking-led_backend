@@ -128,6 +128,9 @@ class CaseStudyForm
                     ->directory('case-studies/descriptions')
                     ->visibility('public')
                     ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                    ->imageEditor()
+                    ->imageEditorAspectRatios(['3:2', '4:3', '1:1'])
+                    ->helperText(__('Recommended size: 1200px x 800px (3:2 aspect ratio).'))
                     ->columnSpanFull(),
             ])->columnSpanFull(),
         ];
@@ -165,7 +168,8 @@ class CaseStudyForm
                 ->visibility('public')
                 ->getUploadedFileNameForStorageUsing($keepOriginal)
                 ->imageEditor()
-                ->imageEditorAspectRatios(['1:1', '4:3', '16:9', '3:2', '2:1']),
+                ->imageEditorAspectRatios(['2:1', '16:9', '3:2', '1:1'])
+                ->helperText(__('Recommended size: 2000px x 1000px (2:1 aspect ratio) — used as the case study detail-page hero image, and as the listing-page card image.')),
             FileUpload::make('slider_images')
                 ->label(__('Slider Images'))
                 ->multiple()
@@ -175,6 +179,8 @@ class CaseStudyForm
                 ->visibility('public')
                 ->getUploadedFileNameForStorageUsing($keepOriginal)
                 ->imageEditor()
+                ->imageEditorAspectRatios(['3:4', '4:5', '1:1'])
+                ->helperText(__('Recommended size: 700px x 950px (3:4 portrait aspect ratio) — displayed in a narrow, tall slider card. Keep sizes consistent across slides.'))
                 ->reorderable(),
         ];
     }
