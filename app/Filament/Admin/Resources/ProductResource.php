@@ -14,6 +14,10 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?int $globalSearchSort = 10;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-cube';
 
     protected static ?string $navigationLabel = 'Products';

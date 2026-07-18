@@ -14,6 +14,10 @@ class NewsletterSubscriptionResource extends Resource
 {
     protected static ?string $model = NewsletterSubscription::class;
 
+    protected static ?string $recordTitleAttribute = 'email';
+
+    protected static bool $isGloballySearchable = false;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-envelope';
 
     protected static ?string $navigationLabel = 'Newsletter';

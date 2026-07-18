@@ -14,9 +14,15 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static bool $isGloballySearchable = false;
+
+    protected static ?int $globalSearchSort = 230;
+
     protected static ?string $navigationLabel = 'Users';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 1;
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-users';
 

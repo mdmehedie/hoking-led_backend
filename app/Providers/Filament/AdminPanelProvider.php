@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Admin\GlobalSearch\AdminGlobalSearchProvider;
 use App\Filament\Admin\Widgets\ContentCountsWidget;
 use App\Filament\Admin\Widgets\NewsletterStatsWidget;
 use App\Filament\Admin\Widgets\RecentContactsWidget;
@@ -49,6 +50,7 @@ class AdminPanelProvider extends PanelProvider
             })
             ->login(\App\Filament\Admin\Pages\Auth\Login::class)
             ->profile(EditProfile::class)
+            ->globalSearch(AdminGlobalSearchProvider::class)
             ->colors([
                 'primary' => Color::Amber,
             ])

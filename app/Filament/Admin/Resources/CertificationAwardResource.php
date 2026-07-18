@@ -14,6 +14,10 @@ class CertificationAwardResource extends Resource
 {
     protected static ?string $model = CertificationAward::class;
 
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?int $globalSearchSort = 110;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-trophy';
 
     protected static ?string $navigationLabel = 'Certifications & Awards';

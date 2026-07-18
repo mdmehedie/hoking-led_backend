@@ -14,6 +14,10 @@ class PageResource extends Resource
 {
     protected static ?string $model = Page::class;
 
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?int $globalSearchSort = 30;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document';
 
     protected static ?string $navigationLabel = 'Pages';

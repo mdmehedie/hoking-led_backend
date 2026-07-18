@@ -24,6 +24,8 @@ class SliderResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    protected static ?int $globalSearchSort = 140;
+
     public static function getNavigationGroup(): ?string
     {
         return 'Content';

@@ -14,6 +14,10 @@ class VideoResource extends Resource
 {
     protected static ?string $model = Video::class;
 
+    protected static ?string $recordTitleAttribute = 'slug';
+
+    protected static ?int $globalSearchSort = 190;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-video-camera';
 
     protected static ?string $navigationLabel = 'Videos';

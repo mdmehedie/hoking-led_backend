@@ -14,6 +14,10 @@ class BlogResource extends Resource
 {
     protected static ?string $model = Blog::class;
 
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?int $globalSearchSort = 40;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationLabel = 'Blogs';

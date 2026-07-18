@@ -15,6 +15,10 @@ class FormResource extends Resource
 {
     protected static ?string $model = Form::class;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?int $globalSearchSort = 180;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
 

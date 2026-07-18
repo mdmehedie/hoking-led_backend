@@ -14,6 +14,10 @@ class ProjectResource extends Resource
 {
     protected static ?string $model = Project::class;
 
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?int $globalSearchSort = 80;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-briefcase';
 
     protected static ?string $navigationLabel = 'Projects';

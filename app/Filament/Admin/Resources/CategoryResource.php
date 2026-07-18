@@ -14,6 +14,10 @@ class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?int $globalSearchSort = 20;
+
     protected static \BackedEnum|string|null $navigationIcon = Heroicon::Folder;
 
     protected static ?string $navigationLabel = 'Categories';

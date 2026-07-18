@@ -14,6 +14,10 @@ class ConversationResource extends Resource
 {
     protected static ?string $model = Conversation::class;
 
+    protected static ?string $recordTitleAttribute = 'visitor_name';
+
+    protected static ?int $globalSearchSort = 170;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-chat-bubble-left-ellipsis';
 
     protected static ?string $navigationLabel = 'Live Chat';

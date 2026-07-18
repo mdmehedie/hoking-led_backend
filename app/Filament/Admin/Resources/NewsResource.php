@@ -14,6 +14,10 @@ class NewsResource extends Resource
 {
     protected static ?string $model = News::class;
 
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?int $globalSearchSort = 50;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-newspaper';
 
     protected static ?string $navigationLabel = 'News';

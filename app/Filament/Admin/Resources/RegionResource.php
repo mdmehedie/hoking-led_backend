@@ -15,6 +15,10 @@ class RegionResource extends Resource
 {
     protected static ?string $model = Region::class;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?int $globalSearchSort = 210;
+
     protected static \BackedEnum|string|null $navigationIcon = Heroicon::GlobeAmericas;
 
     protected static ?string $navigationLabel = 'Regions';
