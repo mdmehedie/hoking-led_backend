@@ -14,6 +14,10 @@ class CoreAdvantageResource extends Resource
 {
     protected static ?string $model = CoreAdvantage::class;
 
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?int $globalSearchSort = 120;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-light-bulb';
 
     protected static ?string $navigationLabel = 'Core Advantages';

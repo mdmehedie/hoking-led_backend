@@ -14,6 +14,10 @@ class TeamMemberResource extends Resource
 {
     protected static ?string $model = TeamMember::class;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?int $globalSearchSort = 90;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-user-group';
 
     protected static ?string $navigationLabel = 'Team Members';
@@ -21,7 +25,7 @@ class TeamMemberResource extends Resource
     protected static ?string $slug = 'team-members';
 
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 2;
 
     public static function getNavigationGroup(): ?string
     {

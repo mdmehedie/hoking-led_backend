@@ -15,6 +15,10 @@ class TranslationResource extends Resource
 {
     protected static ?string $model = UiTranslation::class;
 
+    protected static ?string $recordTitleAttribute = 'key';
+
+    protected static ?int $globalSearchSort = 240;
+
     protected static \BackedEnum|string|null $navigationIcon = Heroicon::Language;
 
     protected static ?string $navigationLabel = 'Translations';

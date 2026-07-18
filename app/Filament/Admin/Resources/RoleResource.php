@@ -14,10 +14,16 @@ class RoleResource extends Resource
 {
     protected static ?string $model = Role::class;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static bool $isGloballySearchable = false;
+
+    protected static ?int $globalSearchSort = 220;
+
     protected static ?string $navigationLabel = 'Roles';
 
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 3;
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-shield-check';
 
@@ -28,7 +34,7 @@ class RoleResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Settings';
+        return 'User Management';
     }
 
     public static function canCreate(): bool

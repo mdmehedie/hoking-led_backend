@@ -14,7 +14,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Forms\Form;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Http\UploadedFile;
 
@@ -96,22 +95,13 @@ class PageForm
                     ->image()
                     ->disk('public')
                     ->visibility('public')
-                    ->required(fn (\Filament\Schemas\Components\Utilities\Get $get) => empty($get("content.hero_video")))
+                    ->required()
                     ->directory('pages/company')
                     ->getUploadedFileNameForStorageUsing($keepOriginal)
-                    ->columnSpanFull()
-                    ->live(),
-                FileUpload::make("content.hero_video")
-                    ->label(__('Hero Video'))
-                    ->disk('public')
-                    ->visibility('public')
-                    ->required(fn (Get $get) => empty($get("content.hero_bg")))
-                    ->directory('pages/company/videos')
-                    ->getUploadedFileNameForStorageUsing($keepOriginal)
-                    ->acceptedFileTypes(['video/mp4', 'video/webm', 'video/ogg'])
-                    ->maxSize(51200) // 50MB
-                    ->columnSpanFull()
-                    ->live(),
+                    ->imageEditor()
+                    ->imageEditorAspectRatios(['3:1', '6:2'])
+                    ->helperText(__('Recommended size: 1920px x 640px (3:1 aspect ratio).'))
+                    ->columnSpanFull(),
                 TextInput::make("content.hero_title")
                     ->label(__('Hero Title'))
                     ->required()
@@ -136,6 +126,9 @@ class PageForm
                     ->required()
                     ->getUploadedFileNameForStorageUsing($keepOriginal)
                     ->directory('pages/company')
+                    ->imageEditor()
+                    ->imageEditorAspectRatios(['32:9', '64:18'])
+                    ->helperText(__('Recommended size: 1920px x 540px (32:9 aspect ratio).'))
                     ->columnSpanFull(),
             ]),
 
@@ -170,30 +163,25 @@ class PageForm
                     ->url()
                     ->maxLength(255)
                     ->columnSpanFull(),
-                FileUpload::make("content.our_factory.image_1")
-                    ->label(__('Image 1'))
-                    ->image()
-                    ->disk('public')
-                    ->visibility('public')
-                    ->getUploadedFileNameForStorageUsing($keepOriginal)
+                Repeater::make("content.our_factory.images")
+                    ->label(__('Factory Images'))
+                    ->schema([
+                        FileUpload::make('image')
+                            ->label(__('Image'))
+                            ->image()
+                            ->disk('public')
+                            ->visibility('public')
+                            ->getUploadedFileNameForStorageUsing($keepOriginal)
+                            ->required()
+                            ->imageEditor()
+                            ->imageEditorAspectRatios(['4:3', '8:6'])
+                            ->helperText(__('Recommended size: 800px x 600px (4:3 aspect ratio).'))
+                            ->directory('pages/company'),
+                    ])
                     ->required()
-                    ->directory('pages/company'),
-                FileUpload::make("content.our_factory.image_2")
-                    ->label(__('Image 2'))
-                    ->image()
-                    ->disk('public')
-                    ->visibility('public')
-                    ->getUploadedFileNameForStorageUsing($keepOriginal)
-                    ->required()
-                    ->directory('pages/company'),
-                FileUpload::make("content.our_factory.image_3")
-                    ->label(__('Image 3'))
-                    ->image()
-                    ->disk('public')
-                    ->visibility('public')
-                    ->getUploadedFileNameForStorageUsing($keepOriginal)
-                    ->required()
-                    ->directory('pages/company'),
+                    ->minItems(1)
+                    ->reorderable()
+                    ->columnSpanFull(),
             ])->columns(2),
 
             Section::make(__('Certifications Section'))->schema([
@@ -226,6 +214,9 @@ class PageForm
                     ->required()
                     ->getUploadedFileNameForStorageUsing($keepOriginal)
                     ->directory('pages/company')
+                    ->imageEditor()
+                    ->imageEditorAspectRatios(['3:1', '6:2'])
+                    ->helperText(__('Recommended size: 1920px x 640px (3:1 aspect ratio).'))
                     ->columnSpanFull(),
             ])->columns(1),
         ];

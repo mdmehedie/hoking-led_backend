@@ -14,6 +14,10 @@ class CaseStudyResource extends Resource
 {
     protected static ?string $model = CaseStudy::class;
 
+    protected static ?string $recordTitleAttribute = 'title';
+
+    protected static ?int $globalSearchSort = 60;
+
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-chart-bar';
 
     protected static ?string $navigationLabel = 'Case Studies';

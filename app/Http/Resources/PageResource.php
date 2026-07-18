@@ -54,20 +54,20 @@ class PageResource extends JsonResource
      */
     protected function transformCompanyContent(array $content): array
     {
-        $imageFields = ['hero_bg', 'hero_video', 'banner', 'bottom_image'];
+        $imageFields = ['hero_bg', 'banner', 'bottom_image'];
         foreach ($imageFields as $field) {
             if (!empty($content[$field])) {
                 $content[$field] = Storage::disk('public')->url($content[$field]);
             }
         }
 
-        if (!empty($content['our_factory'])) {
-            $factoryImages = ['image_1', 'image_2', 'image_3'];
-            foreach ($factoryImages as $img) {
-                if (!empty($content['our_factory'][$img])) {
-                    $content['our_factory'][$img] = Storage::disk('public')->url($content['our_factory'][$img]);
+        if (!empty($content['our_factory']['images']) && is_array($content['our_factory']['images'])) {
+            foreach ($content['our_factory']['images'] as &$factoryImage) {
+                if (!empty($factoryImage['image'])) {
+                    $factoryImage['image'] = Storage::disk('public')->url($factoryImage['image']);
                 }
             }
+            unset($factoryImage);
         }
 
         return $content;
