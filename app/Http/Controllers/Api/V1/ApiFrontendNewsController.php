@@ -17,7 +17,7 @@ class ApiFrontendNewsController extends ApiBaseController
         $popular = $request->boolean('popular');
         $limit = $request->get('limit');
 
-        $query = News::published();
+        $query = News::published()->with('author');
 
         // Apply filters
         $query->when($recent, fn ($q) => $q->recent($limit ?? 5));
@@ -39,6 +39,7 @@ class ApiFrontendNewsController extends ApiBaseController
     public function show(Request $request, string $slug): JsonResponse
     {
         $newsItem = News::published()
+            ->with('author')
             ->where('slug', $slug)
             ->first();
 

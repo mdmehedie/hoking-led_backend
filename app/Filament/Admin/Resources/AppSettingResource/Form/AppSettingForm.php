@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\AppSettingResource\Form;
 
+use App\Helpers\UploadFileName;
 use App\Models\Locale;
 use App\Models\Region;
 use App\Filament\Forms\Components\TinyEditor;
@@ -42,7 +43,7 @@ class AppSettingForm
                         ->visibility('public')
                         ->directory('settings')
                         ->acceptedFileTypes(['image/*'])
-                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => UploadFileName::make($file))
                         ->imageEditor()
                         ->imageCropAspectRatio('179:32')
                         ->imageEditorAspectRatios(['179:32'])
@@ -54,7 +55,7 @@ class AppSettingForm
                         ->visibility('public')
                         ->directory('settings')
                         ->acceptedFileTypes(['image/*'])
-                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => UploadFileName::make($file))
                         ->imageEditor()
                         ->imageCropAspectRatio('179:32')
                         ->imageEditorAspectRatios(['179:32'])
@@ -68,7 +69,7 @@ class AppSettingForm
                         ->visibility('public')
                         ->directory('settings')
                         ->acceptedFileTypes(['image/*'])
-                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => UploadFileName::make($file))
                         ->imageEditor()
                         ->imageCropAspectRatio('1:1')
                         ->imageEditorAspectRatios(['1:1'])

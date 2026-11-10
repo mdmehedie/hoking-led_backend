@@ -17,7 +17,7 @@ class ApiFrontendBlogController extends ApiBaseController
         $popular = $request->boolean('popular');
         $limit = $request->get('limit');
 
-        $query = Blog::published();
+        $query = Blog::published()->with('author');
 
         // Apply filters
         $query->when($recent, fn ($q) => $q->recent($limit ?? 5));
@@ -39,6 +39,7 @@ class ApiFrontendBlogController extends ApiBaseController
     public function show(Request $request, string $slug): JsonResponse
     {
         $blog = Blog::published()
+            ->with('author')
             ->where('slug', $slug)
             ->first();
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\CategoryResource\Form;
 
+use App\Helpers\UploadFileName;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TagsInput;
 use Illuminate\Http\UploadedFile;
@@ -75,7 +76,7 @@ class CategoryForm
                         ->disk('public')
                         ->directory('categories/thumbnails')
                         ->visibility('public')
-                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => UploadFileName::make($file))
                         ->nullable()
                         ->helperText(__('Recommended size: 800px x 600px (4:3 aspect ratio) or 1200px x 800px landscape.')),
                     FileUpload::make('icon')
@@ -84,7 +85,7 @@ class CategoryForm
                         ->disk('public')
                         ->directory('categories/icons')
                         ->visibility('public')
-                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => UploadFileName::make($file))
                         ->nullable()
                         ->helperText(__('Recommended: SVG format, or a square PNG/JPEG (e.g. 64px x 64px).')),
                 ]),

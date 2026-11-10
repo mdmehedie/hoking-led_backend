@@ -44,6 +44,10 @@ class AppServiceProvider extends ServiceProvider
             \App\Models\News::observe(\App\Observers\NewsObserver::class);
             \App\Models\CaseStudy::observe(\App\Observers\CaseStudyObserver::class);
             \App\Models\AppSetting::observe(\App\Observers\AppSettingObserver::class);
+
+            foreach (array_keys(\App\Observers\FrontendRevalidationObserver::TAGS) as $model) {
+                $model::observe(\App\Observers\FrontendRevalidationObserver::class);
+            }
         }  catch(\Exception $e){
             
         }

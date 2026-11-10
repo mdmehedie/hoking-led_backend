@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\TestimonialResource\Form;
 
+use App\Helpers\UploadFileName;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
@@ -40,7 +41,7 @@ class TestimonialForm
                         ->disk('public')
                         ->directory('testimonials')
                         ->visibility('public')
-                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => UploadFileName::make($file))
                         ->imageEditor()
                         ->imageEditorAspectRatios(['1:1', '2:2'])
                         ->helperText(__('Recommended size: 300px x 300px (1:1 square client photo).')),

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\CertificationAwardResource\Form;
 
+use App\Helpers\UploadFileName;
 use App\Models\CertificationAward;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TagsInput;
@@ -79,7 +80,7 @@ class CertificationAwardForm
                 ->imageEditorAspectRatios(['4:5', '1:1', '3:4'])
                 ->helperText(__('Recommended size: 640px x 800px (4:5 portrait aspect ratio) — displayed in a narrow, tall slider card.'))
                 ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName()),
+                ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => UploadFileName::make($file)),
 
             TextInput::make('sort_order')
                 ->label(__('Sort Order'))

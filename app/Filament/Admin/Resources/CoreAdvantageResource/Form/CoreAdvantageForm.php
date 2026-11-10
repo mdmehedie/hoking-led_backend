@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\CoreAdvantageResource\Form;
 
+use App\Helpers\UploadFileName;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -33,7 +34,7 @@ class CoreAdvantageForm
                         ->disk('public')
                         ->directory('core-advantages/icons')
                         ->visibility('public')
-                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                        ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => UploadFileName::make($file))
                         ->imageEditor()
                         ->imageEditorAspectRatios(['1:1', '2:2'])
                         ->helperText(__('Recommended size: 128px x 128px (1:1 square icon, transparent PNG/SVG).'))

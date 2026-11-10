@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\UploadFileName;
 use App\Models\MediaLibrary;
 use Illuminate\Http\Request;
 
@@ -14,7 +15,7 @@ class EditorImageUploadController
         ]);
 
         $file = $request->file('file');
-        $filename = time() . '_' . $file->getClientOriginalName();
+        $filename = UploadFileName::make($file);
         $path = $file->storeAs('editor-images', $filename, 'public');
 
         $media = MediaLibrary::create([

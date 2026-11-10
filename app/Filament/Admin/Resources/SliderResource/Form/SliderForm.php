@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\SliderResource\Form;
 
 use App\Filament\Forms\Components\TinyEditor;
+use App\Helpers\UploadFileName;
 use App\Models\Locale;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\FileUpload;
@@ -53,7 +54,7 @@ class SliderForm
                             ->image()
                             ->imageEditor()
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                            ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => UploadFileName::make($file))
                             ->helperText(__('Recommended size: 1920px width x 600px to 800px height (aspect ratio: ~3:1 or 16:9 for full desktop viewport coverage).'))
                             ->visible(fn (callable $get) => $get('background_type') === 'image')
                             ->required(fn (callable $get) => $get('background_type') === 'image'),
@@ -63,7 +64,7 @@ class SliderForm
                             ->directory('sliders/videos')
                             ->visibility('public')
                             ->acceptedFileTypes(['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime'])
-                            ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                            ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => UploadFileName::make($file))
                             ->helperText(__('Recommended: MP4 format, 1920x1080 or 1920x600, under 10MB for optimal loading performance.'))
                             ->visible(fn (callable $get) => $get('background_type') === 'video')
                             ->required(fn (callable $get) => $get('background_type') === 'video'),
@@ -75,7 +76,7 @@ class SliderForm
                             ->image()
                             ->imageEditor()
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
-                            ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                            ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => UploadFileName::make($file))
                             ->helperText(__('Image displayed on the card. Recommended size: 223px width x 159px height (aspect ratio: ~7:5 or 1.4:1).')),
                         TextInput::make('primary_button_link')
                             ->label(__('Primary Button Link'))

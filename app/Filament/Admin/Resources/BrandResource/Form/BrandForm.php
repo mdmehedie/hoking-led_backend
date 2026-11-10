@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\BrandResource\Form;
 
+use App\Helpers\UploadFileName;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
@@ -33,7 +34,7 @@ class BrandForm
                     ->disk('public')
                     ->directory('brands/logos')
                     ->visibility('public')
-                    ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                    ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => UploadFileName::make($file))
                     ->imageEditor()
                     ->imageCropAspectRatio('25:7')
                     ->helperText(__('Recommended size: 200px x 56px (25:7 aspect ratio)')),

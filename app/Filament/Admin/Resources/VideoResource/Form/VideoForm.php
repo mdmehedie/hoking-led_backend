@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\VideoResource\Form;
 
+use App\Helpers\UploadFileName;
 use App\Models\Locale;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -41,7 +42,7 @@ class VideoForm
 
     private static function mediaSchema(): array
     {
-        $keepOriginal = fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName();
+        $keepOriginal = fn (UploadedFile $file) => UploadFileName::make($file);
 
         return [
             FileUpload::make('video_path')

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\CaseStudyResource\Form;
 
+use App\Helpers\UploadFileName;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
@@ -127,7 +128,7 @@ class CaseStudyForm
                     ->disk('public')
                     ->directory('case-studies/descriptions')
                     ->visibility('public')
-                    ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                    ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => UploadFileName::make($file))
                     ->imageEditor()
                     ->imageEditorAspectRatios(['3:2', '4:3', '1:1'])
                     ->helperText(__('Recommended size: 1200px x 800px (3:2 aspect ratio).'))
@@ -157,7 +158,7 @@ class CaseStudyForm
 
     private static function mediaSchema(): array
     {
-        $keepOriginal = fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName();
+        $keepOriginal = fn (UploadedFile $file) => UploadFileName::make($file);
 
         return [
             FileUpload::make('image_path')

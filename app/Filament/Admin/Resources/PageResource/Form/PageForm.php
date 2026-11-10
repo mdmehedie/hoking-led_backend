@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\PageResource\Form;
 
 use App\Filament\Forms\Components\TinyEditor;
+use App\Helpers\UploadFileName;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -506,6 +507,6 @@ class PageForm
 
     private static function getKeepOriginalName(): \Closure
     {
-        return fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName();
+        return fn (UploadedFile $file) => UploadFileName::make($file);
     }
 }
