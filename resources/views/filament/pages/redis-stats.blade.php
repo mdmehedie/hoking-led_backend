@@ -56,9 +56,7 @@
 
         <!-- Memory Usage -->
         <x-filament::card>
-            <x-filament::card.header>
-                <h3 class="text-lg font-medium">Memory Usage</h3>
-            </x-filament::card.header>
+            <h3 class="text-lg font-medium mb-4">Memory Usage</h3>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
@@ -83,9 +81,7 @@
         <!-- Performance Stats -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <x-filament::card>
-                <x-filament::card.header>
-                    <h3 class="text-lg font-medium">Performance Statistics</h3>
-                </x-filament::card.header>
+                <h3 class="text-lg font-medium mb-4">Performance Statistics</h3>
                 
                 <div class="space-y-3">
                     <div class="flex justify-between">
@@ -112,9 +108,7 @@
             </x-filament::card>
 
             <x-filament::card>
-                <x-filament::card.header>
-                    <h3 class="text-lg font-medium">Connection Statistics</h3>
-                </x-filament::card.header>
+                <h3 class="text-lg font-medium mb-4">Connection Statistics</h3>
                 
                 <div class="space-y-3">
                     <div class="flex justify-between">
@@ -139,9 +133,7 @@
 
         <!-- Database Information -->
         <x-filament::card>
-            <x-filament::card.header>
-                <h3 class="text-lg font-medium">Database Information</h3>
-            </x-filament::card.header>
+            <h3 class="text-lg font-medium mb-4">Database Information</h3>
             
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -175,9 +167,7 @@
 
         <!-- Cache Configuration -->
         <x-filament::card>
-            <x-filament::card.header>
-                <h3 class="text-lg font-medium">Cache Configuration</h3>
-            </x-filament::card.header>
+            <h3 class="text-lg font-medium mb-4">Cache Configuration</h3>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>

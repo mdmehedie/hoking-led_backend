@@ -19,11 +19,9 @@
         <div id="traffic-content" class="tab-content">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 <!-- Sessions Overview -->
-                <x-filament::widget>
-                    <x-filament::widget::header>
-                        <h3 class="font-semibold text-gray-900">Sessions Overview</h3>
-                    </x-filament::widget::header>
-                    <div class="space-y-4">
+                <x-filament::card>
+                                            <h3 class="font-semibold text-gray-900 mb-4">Sessions Overview</h3>
+                                        <div class="space-y-4">
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-600">Total Sessions</span>
                             <span class="text-lg font-semibold">{{ number_format($this->getTrafficData()['sessions']['sessions'] ?? 0) }}</span>
@@ -37,14 +35,12 @@
                             <span class="text-lg font-semibold">{{ $this->getTrafficData()['sessions']['engagement_rate'] ?? 0 }}%</span>
                         </div>
                     </div>
-                </x-filament::widget>
+                </x-filament::card>
 
                 <!-- Device Breakdown -->
-                <x-filament::widget>
-                    <x-filament::widget::header>
-                        <h3 class="font-semibold text-gray-900">Device Breakdown</h3>
-                    </x-filament::widget::header>
-                    <div class="space-y-2">
+                <x-filament::card>
+                                            <h3 class="font-semibold text-gray-900 mb-4">Device Breakdown</h3>
+                                        <div class="space-y-2">
                         @forelse ($this->getTrafficData()['devices'] as $device)
                             <div class="flex justify-between items-center py-2">
                                 <span class="text-sm text-gray-900">{{ ucfirst($device['device']) }}</span>
@@ -59,14 +55,12 @@
                             <p class="text-gray-500 text-sm">No device data available</p>
                         @endforelse
                     </div>
-                </x-filament::widget>
+                </x-filament::card>
 
                 <!-- Traffic Sources -->
-                <x-filament::widget>
-                    <x-filament::widget::header>
-                        <h3 class="font-semibold text-gray-900">Traffic Sources</h3>
-                    </x-filament::widget::header>
-                    <div class="space-y-2">
+                <x-filament::card>
+                                            <h3 class="font-semibold text-gray-900 mb-4">Traffic Sources</h3>
+                                        <div class="space-y-2">
                         @forelse ($this->getTrafficData()['sources'] as $source)
                             <div class="flex justify-between items-center py-2">
                                 <span class="text-sm text-gray-900 truncate">{{ $source['source'] }}</span>
@@ -76,15 +70,13 @@
                             <p class="text-gray-500 text-sm">No traffic source data available</p>
                         @endforelse
                     </div>
-                </x-filament::widget>
+                </x-filament::card>
             </div>
 
             <!-- Top Pages -->
-            <x-filament::widget class="col-span-12">
-                <x-filament::widget::header>
-                    <h3 class="font-semibold text-gray-900">Top Pages (Last 7 Days)</h3>
-                </x-filament::widget::header>
-                <div class="overflow-x-auto">
+            <x-filament::card class="col-span-12">
+                                    <h3 class="font-semibold text-gray-900 mb-4">Top Pages (Last 7 Days)</h3>
+                                <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
@@ -106,18 +98,16 @@
                         </tbody>
                     </table>
                 </div>
-            </x-filament::widget>
+            </x-filament::card>
         </div>
 
         <!-- Behavior Tab -->
         <div id="behavior-content" class="tab-content hidden">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <!-- Custom Events -->
-                <x-filament::widget>
-                    <x-filament::widget::header>
-                        <h3 class="font-semibold text-gray-900">Custom Events</h3>
-                    </x-filament::widget::header>
-                    <div class="space-y-2">
+                <x-filament::card>
+                                            <h3 class="font-semibold text-gray-900 mb-4">Custom Events</h3>
+                                        <div class="space-y-2">
                         @forelse ($this->getBehaviorData()['events'] as $event)
                             <div class="border-b border-gray-200 py-2">
                                 <div class="flex justify-between items-center">
@@ -135,14 +125,12 @@
                             <p class="text-gray-500 text-sm">No custom events tracked</p>
                         @endforelse
                     </div>
-                </x-filament::widget>
+                </x-filament::card>
 
                 <!-- User Paths -->
-                <x-filament::widget>
-                    <x-filament::widget::header>
-                        <h3 class="font-semibold text-gray-900">Popular User Paths</h3>
-                    </x-filament::widget::header>
-                    <div class="space-y-2">
+                <x-filament::card>
+                                            <h3 class="font-semibold text-gray-900 mb-4">Popular User Paths</h3>
+                                        <div class="space-y-2">
                         @forelse ($this->getBehaviorData()['user_paths'] as $path)
                             <div class="flex justify-between items-center py-2">
                                 <span class="text-sm text-gray-900 truncate">{{ $path['path'] }}</span>
@@ -152,15 +140,13 @@
                             <p class="text-gray-500 text-sm">No user path data available</p>
                         @endforelse
                     </div>
-                </x-filament::widget>
+                </x-filament::card>
             </div>
 
             <!-- Funnel Analysis -->
-            <x-filament::widget class="col-span-12">
-                <x-filament::widget::header>
-                    <h3 class="font-semibold text-gray-900">Conversion Funnel</h3>
-                </x-filament::widget::header>
-                <div class="space-y-6">
+            <x-filament::card class="col-span-12">
+                                    <h3 class="font-semibold text-gray-900 mb-4">Conversion Funnel</h3>
+                                <div class="space-y-6">
                     @foreach ($this->getBehaviorData()['funnels'] as $funnel)
                         <div>
                             <h4 class="text-md font-medium text-gray-900 mb-4">{{ $funnel['name'] }}</h4>
@@ -176,18 +162,16 @@
                         </div>
                     @endforeach
                 </div>
-            </x-filament::widget>
+            </x-filament::card>
         </div>
 
         <!-- Performance Tab -->
         <div id="performance-content" class="tab-content hidden">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <!-- Core Web Vitals -->
-                <x-filament::widget>
-                    <x-filament::widget::header>
-                        <h3 class="font-semibold text-gray-900">Core Web Vitals (Last 7 Days)</h3>
-                    </x-filament::widget::header>
-                    <div class="space-y-4">
+                <x-filament::card>
+                                            <h3 class="font-semibold text-gray-900 mb-4">Core Web Vitals (Last 7 Days)</h3>
+                                        <div class="space-y-4">
                         <!-- LCP -->
                         <div>
                             <div class="flex justify-between items-center">
@@ -215,14 +199,12 @@
                             <div class="text-xs text-gray-500 mt-1">{{ $this->getPerformanceData()['core_web_vitals']['inp']['count'] ?? 0 }} samples</div>
                         </div>
                     </div>
-                </x-filament::widget>
+                </x-filament::card>
 
                 <!-- Performance Trends -->
-                <x-filament::widget>
-                    <x-filament::widget::header>
-                        <h3 class="font-semibold text-gray-900">Performance Trends</h3>
-                    </x-filament::widget::header>
-                    <div class="space-y-3">
+                <x-filament::card>
+                                            <h3 class="font-semibold text-gray-900 mb-4">Performance Trends</h3>
+                                        <div class="space-y-3">
                         @foreach ($this->getPerformanceData()['performance_trends'] as $metric => $trend)
                             <div class="border-b border-gray-200 pb-3">
                                 <div class="flex justify-between items-center mb-2">
@@ -243,16 +225,14 @@
                             </div>
                         @endforeach
                     </div>
-                </x-filament::widget>
+                </x-filament::card>
             </div>
 
             <!-- PageSpeed Data -->
             @if (!empty($this->getPerformanceData()['pagespeed_data']))
-                <x-filament::widget class="col-span-12">
-                    <x-filament::widget::header>
-                        <h3 class="font-semibold text-gray-900">PageSpeed Analysis</h3>
-                    </x-filament::widget::header>
-                    <div class="space-y-4">
+                <x-filament::card class="col-span-12">
+                                            <h3 class="font-semibold text-gray-900 mb-4">PageSpeed Analysis</h3>
+                                        <div class="space-y-4">
                         @foreach ($this->getPerformanceData()['pagespeed_data'] as $urlData)
                             <div class="border border-gray-200 rounded-lg p-4">
                                 <h4 class="text-md font-medium text-gray-900 mb-2">{{ $urlData['url'] }}</h4>
@@ -278,7 +258,7 @@
                             </div>
                         @endforeach
                     </div>
-                </x-filament::widget>
+                </x-filament::card>
             @endif
         </div>
     </div>
