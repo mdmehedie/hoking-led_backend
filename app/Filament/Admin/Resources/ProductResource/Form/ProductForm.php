@@ -44,7 +44,7 @@ class ProductForm
             Select::make('category_id')
                 ->relationship('category', 'name')
                 ->label(__('Category'))
-                ->nullable(),
+                ->required(),
             TextInput::make('order_column')
                     ->label(__('Sort Order'))
                     ->numeric()
