@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\ProductResource\Form;
 
 use App\Filament\Forms\Components\TableBuilder;
+use App\Helpers\UploadFileName;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -43,7 +44,7 @@ class ProductForm
             Select::make('category_id')
                 ->relationship('category', 'name')
                 ->label(__('Category'))
-                ->nullable(),
+                ->required(),
             TextInput::make('order_column')
                     ->label(__('Sort Order'))
                     ->numeric()
@@ -197,7 +198,7 @@ class ProductForm
                     ->disk('public')
                     ->directory('products/descriptions')
                     ->visibility('public')
-                    ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName())
+                    ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => UploadFileName::make($file))
                     ->columnSpanFull()
                     ->helperText(function (callable $get) {
                         $layout = $get('layout') ?: 'stacked';
@@ -260,7 +261,7 @@ class ProductForm
                     ->directory('products/videos')
                     ->visibility('public')
                     ->hidden(fn ($state, callable $get) => $get('type') === 'embed')
-                    ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName()),
+                    ->getUploadedFileNameForStorageUsing(fn (UploadedFile $file) => UploadFileName::make($file)),
             ])
             ->collapsible()
             ->columnSpanFull();
@@ -268,7 +269,7 @@ class ProductForm
 
     private static function mediaSchema(): array
     {
-        $keepOriginal = fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName();
+        $keepOriginal = fn (UploadedFile $file) => UploadFileName::make($file);
 
         return [
             FileUpload::make('main_image')

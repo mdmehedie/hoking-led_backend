@@ -15,6 +15,7 @@ class ApiFrontendPageController extends ApiBaseController
         $perPage = $request->get('per_page', 10);
 
         $pages = Page::published()
+            ->with('author')
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
@@ -27,6 +28,7 @@ class ApiFrontendPageController extends ApiBaseController
     public function show(Request $request, string $slug): JsonResponse
     {
         $page = Page::published()
+            ->with('author')
             ->where('slug', $slug)
             ->first();
 

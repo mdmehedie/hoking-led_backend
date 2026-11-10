@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiBaseController;
+use App\Http\Resources\ProductMenuResource;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
@@ -17,6 +18,7 @@ class ApiFrontendProductController extends ApiBaseController
         $isTop = $request->boolean('top');
 
         $products = Product::published()
+            ->with(['category', 'relatedProducts'])
             ->when($category, fn ($q, $cat) => $q->where('category_id', $cat))
             ->when($isTop, fn ($q) => $q->where('is_top', true))
             ->orderBy('created_at', 'desc')
@@ -28,9 +30,24 @@ class ApiFrontendProductController extends ApiBaseController
         );
     }
 
+    public function menu(): JsonResponse
+    {
+        $products = Product::published()
+            ->select(['id', 'title', 'slug', 'short_description', 'main_image', 'order_column', 'category_id', 'updated_at'])
+            ->with('category:id,name,slug')
+            ->orderBy('order_column')
+            ->get();
+
+        return $this->okResponse(
+            ['products' => ProductMenuResource::collection($products)],
+            __('Products retrieved successfully')
+        );
+    }
+
     public function show(Request $request, string $slug): JsonResponse
     {
         $product = Product::published()
+            ->with(['category', 'relatedProducts'])
             ->where('slug', $slug)
             ->first();
 

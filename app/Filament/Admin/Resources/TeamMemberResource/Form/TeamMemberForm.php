@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\TeamMemberResource\Form;
 
 use App\Filament\Forms\Components\TinyEditor;
+use App\Helpers\UploadFileName;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TagsInput;
@@ -27,7 +28,7 @@ class TeamMemberForm
 
     private static function memberSchema(): array
     {
-        $keepOriginal = fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName();
+        $keepOriginal = fn (UploadedFile $file) => UploadFileName::make($file);
 
         return [
             TextInput::make('name')

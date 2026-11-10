@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\ProjectResource\Form;
 
+use App\Helpers\UploadFileName;
 use Filament\Forms\Components\FileUpload;
 use App\Filament\Forms\Components\TinyEditor;
 use Filament\Forms\Components\Select;
@@ -87,7 +88,7 @@ class ProjectForm
 
     private static function mediaSchema(): array
     {
-        $keepOriginal = fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName();
+        $keepOriginal = fn (UploadedFile $file) => UploadFileName::make($file);
 
         return [
             FileUpload::make('cover_image')

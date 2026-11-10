@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\NewsResource\Form;
 
+use App\Helpers\UploadFileName;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use App\Filament\Forms\Components\TinyEditor;
@@ -30,7 +31,7 @@ class NewsForm
 
     private static function contentSchema(): array
     {
-        $keepOriginal = fn (UploadedFile $file) => time() . '_' . $file->getClientOriginalName();
+        $keepOriginal = fn (UploadedFile $file) => UploadFileName::make($file);
 
         return [
             TextInput::make('title')

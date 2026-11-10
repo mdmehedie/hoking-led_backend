@@ -45,6 +45,7 @@ Route::prefix('v1')->group(function () {
     Route::get('case-study-categories/{slug}', [ApiFrontendCaseStudyCategoryController::class, 'show'])->name('case-study-categories.show');
 
     Route::get('products', [ApiFrontendProductController::class, 'index'])->name('products.index');
+    Route::get('products/menu', [ApiFrontendProductController::class, 'menu'])->name('products.menu');
     Route::get('products/{slug}', [ApiFrontendProductController::class, 'show'])->name('products.show');
 
     Route::get('categories', [ApiFrontendCategoryController::class, 'index'])->name('categories.index');
