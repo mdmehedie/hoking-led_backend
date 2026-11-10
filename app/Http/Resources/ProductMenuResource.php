@@ -20,6 +20,7 @@ class ProductMenuResource extends JsonResource
             'short_description' => $this->short_description,
             'main_image' => $this->main_image ? Storage::disk('public')->url($this->main_image) : null,
             'sort_order' => $this->order_column,
+            'updated_at' => $this->updated_at,
             'category' => $this->when($this->category, fn () => [
                 'id' => $this->category->id,
                 'name' => $this->category->name,

@@ -33,7 +33,7 @@ class ApiFrontendProductController extends ApiBaseController
     public function menu(): JsonResponse
     {
         $products = Product::published()
-            ->select(['id', 'title', 'slug', 'short_description', 'main_image', 'order_column', 'category_id'])
+            ->select(['id', 'title', 'slug', 'short_description', 'main_image', 'order_column', 'category_id', 'updated_at'])
             ->with('category:id,name,slug')
             ->orderBy('order_column')
             ->get();
